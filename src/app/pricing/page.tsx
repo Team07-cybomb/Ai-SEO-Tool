@@ -158,19 +158,19 @@ const PricingPage: React.FC = () => {
           
           {/* Billing Toggle */}
           <div className="billing-toggle">
-            <span className={billingCycle === 'monthly' ? 'active' : ''}>Monthly</span>
-            <label className="toggle-switch">
-              <input 
-                type="checkbox" 
-                checked={billingCycle === 'annual'} 
-                onChange={() => setBillingCycle(billingCycle === 'annual' ? 'monthly' : 'annual')} 
-              />
-              <span className="slider"></span>
-            </label>
-            <span className={billingCycle === 'annual' ? 'active' : ''}>
-              Annual <span className="discount-badge">Save 20%</span>
-            </span>
-          </div>
+  <span className={billingCycle === 'monthly' ? 'active' : ''}>Monthly</span>
+  <label className="toggle-switch">
+    <input 
+      type="checkbox" 
+      checked={billingCycle === 'annual'} 
+      onChange={() => setBillingCycle(billingCycle === 'annual' ? 'monthly' : 'annual')} 
+    />
+    <span className="slider"></span>
+  </label>
+  <span className={billingCycle === 'annual' ? 'active' : ''}>
+    Annual <span className="discount-badge">Save 20%</span>
+  </span>
+</div>
         </div>
       </header>
 
@@ -360,7 +360,7 @@ const PricingPage: React.FC = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: #ccc;
+          background-color: green;
           transition: .4s;
           border-radius: 34px;
         }
@@ -394,6 +394,8 @@ const PricingPage: React.FC = () => {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 30px;
+          align-items: stretch;
+          grid-auto-rows: 1fr;
         }
         
         .pricing-card {
@@ -403,6 +405,9 @@ const PricingPage: React.FC = () => {
           padding: 30px;
           position: relative;
           transition: transform 0.3s ease, box-shadow 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
         }
         
         .pricing-card:hover {
@@ -479,12 +484,14 @@ const PricingPage: React.FC = () => {
         
         .cta-button {
           width: 100%;
-          padding: 12px 20px;
+          padding: 15px 20px;
           border: none;
           border-radius: 6px;
           font-weight: 600;
           cursor: pointer;
           transition: background-color 0.3s ease;
+          
+          margin-top: auto;
         }
         
         .cta-button.primary {
@@ -519,7 +526,9 @@ const PricingPage: React.FC = () => {
         .feature-comparison h2 {
           text-align: center;
           margin-bottom: 40px;
-          color: #2d3748;
+          color:rgb(12, 69, 143);
+          font-size:2.5rem;
+          font-weight:600;
         }
         
         .comparison-table {
@@ -566,40 +575,93 @@ const PricingPage: React.FC = () => {
         
         /* FAQ Section */
         .faq-section {
-          padding: 60px 0;
+          padding: 80px 0;
+          background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
         }
         
         .faq-section h2 {
           text-align: center;
-          margin-bottom: 40px;
-          color: #2d3748;
+          margin-bottom: 24px;
+          color:rgb(7, 79, 151);
+          font-size: 2.5rem;
+          font-weight: 600;
+          line-height: 1.2;
         }
         
         .faq-list {
           max-width: 800px;
           margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
         }
         
         .faq-item {
-          border-bottom: 1px solid #e2e8f0;
           cursor: pointer;
+          background: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          padding: 16px 20px;
+          border: 1px solid #edf2f7;
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+          position: relative;
+        }
+        
+        .faq-item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+          border-color: #e2e8f0;
+        }
+        
+        .faq-item::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          border-top-left-radius: 12px;
+          border-bottom-left-radius: 12px;
+          background: linear-gradient(180deg, #63b3ed, #4299e1);
+          opacity: 0.6;
+        }
+        
+        .faq-item.expanded::before {
+          opacity: 1;
         }
         
         .faq-question {
-          padding: 20px 0;
-          font-weight: 600;
+          font-weight: 700;
           display: flex;
           justify-content: space-between;
           align-items: center;
+          color: #2d3748;
+          gap: 12px;
         }
         
-        .faq-question:hover {
+        .faq-question i {
+          color: #718096;
+          transition: transform 0.2s ease, color 0.2s ease;
+        }
+        
+        .faq-item:hover .faq-question i {
+          color: #4299e1;
+        }
+        
+        .faq-item.expanded .faq-question i {
+          transform: rotate(180deg);
           color: #4299e1;
         }
         
         .faq-answer {
-          padding: 0 0 20px 0;
+          padding-top: 10px;
           color: #4a5568;
+          animation: fadeIn 0.25s ease;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         
         /* Final CTA */
