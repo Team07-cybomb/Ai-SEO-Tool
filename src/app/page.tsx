@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+
 import { Menu, Search, BarChart3, Zap, Shield, TrendingUp } from "lucide-react"
-import Link from "next/link"
+
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -18,126 +18,21 @@ export default function LandingPage() {
       setIsScrolledPastBanner(window.scrollY > window.innerHeight * 0.8)
     }
 
-    window.addEventListener('scroll', handleScroll)
+    // window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar with dynamic background */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolledPastBanner 
-          ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border" 
-          : "bg-white"
-      }`}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Search className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className={`text-xl font-bold ${
-                isScrolledPastBanner ? "text-foreground" : "text-gray-900"
-              }`}>
-                SEO Audit Pro
-              </span>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link 
-                href="/pricing" 
-                className={`transition-colors ${
-                  isScrolledPastBanner ? "text-muted-foreground hover:text-foreground" : "text-gray-700 hover:text-gray-900"
-                }`}
-              >
-                Pricing
-              </Link>
-              <Link 
-                href="/support" 
-                className={`transition-colors ${
-                  isScrolledPastBanner ? "text-muted-foreground hover:text-foreground" : "text-gray-700 hover:text-gray-900"
-                }`}
-              >
-                Support
-              </Link>
-              <Link 
-                href="/about-us" 
-                className={`transition-colors ${
-                  isScrolledPastBanner ? "text-muted-foreground hover:text-foreground" : "text-gray-700 hover:text-gray-900"
-                }`}
-              >
-                About Us
-              </Link>
-              <Button variant={isScrolledPastBanner ? "outline" : "ghost"} size="sm">
-                Sign In
-              </Button>
-              <Button size="sm">Get Started</Button>
-            </div>
-
-            {/* Mobile Navigation */}
-            <div className="md:hidden">
-              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <Menu className={`w-5 h-5 ${
-                      isScrolledPastBanner ? "text-foreground" : "text-gray-900"
-                    }`} />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                  <div className="flex flex-col space-y-6 mt-6">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                        <Search className="w-5 h-5 text-primary-foreground" />
-                      </div>
-                      <span className="text-xl font-bold text-foreground">SEO Audit Pro</span>
-                    </div>
-                    <div className="flex flex-col space-y-4">
-                      <Link
-                        href="/pricing"
-                        className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Pricing
-                      </Link>
-                      <Link
-                        href="/support"
-                        className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Support
-                      </Link>
-                      <Link
-                        href="/about-us"
-                        className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        About Us
-                      </Link>
-                      <div className="flex flex-col space-y-3 pt-4">
-                        <Button variant="outline" className="w-full bg-transparent">
-                          Sign In
-                        </Button>
-                        <Button className="w-full">Get Started</Button>
-                      </div>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
-      </nav>
+      
 
       {/* Hero Section with Background Image & Overlay */}
       <section
-        className="relative w-full h-screen pt-35 pb-16 px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat"
+        className="relative w-full h-full pt-35 pb-16 px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/banner.png')" }}
       >
         {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/60"></div>
+        <div className="absolute inset-0 bg-black/80"></div>
 
         <div className="relative container mx-auto text-center max-w-4xl text-white">
           <Badge variant="secondary" className="mb-4">
@@ -152,10 +47,10 @@ export default function LandingPage() {
             boost your website's search rankings.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="text-lg px-8 w-full sm:w-auto">
+            <Button size="lg" className="text-lg px-8  sm:w-auto">
               Start Free Audit
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent w-full sm:w-auto">
+            <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent  sm:w-auto">
               View Sample Report
             </Button>
           </div>
@@ -180,7 +75,7 @@ export default function LandingPage() {
 
 
       {/* Feature Highlights */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" id="Features">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Everything You Need for SEO Success</h2>
@@ -280,12 +175,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto text-center">
-          <p className="text-muted-foreground text-sm sm:text-base">© 2025 SEO Audit Pro. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   )
 }
