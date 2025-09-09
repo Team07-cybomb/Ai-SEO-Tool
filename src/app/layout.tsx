@@ -25,7 +25,7 @@ export default function RootLayout({
        
 
         {/* ✅ Page Content */}
-        <main style={{ padding: "20px" }}>{children}</main>
+        <main style={{ padding: "" }}>{children}</main>
 
         {/* ✅ Analytics
         <Analytics /> */}
