@@ -1,19 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, Search, BarChart3, Zap, Shield, TrendingUp } from "lucide-react"
-import Link from "next/link";
+import Link from "next/link"
+
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Check if we've scrolled past the banner section (approx 100vh)
+      setIsScrolledPastBanner(window.scrollY > window.innerHeight * 0.8)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border z-50">
+      {/* Navbar with dynamic background */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        isScrolledPastBanner 
+          ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border" 
+          : "bg-white"
+      }`}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -21,35 +37,53 @@ export default function LandingPage() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Search className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold text-foreground">SEO Audit Pro</span>
+              <span className={`text-xl font-bold ${
+                isScrolledPastBanner ? "text-foreground" : "text-gray-900"
+              }`}>
+                SEO Audit Pro
+              </span>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-
-               {/* ✅ Global Navigation */}
-    
-          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
-          <Link href="/support" className="text-muted-foreground hover:text-foreground transition-colors">Support</Link>
-          <Link href="/profile" className="text-muted-foreground hover:text-foreground transition-colors">Profile</Link>
-        
-              <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                Plans
+              <Link 
+                href="/pricing" 
+                className={`transition-colors ${
+                  isScrolledPastBanner ? "text-muted-foreground hover:text-foreground" : "text-gray-700 hover:text-gray-900"
+                }`}
+              >
+                Pricing
               </Link>
-              <a href="#profile" className="text-muted-foreground hover:text-foreground transition-colors">
-                Profile
-              </a>
-              <Button variant="outline" size="sm">
+              <Link 
+                href="/support" 
+                className={`transition-colors ${
+                  isScrolledPastBanner ? "text-muted-foreground hover:text-foreground" : "text-gray-700 hover:text-gray-900"
+                }`}
+              >
+                Support
+              </Link>
+              <Link 
+                href="/about-us" 
+                className={`transition-colors ${
+                  isScrolledPastBanner ? "text-muted-foreground hover:text-foreground" : "text-gray-700 hover:text-gray-900"
+                }`}
+              >
+                About Us
+              </Link>
+              <Button variant={isScrolledPastBanner ? "outline" : "ghost"} size="sm">
                 Sign In
               </Button>
               <Button size="sm">Get Started</Button>
             </div>
 
+            {/* Mobile Navigation */}
             <div className="md:hidden">
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    <Menu className="w-5 h-5" />
+                    <Menu className={`w-5 h-5 ${
+                      isScrolledPastBanner ? "text-foreground" : "text-gray-900"
+                    }`} />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
@@ -61,20 +95,27 @@ export default function LandingPage() {
                       <span className="text-xl font-bold text-foreground">SEO Audit Pro</span>
                     </div>
                     <div className="flex flex-col space-y-4">
-                      <a
-                        href="#plans"
+                      <Link
+                        href="/pricing"
                         className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Plans
-                      </a>
-                      <a
-                        href="#profile"
+                        Pricing
+                      </Link>
+                      <Link
+                        href="/support"
                         className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Profile
-                      </a>
+                        Support
+                      </Link>
+                      <Link
+                        href="/about-us"
+                        className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        About Us
+                      </Link>
                       <div className="flex flex-col space-y-3 pt-4">
                         <Button variant="outline" className="w-full bg-transparent">
                           Sign In
@@ -90,17 +131,23 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto text-center max-w-4xl">
+      {/* Hero Section with Background Image & Overlay */}
+      <section
+        className="relative w-full h-screen pt-35 pb-16 px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/banner.png')" }}
+      >
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-black/60"></div>
+
+        <div className="relative container mx-auto text-center max-w-4xl text-white">
           <Badge variant="secondary" className="mb-4">
             Professional SEO Analysis
           </Badge>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 text-balance leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Comprehensive SEO Audits for
             <span className="text-primary"> Better Rankings</span>
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground mb-8 text-pretty max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
             Get detailed SEO and performance reports with actionable insights. Identify issues, track improvements, and
             boost your website's search rankings.
           </p>
@@ -112,8 +159,25 @@ export default function LandingPage() {
               View Sample Report
             </Button>
           </div>
+
+          {/* Stats Row */}
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+            <div>
+              <h3 className="text-2xl font-bold">500K+</h3>
+              <p className="text-light-foreground">Audits Completed</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">98%</h3>
+              <p className="text-light-foreground">Accuracy Rate</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">24/7</h3>
+              <p className="text-light-foreground">Support</p>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* Feature Highlights */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
