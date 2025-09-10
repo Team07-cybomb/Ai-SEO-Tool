@@ -7,11 +7,14 @@ const AboutPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       {/* Hero Section */}
-      <header className="bg-gradient-to-r from-[#2f8e76] to-[#34d399] text-white py-20 px-6 text-center">
-        <h1 className="text-5xl font-bold mb-6 text-[#003366]">
-          About AI Landing Page Optimizer
+      <header
+        className="text-white pt-28 sm:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 text-center"
+        style={{ backgroundColor: "var(--primary)" }}
+      >
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-snug">
+          AI Landing Page Optimizer
         </h1>
-        <p className="max-w-3xl mx-auto text-lg leading-relaxed">
+        <p className="max-w-3xl mx-auto text-base sm:text-lg lg:text-xl leading-snug text-gray-200 tracking-wide">
           The AI-powered solution that audits and optimizes your landing pages
           for SEO, performance, and bugs. Unlock valuable insights and boost
           your website's search rankings with detailed, actionable reports.
@@ -19,127 +22,151 @@ const AboutPage = () => {
       </header>
 
       {/* Mission Section */}
-      <section className="max-w-6xl mx-auto px-6 py-16 text-center">
-        <h2 className="text-3xl font-semibold mb-6 text-[#003366]">
-          Our Mission
-        </h2>
-        <p className="text-lg leading-relaxed max-w-4xl mx-auto">
-          Our mission is to help businesses, developers, and marketers optimize
-          their websites through comprehensive SEO and performance audits. We
-          leverage the power of AI and key industry tools like Google PageSpeed
-          Insights, Lighthouse, and Moz/Ahrefs to deliver actionable insights
-          and recommendations that improve your website's performance and search
-          visibility.
-        </p>
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-12 sm:pb-16">
+        <div className="text-center mb-10 sm:mb-14">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#003366] mb-4">
+            Our Commitment to Growth & Innovation
+          </h2>
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            Discover how we help businesses, developers, and marketers optimize
+            their websites.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 items-center">
+          {/* Left Image */}
+          <div className="flex">
+            <img
+              src="/our-mission.jpg"
+              alt="Our Mission"
+              className="w-full h-auto rounded-xl shadow-lg object-cover"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Right Content */}
+          <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-xl border border-gray-200 flex flex-col justify-center">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-[#003366]">
+              Our Mission
+            </h3>
+            <p className="text-base sm:text-lg leading-relaxed text-gray-700">
+              Our mission is to help businesses, developers, and marketers
+              optimize their websites through comprehensive SEO and performance
+              audits. We leverage the power of AI and key industry tools like
+              Google PageSpeed Insights, Lighthouse, and Moz/Ahrefs to deliver
+              actionable insights and recommendations that improve your
+              website's performance and search visibility.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="bg-white py-16 px-6">
-        <h2 className="text-3xl font-semibold text-center mb-12 text-[#003366]">
-          Key Features
-        </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {/* Feature 1 */}
-          <div className="p-6 bg-[#f9f9f9] rounded-xl shadow-md hover:shadow-xl transition-all hover:scale-105 transform">
-            <CheckCircle className="w-10 h-10 text-[#34d399] mb-4" />
-            <h3 className="text-xl font-semibold mb-4 text-[#003366]">
-              Comprehensive SEO Analysis
-            </h3>
-            <p className="text-base leading-relaxed">
-              Our platform analyzes on-page SEO factors like meta tags,
-              headings, alt tags, and schema to ensure your content is optimized
-              for search engines.
-            </p>
-          </div>
-          {/* Feature 2 */}
-          <div className="p-6 bg-[#f9f9f9] rounded-xl shadow-md hover:shadow-xl transition-all hover:scale-105 transform">
-            <Zap className="w-10 h-10 text-[#34d399] mb-4" />
-            <h3 className="text-xl font-semibold mb-4 text-[#003366]">
-              Performance Optimization
-            </h3>
-            <p className="text-base leading-relaxed">
-              Identify performance bottlenecks, analyze Core Web Vitals, and
-              improve your page load times to ensure a seamless user experience.
-            </p>
-          </div>
-          {/* Feature 3 */}
-          <div className="p-6 bg-[#f9f9f9] rounded-xl shadow-md hover:shadow-xl transition-all hover:scale-105 transform">
-            <Bug className="w-10 h-10 text-[#34d399] mb-4" />
-            <h3 className="text-xl font-semibold mb-4 text-[#003366] break-words">
-              Bug Detection & Issue Repair
-            </h3>
-            <p className="text-base leading-relaxed">
-              Find critical bugs and broken elements that can harm user
-              experience and SEO rankings. We provide actionable recommendations
-              to fix them.
-            </p>
-          </div>
-          {/* Feature 4 */}
-          <div className="p-6 bg-[#f9f9f9] rounded-xl shadow-md hover:shadow-xl transition-all hover:scale-105 transform">
-            <BarChart className="w-10 h-10 text-[#34d399] mb-4" />
-            <h3 className="text-xl font-semibold mb-4 text-[#003366]">
-              Backlink & Domain Authority
-            </h3>
-            <p className="text-base leading-relaxed">
-              Track your backlinks, domain authority, and referring domains to
-              strengthen your website's trustworthiness and improve search
-              engine rankings.
-            </p>
+      <section className="bg-white py-12 sm:py-16 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-10 sm:mb-14 text-[#003366]">
+            Key Features
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {[
+              {
+                icon: (
+                  <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-[#34d399] mb-4 mx-auto" />
+                ),
+                title: "Comprehensive SEO Analysis",
+                text: "Analyze on-page SEO factors like meta tags, headings, alt tags, and schema to ensure your content is fully optimized.",
+              },
+              {
+                icon: (
+                  <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-[#34d399] mb-4 mx-auto" />
+                ),
+                title: "Performance Optimization",
+                text: "Review Core Web Vitals, reduce delays, and improve loading speed for seamless interaction and higher engagement.",
+              },
+              {
+                icon: (
+                  <Bug className="w-8 h-8 sm:w-10 sm:h-10 text-[#34d399] mb-4 mx-auto" />
+                ),
+                title: "Bug Detection & Repair",
+                text: "Identify bugs and broken elements that affect user experience and rankings, with actionable solutions to fix them.",
+              },
+              {
+                icon: (
+                  <BarChart className="w-8 h-8 sm:w-10 sm:h-10 text-[#34d399] mb-4 mx-auto" />
+                ),
+                title: "Backlink & Authority",
+                text: "Monitor backlinks, domain authority, and referring domains to strengthen trust and improve search rankings.",
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="p-6 sm:p-8 bg-white rounded-xl shadow-md hover:shadow-xl transition-all hover:scale-105 transform border border-gray-100 hover:border-[#34d399] text-center"
+              >
+                {feature.icon}
+                <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-[#003366]">
+                  {feature.title}
+                </h3>
+                <p className="text-base sm:text-lg leading-relaxed text-gray-700">
+                  {feature.text}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Who We Help Section */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-semibold text-center mb-8 text-[#003366]">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-10 sm:mb-14 text-[#003366]">
           Who Can Benefit?
         </h2>
-        <div className="grid md:grid-cols-3 gap-8 text-center">
-          <div className="p-6 bg-white shadow rounded-lg hover:shadow-xl transition-all hover:scale-105 transform">
-            <h3 className="text-xl font-semibold mb-3 text-[#003366]">
-              Marketers
-            </h3>
-            <p className="text-base leading-relaxed">
-              Optimize your landing pages for better rankings, higher CTR, and
-              better performance in search engines to increase conversions.
-            </p>
-          </div>
-          <div className="p-6 bg-white shadow rounded-lg hover:shadow-xl transition-all hover:scale-105 transform">
-            <h3 className="text-xl font-semibold mb-3 text-[#003366]">
-              Developers
-            </h3>
-            <p className="text-base leading-relaxed">
-              Save time with our automated bug detection and performance
-              optimization tools, allowing you to focus on building instead of
-              debugging.
-            </p>
-          </div>
-          <div className="p-6 bg-white shadow rounded-lg hover:shadow-xl transition-all hover:scale-105 transform">
-            <h3 className="text-xl font-semibold mb-3 text-[#003366]">
-              Business Owners
-            </h3>
-            <p className="text-base leading-relaxed">
-              Ensure your website is fast, optimized, mobile-friendly and
-              ranking well in search results to drive more traffic and increase
-              sales.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+          {[
+            {
+              title: "Marketers",
+              text: "Optimize landing pages for better rankings, higher CTR, and improved conversions through SEO-driven insights.",
+            },
+            {
+              title: "Developers",
+              text: "Save time with automated bug detection and performance tools, so you can focus on building instead of debugging.",
+            },
+            {
+              title: "Business Owners",
+              text: "Ensure your site is fast, mobile-friendly, and ranking high to drive more traffic and boost sales.",
+            },
+          ].map((role, i) => (
+            <div
+              key={i}
+              className="p-6 sm:p-8 bg-white rounded-xl shadow-md hover:shadow-xl transition-all hover:scale-105 transform text-center"
+            >
+              <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-[#003366]">
+                {role.title}
+              </h3>
+              <p className="text-base sm:text-lg leading-relaxed text-gray-700">
+                {role.text}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Call to Action Section */}
-      <section className="bg-gradient-to-r from-[#34d399] to-[#2f8e76] text-white py-16 px-6 text-center">
-        <h2 className="text-3xl font-semibold mb-6 text-[#003366]">
+      <section
+        className="text-white py-12 sm:py-16 px-4 sm:px-6 text-center"
+        style={{ backgroundColor: "var(--primary)" }}
+      >
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6">
           Ready to Improve Your SEO?
         </h2>
-        <p className="text-lg max-w-3xl mx-auto mb-6">
+        <p className="text-base sm:text-lg lg:text-xl max-w-3xl mx-auto mb-6 text-gray-200 tracking-wide">
           Thousands of websites are already benefiting from our AI-powered
           optimization tool. Start improving your SEO and performance today with
           our free audit.
         </p>
         <a
           href="/audit"
-          className="inline-block bg-white text-[#34d399] px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all"
+          className="inline-block bg-white px-5 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all text-base sm:text-lg"
+          style={{ color: "var(--primary)" }}
         >
           Start Your Free Audit
         </a>
