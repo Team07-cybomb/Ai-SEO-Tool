@@ -7,7 +7,7 @@ import { MessageCircle, Mail, FileText, HelpCircle } from "lucide-react"
 
 export default function SupportPage() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 pt-25 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Support</h1>

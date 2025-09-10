@@ -5,7 +5,7 @@ import { CreditCard, Download, CheckCircle } from "lucide-react"
 
 export default function BillingPage() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 pt-25 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Purchase & Billing</h1>

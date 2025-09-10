@@ -126,7 +126,7 @@ export default function ReportsPage() {
   return (
     <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-25">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Reports</h1>
           <p className="text-muted-foreground">View and manage your SEO audit reports</p>
