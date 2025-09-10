@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import Link from "next/link";
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -19,14 +19,7 @@ const LoginPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
       <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full relative">
-        {/* Close Button */}
-        <button
-          className="absolute top-4 left-4 text-gray-500 hover:text-gray-900 transition-colors duration-200"
-          aria-label="Close"
-          title="Close"
-        >
-          ✕
-        </button>
+
 
         {/* Logo */}
         <div className="flex justify-center mb-6">
@@ -53,7 +46,7 @@ const LoginPage = () => {
 
         {/* Title */}
         <h1 className="text-3xl font-bold text-center mb-6">Sign in</h1>
-        
+
         {/* Form */}
         <form onSubmit={handleNext} className="space-y-4">
           {/* Email input */}
@@ -95,7 +88,7 @@ const LoginPage = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="w-full py-3 px-4 bg-emerald-600 text-white rounded-full font-semibold shadow-lg hover:bg-emerald-500"
+              className="w-full py-3 px-4 bg-emerald-600 text-white rounded-full font-semibold shadow-lg hover:bg-emerald-500 cursor-pointer"
             >
               {showPassword ? "Login" : "Next"}
             </motion.button>
@@ -105,24 +98,31 @@ const LoginPage = () => {
         {/* Forgot password */}
         <AnimatePresence>
           {showPassword && (
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
               transition={{ duration: 0.3 }}
-              className="w-full py-3 mt-4 px-4 border border-gray-300 text-gray-900 rounded-full font-semibold hover:scale-105 transition-transform hover:bg-gray-100 shadow-lg"
+              className="flex justify-center mt-4"
             >
-              Forgot password?
-            </motion.button>
+              <Link
+                href="/forgotpassword"
+                className="text-sm text-blue-600 font-medium hover:underline"
+              >
+                Forgotten your password?
+              </Link>
+            </motion.div>
           )}
         </AnimatePresence>
+
+
 
         {/* Sign-up link */}
         <p className="mt-8 text-center text-gray-600">
           Don’t have an account?{" "}
-          <a href="#" className="text-emerald-600 hover:underline">
+          <Link href="/signup" className="text-emerald-600 hover:underline">
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
