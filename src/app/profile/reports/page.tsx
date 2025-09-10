@@ -196,12 +196,30 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      {/* Filters and Search */}
+      {/* Filters and Search + Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Audit Reports</CardTitle>
-          <CardDescription>Detailed view of all your website audits</CardDescription>
+        <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div>
+            <CardTitle>Audit Reports</CardTitle>
+            <CardDescription>Detailed view of all your website audits</CardDescription>
+          </div>
+          {/* Grade Sheet on the right side */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="flex flex-col items-center border rounded-lg p-2 sm:p-4">
+              <span className="text-lg font-bold text-green-600">Good</span>
+              <p className="text-xs sm:text-sm text-muted-foreground">90 - 100</p>
+            </div>
+            <div className="flex flex-col items-center border rounded-lg p-2 sm:p-4">
+              <span className="text-lg font-bold text-yellow-600">Avg</span>
+              <p className="text-xs sm:text-sm text-muted-foreground">70 - 89</p>
+            </div>
+            <div className="flex flex-col items-center border rounded-lg p-2 sm:p-4">
+              <span className="text-lg font-bold text-red-600">Bad</span>
+              <p className="text-xs sm:text-sm text-muted-foreground">Below 70</p>
+            </div>
+          </div>
         </CardHeader>
+
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
             <div className="relative flex-1">
@@ -226,17 +244,7 @@ export default function ReportsPage() {
                   <SelectItem value="failed">Failed</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="seo">SEO Score</SelectItem>
-                  <SelectItem value="speed">Speed Score</SelectItem>
-                  <SelectItem value="website">Website</SelectItem>
-                </SelectContent>
-              </Select>
+
             </div>
           </div>
 
