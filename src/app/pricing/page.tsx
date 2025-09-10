@@ -262,7 +262,9 @@ const PricingPage: React.FC = () => {
               >
                 <div className="faq-question">
                   {faq.question}
-                  <i className={`fas fa-chevron-${expandedFaq === index ? 'up' : 'down'}`}></i>
+                  <span className="chevron-icon">
+                    {expandedFaq === index ? '⌄' : '⌄'}
+                  </span>
                 </div>
                 {expandedFaq === index && (
                   <div className="faq-answer">{faq.answer}</div>
@@ -292,13 +294,15 @@ const PricingPage: React.FC = () => {
         .container {
           max-width: 1200px;
           margin: 0 auto;
+          margin-top:50px;
           padding: 0 20px;
         }
         
         /* Header Styles */
         .pricing-header {
           text-align: center;
-          padding: 60px 0 40px;
+          padding: 60px 0 60px;
+          font-weight:600;
           background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
         }
         
@@ -324,7 +328,7 @@ const PricingPage: React.FC = () => {
         
         .billing-toggle span {
           font-weight: 600;
-          color: #718096;
+          color:rgb(2, 2, 2);
         }
         
         .billing-toggle span.active {
@@ -334,7 +338,7 @@ const PricingPage: React.FC = () => {
         .discount-badge {
           background: #48bb78;
           color: white;
-          padding: 2px 8px;
+          padding: 2px 8px 6px;
           border-radius: 12px;
           font-size: 0.8rem;
           margin-left: 5px;
@@ -387,7 +391,7 @@ const PricingPage: React.FC = () => {
         
         /* Pricing Plans */
         .pricing-plans {
-          padding: 60px 0;
+          padding: 30px 0;
         }
         
         .plans-grid {
@@ -513,13 +517,14 @@ const PricingPage: React.FC = () => {
         }
         
         .cta-button.large {
-          padding: 16px 24px;
+          padding: 16px 5px;
           font-size: 1.1rem;
+          width:400px;
         }
         
         /* Feature Comparison */
         .feature-comparison {
-          padding: 60px 0;
+          padding: 30px 0;
           background: #f7fafc;
         }
         
@@ -603,8 +608,9 @@ const PricingPage: React.FC = () => {
           box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           padding: 16px 20px;
           border: 1px solid #edf2f7;
-          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+          transition: all 0.3s ease;
           position: relative;
+          overflow: hidden;
         }
         
         .faq-item:hover {
@@ -639,29 +645,45 @@ const PricingPage: React.FC = () => {
           gap: 12px;
         }
         
-        .faq-question i {
+        .chevron-icon {
           color: #718096;
-          transition: transform 0.2s ease, color 0.2s ease;
+          transition: all 0.3s ease;
+          font-size: 2rem;
+          font-weight: bold;
+          display: inline-block;
+          width: 40px;
+          text-align: center;
+          transform: rotate(0deg);
         }
         
-        .faq-item:hover .faq-question i {
+        .faq-item:hover .chevron-icon {
           color: #4299e1;
         }
         
-        .faq-item.expanded .faq-question i {
+        .faq-item.expanded .chevron-icon {
+          color: #4299e1;
           transform: rotate(180deg);
-          color: #4299e1;
         }
         
         .faq-answer {
-          padding-top: 10px;
+          padding-top: 15px;
           color: #4a5568;
-          animation: fadeIn 0.25s ease;
+          animation: slideDown 0.3s ease;
+          border-top: 1px solid #e2e8f0;
+          margin-top: 10px;
         }
         
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes slideDown {
+          from { 
+            opacity: 0; 
+            transform: translateY(-10px);
+            max-height: 0;
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0);
+            max-height: 200px;
+          }
         }
         
         /* Final CTA */
