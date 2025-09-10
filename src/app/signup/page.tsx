@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, FormEvent } from "react";
-
+import Link from "next/link";
 const SignupPage = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -13,29 +13,9 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
+    <div className="flex items-center justify-center  min-h-screen bg-blue-50 p-4">
       <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full relative">
-        {/* Close Button */}
-        <button
-          className="absolute top-4 left-4 text-gray-500 hover:text-gray-900 transition-colors duration-200"
-          aria-label="Close"
-          title="Close"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+
 
         {/* Logo */}
         <div className="flex justify-center mb-6">
@@ -86,9 +66,16 @@ const SignupPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full py-3 px-4 bg-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-shadow duration-200"
           />
+          <input
+            type="password"
+            placeholder=" Re-Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full py-3 px-4 bg-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-shadow duration-200"
+          />
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-emerald-600 text-white rounded-full font-semibold transition-transform transform hover:scale-105 duration-200 shadow-lg hover:bg-emerald-500"
+            className="w-full py-3 px-4 bg-emerald-600 text-white rounded-full font-semibold transition-transform transform hover:scale-105 duration-200 shadow-lg hover:bg-emerald-500 cursor-pointer"
           >
             Sign up
           </button>
@@ -97,9 +84,9 @@ const SignupPage = () => {
         {/* Login link */}
         <p className="mt-8 text-center text-gray-600">
           Already have an account?{" "}
-          <a href="#" className="text-emerald-600 hover:underline">
+          <Link href="/login" className="text-emerald-600 hover:underline">
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>
