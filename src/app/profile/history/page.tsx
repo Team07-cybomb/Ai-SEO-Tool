@@ -1,7 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Download, Eye, Calendar } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Download, Eye } from "lucide-react";
 
 export default function HistoryPage() {
   const auditHistory = [
@@ -45,46 +51,55 @@ export default function HistoryPage() {
       speedScore: 76,
       status: "completed",
     },
-  ]
+  ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 pt-25 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Audit History</h1>
-          <p className="text-muted-foreground">View and manage your previous SEO audits</p>
+          <p className="text-muted-foreground">
+            View and manage your previous SEO audits
+          </p>
         </div>
-        <Button variant="outline">
-          <Calendar className="w-4 h-4 mr-2" />
-          Filter by Date
-        </Button>
       </div>
 
       {/* History Table */}
       <Card>
         <CardHeader>
           <CardTitle>All Audits</CardTitle>
-          <CardDescription>Complete history of your website audits</CardDescription>
+          <CardDescription>
+            Complete history of your website audits
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {auditHistory.map((audit) => (
-              <div key={audit.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                <div className="flex items-center space-x-4">
+              <div
+                key={audit.id}
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-border rounded-lg gap-3 sm:gap-0"
+              >
+                {/* Website & Date */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
                   <div>
-                    <p className="font-medium text-foreground">{audit.website}</p>
-                    <p className="text-sm text-muted-foreground">{audit.date}</p>
+                    <p className="font-medium text-foreground">
+                      {audit.website}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {audit.date}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <div className="flex space-x-2">
+                {/* Scores & Buttons */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-2 sm:gap-0">
+                  <div className="flex space-x-2 justify-center sm:justify-start">
                     <Badge variant="secondary">SEO: {audit.seoScore}</Badge>
                     <Badge variant="outline">Speed: {audit.speedScore}</Badge>
                   </div>
 
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 justify-center sm:justify-start">
                     <Button variant="ghost" size="sm">
                       <Eye className="w-4 h-4 mr-1" />
                       View
@@ -101,5 +116,5 @@ export default function HistoryPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
