@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
+import Link from "next/link"
 import { Menu, Search, BarChart3, Zap, Shield, TrendingUp } from "lucide-react"
 
 
@@ -47,10 +47,12 @@ export default function LandingPage() {
             boost your website's search rankings.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="text-lg px-8  sm:w-auto">
-              Start Free Audit
-            </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent  sm:w-auto">
+              <Link href="/audit">
+                <Button size="lg" className="text-lg px-8 sm:w-auto">
+                  Start Free Audit
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent  sm:w-auto">
               View Sample Report
             </Button>
           </div>
@@ -78,7 +80,7 @@ export default function LandingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30" id="Features">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Everything You Need for SEO Success</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 text-primary">Everything You Need for SEO Success</h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Our comprehensive platform provides detailed analysis and actionable recommendations to improve your
               website's search engine performance.
@@ -102,7 +104,7 @@ export default function LandingPage() {
             <Card className="border-border hover:shadow-lg transition-shadow">
               <CardHeader className="text-center sm:text-left">
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                  <Zap className="w-6 h-6 text-secondary" />
+                  <Zap className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Performance Monitoring</CardTitle>
                 <CardDescription className="leading-relaxed">
@@ -114,7 +116,7 @@ export default function LandingPage() {
             <Card className="border-border hover:shadow-lg transition-shadow">
               <CardHeader className="text-center sm:text-left">
                 <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                  <TrendingUp className="w-6 h-6 text-accent" />
+                  <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Progress Tracking</CardTitle>
                 <CardDescription className="leading-relaxed">
@@ -138,7 +140,7 @@ export default function LandingPage() {
             <Card className="border-border hover:shadow-lg transition-shadow">
               <CardHeader className="text-center sm:text-left">
                 <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                  <Search className="w-6 h-6 text-secondary" />
+                  <Search className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Keyword Insights</CardTitle>
                 <CardDescription className="leading-relaxed">
@@ -150,7 +152,7 @@ export default function LandingPage() {
             <Card className="border-border hover:shadow-lg transition-shadow">
               <CardHeader className="text-center sm:text-left">
                 <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4 mx-auto sm:mx-0">
-                  <BarChart3 className="w-6 h-6 text-accent" />
+                  <BarChart3 className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">PDF Reports</CardTitle>
                 <CardDescription className="leading-relaxed">
@@ -169,9 +171,11 @@ export default function LandingPage() {
           <p className="text-base sm:text-lg text-muted-foreground mb-8 leading-relaxed">
             Join thousands of websites already using our platform to boost their search rankings.
           </p>
+          <Link href="/audit">
           <Button size="lg" className="text-lg px-8 w-full sm:w-auto">
             Start Your Free Audit Today
-          </Button>
+          </Button></Link>
+          
         </div>
       </section>
 

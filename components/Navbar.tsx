@@ -76,12 +76,16 @@ export default function Navbar() {
               About Us
             </Link>
             <Button
-              variant={isScrolledPastBanner ? "outline" : "ghost"}
-              size="sm"
+                asChild
+                variant={isScrolledPastBanner ? "outline" : "ghost"}
+                size="sm"
             >
-              Sign In
+                <Link href="/login">Sign In</Link>
             </Button>
-            <Button size="sm">Get Started</Button>
+
+            <Button asChild size="sm">
+              <Link href="/signup">Get Started</Link>
+            </Button>
           </div>
 
           {/* Mobile Navigation */}
