@@ -55,18 +55,18 @@ function SidebarContent() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col h-full pt-15">
+    <div className="flex flex-col h-full ">
       {/* Logo */}
-      {/* <div className="p-6 border-b border-sidebar-border">
-        <div className="flex items-center space-x-2">
+      <div className="p-6 border-b border-sidebar-border">
+        <Link href="/" className="flex items-center space-x-2 cursor-pointer">
           <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
             <Search className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
           <span className="text-lg font-bold text-sidebar-foreground">
             SEO Audit Pro
           </span>
-        </div>
-      </div> */}
+        </Link>
+      </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-6 space-y-2">

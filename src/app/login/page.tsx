@@ -1,26 +1,35 @@
-"use client"
+"use client";
 import React, { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";  // <-- for navigation
+
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const router = useRouter();  // <-- Initialize router
 
   const handleNext = (e: FormEvent) => {
     e.preventDefault();
     if (!showPassword) {
       setShowPassword(true);
     } else {
-      console.log("Login attempt with:", { email, password });
+      // Static validation for now
+      if (email && password) {
+        console.log("Login attempt with:", { email, password });
+
+        // Redirect to profile page
+        router.push("/profile");
+      } else {
+        alert("Please enter both email and password!");
+      }
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
       <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full relative">
-
-
         {/* Logo */}
         <div className="flex justify-center mb-6">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -39,9 +48,7 @@ const LoginPage = () => {
               />
             </svg>
           </div>
-          <span className="text-xl font-bold text-foreground ml-2">
-            SEO Audit Pro
-          </span>
+          <span className="text-xl font-bold text-foreground ml-2">SEO Audit Pro</span>
         </div>
 
         {/* Title */}
@@ -49,7 +56,6 @@ const LoginPage = () => {
 
         {/* Form */}
         <form onSubmit={handleNext} className="space-y-4">
-          {/* Email input */}
           <input
             type="text"
             placeholder="Phone, email, or username"
@@ -58,7 +64,6 @@ const LoginPage = () => {
             className="w-full py-3 px-4 bg-gray-200 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
           />
 
-          {/* Animated password field */}
           <AnimatePresence>
             {showPassword && (
               <motion.div
@@ -78,7 +83,6 @@ const LoginPage = () => {
             )}
           </AnimatePresence>
 
-          {/* Animated Button */}
           <AnimatePresence mode="wait">
             <motion.button
               key={showPassword ? "login" : "next"}
@@ -105,17 +109,12 @@ const LoginPage = () => {
               transition={{ duration: 0.3 }}
               className="flex justify-center mt-4"
             >
-              <Link
-                href="/forgotpassword"
-                className="text-sm text-blue-600 font-medium hover:underline"
-              >
+              <Link href="/forgotpassword" className="text-sm text-blue-600 font-medium hover:underline">
                 Forgotten your password?
               </Link>
             </motion.div>
           )}
         </AnimatePresence>
-
-
 
         {/* Sign-up link */}
         <p className="mt-8 text-center text-gray-600">

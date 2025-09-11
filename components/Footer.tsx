@@ -1,19 +1,22 @@
-"use client"
+"use client";
 
-import { Search } from "lucide-react"
-import Link from "next/link"
-
+import { Search } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
-  
+  const pathname = usePathname();
+
+  // Hide Footer for all routes starting with /profile
+  if (pathname.startsWith("/profile")) {
+    return null;
+  }
 
   return (
     <footer className="bg-muted border-t border-border py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
-
         {/* Top Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-8">
-
           {/* Logo + About */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -21,12 +24,11 @@ export default function Footer() {
                 <Search className="w-5 h-5 text-primary-foreground" />
               </div>
               <Link href={"/"}>
-                <span className={`text-xl font-bold text-foreground text-gray-900`}>
+                <span className="text-xl font-bold text-gray-900">
                   SEO Audit Pro
                 </span>
               </Link>
             </div>
-
             <p className="text-muted-foreground text-sm leading-relaxed">
               Professional SEO analysis tools to help businesses improve their search engine
               rankings and online visibility.
@@ -39,22 +41,21 @@ export default function Footer() {
               <h3 className="font-semibold text-foreground text-base mb-3">Company</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link 
-                    href="/about-us" 
+                  <Link
+                    href="/about-us"
                     className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                   >
                     About Us
                   </Link>
                 </li>
                 <li>
-            <Link
-              href="/contact-us"
-              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-            >
-              Contact Us
-            </Link>
-          </li>
-
+                  <Link
+                    href="/contact-us"
+                    className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                  >
+                    Contact Us
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -108,5 +109,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
