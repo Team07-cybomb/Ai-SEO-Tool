@@ -148,6 +148,13 @@ const PricingPage: React.FC = () => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
+  const handleFaqKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, index: number) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleFaq(index);
+    }
+  };
+
   return (
     <div className="pricing-page">
       {/* Header Section */}
@@ -259,13 +266,28 @@ const PricingPage: React.FC = () => {
                 key={index} 
                 className={`faq-item ${expandedFaq === index ? 'expanded' : ''}`}
                 onClick={() => toggleFaq(index)}
+                role="button"
+                tabIndex={0}
+                aria-expanded={expandedFaq === index}
+                aria-controls={`faq-answer-${index}`}
+                onKeyDown={(e) => handleFaqKeyDown(e, index)}
               >
                 <div className="faq-question">
                   {faq.question}
-                  <i className={`fas fa-chevron-${expandedFaq === index ? 'up' : 'down'}`}></i>
+                  <span className="chevron-icon" aria-hidden="true">
+                    {expandedFaq === index ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 15L12 9L18 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </span>
                 </div>
                 {expandedFaq === index && (
-                  <div className="faq-answer">{faq.answer}</div>
+                  <div id={`faq-answer-${index}`} className="faq-answer">{faq.answer}</div>
                 )}
               </div>
             ))}
@@ -298,7 +320,8 @@ const PricingPage: React.FC = () => {
         /* Header Styles */
         .pricing-header {
           text-align: center;
-          padding: 60px 0 40px;
+          padding: 60px 0 60px;
+          font-weight:600;
           background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
         }
         
@@ -324,7 +347,7 @@ const PricingPage: React.FC = () => {
         
         .billing-toggle span {
           font-weight: 600;
-          color: #718096;
+          color:rgb(2, 2, 2);
         }
         
         .billing-toggle span.active {
@@ -334,7 +357,7 @@ const PricingPage: React.FC = () => {
         .discount-badge {
           background: #48bb78;
           color: white;
-          padding: 2px 8px;
+          padding: 2px 8px 6px;
           border-radius: 12px;
           font-size: 0.8rem;
           margin-left: 5px;
@@ -360,7 +383,7 @@ const PricingPage: React.FC = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: green;
+          background-color: #4299e1;
           transition: .4s;
           border-radius: 34px;
         }
@@ -378,7 +401,7 @@ const PricingPage: React.FC = () => {
         }
         
         input:checked + .slider {
-          background-color: #4299e1;
+          background-color: green;
         }
         
         input:checked + .slider:before {
@@ -387,7 +410,7 @@ const PricingPage: React.FC = () => {
         
         /* Pricing Plans */
         .pricing-plans {
-          padding: 60px 0;
+          padding: 30px 0;
         }
         
         .plans-grid {
@@ -401,6 +424,7 @@ const PricingPage: React.FC = () => {
         .pricing-card {
           background: white;
           border-radius: 12px;
+          border: 1px solid #e2e8f0;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
           padding: 30px;
           position: relative;
@@ -513,13 +537,14 @@ const PricingPage: React.FC = () => {
         }
         
         .cta-button.large {
-          padding: 16px 24px;
+          padding: 16px 5px;
           font-size: 1.1rem;
+          width:400px;
         }
         
         /* Feature Comparison */
         .feature-comparison {
-          padding: 60px 0;
+          padding: 30px 0;
           background: #f7fafc;
         }
         
@@ -530,6 +555,7 @@ const PricingPage: React.FC = () => {
           font-size:2.5rem;
           font-weight:600;
         }
+        
         
         .comparison-table {
           background: white;
@@ -603,8 +629,9 @@ const PricingPage: React.FC = () => {
           box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           padding: 16px 20px;
           border: 1px solid #edf2f7;
-          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+          transition: all 0.3s ease;
           position: relative;
+          overflow: hidden;
         }
         
         .faq-item:hover {
@@ -639,34 +666,55 @@ const PricingPage: React.FC = () => {
           gap: 12px;
         }
         
-        .faq-question i {
+        .chevron-icon {
           color: #718096;
-          transition: transform 0.2s ease, color 0.2s ease;
+          transition: all 0.3s ease;
+          font-size: 1.3rem;
+        
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 20px;
+          height: 50px;
+          text-align: center;
+          flex-shrink: 0;
+          position: relative;
+          line-height: 1;
         }
         
-        .faq-item:hover .faq-question i {
+        .faq-item:hover .chevron-icon {
           color: #4299e1;
         }
         
-        .faq-item.expanded .faq-question i {
-          transform: rotate(180deg);
+        .faq-item.expanded .chevron-icon {
           color: #4299e1;
+          transform: scale(1.1);
         }
         
         .faq-answer {
-          padding-top: 10px;
+          padding-top: 15px;
           color: #4a5568;
-          animation: fadeIn 0.25s ease;
+          animation: slideDown 0.3s ease;
+          border-top: 1px solid #e2e8f0;
+          margin-top: 10px;
         }
         
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes slideDown {
+          from { 
+            opacity: 0; 
+            transform: translateY(-10px);
+            max-height: 0;
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0);
+            max-height: 200px;
+          }
         }
         
         /* Final CTA */
         .final-cta {
-          padding: 80px 0;
+          padding: 60px 0;
           text-align: center;
           background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
           color: white;
@@ -683,35 +731,350 @@ const PricingPage: React.FC = () => {
           opacity: 0.9;
         }
         
+        /* Mobile Responsive Styles */
+        @media (max-width: 1024px) {
+          .container {
+            padding: 0 15px;
+          }
+          
+          .pricing-header h1 {
+            font-size: 2.2rem;
+          }
+          
+          .pricing-header p {
+            font-size: 1.1rem;
+          }
+          
+          .plans-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+          }
+        }
+
         @media (max-width: 768px) {
+          .container {
+            padding: 0 12px;
+            margin-top: 30px;
+          }
+          
+          /* Header Mobile */
+          .pricing-header {
+            padding: 60px 0 40px;
+          }
+          
+          .pricing-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+          }
+          
+          .pricing-header p {
+            font-size: 1rem;
+            margin-bottom: 25px;
+          }
+          
+          .billing-toggle {
+            flex-direction: row;
+            gap: 15px;
+            margin-top: 15px;
+          }
+          
+          .billing-toggle span {
+            font-size: 0.9rem;
+          }
+          
+          .discount-badge {
+            font-size: 0.7rem;
+            padding: 1px 6px 4px;
+          }
+          
+          .toggle-switch {
+            width: 50px;
+            height: 25px;
+          }
+          
+          .slider:before {
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+          }
+          
+          input:checked + .slider:before {
+            transform: translateX(25px);
+          }
+          
+          /* Pricing Cards Mobile */
           .plans-grid {
             grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          
+          .pricing-card {
+            padding: 20px;
           }
           
           .pricing-card.popular {
             transform: none;
+            border-width: 1px;
           }
           
-          .table-header, .table-row {
-            grid-template-columns: 1fr;
+          .popular-badge {
+            top: -8px;
+            right: 15px;
+            padding: 3px 10px;
+            font-size: 0.7rem;
+          }
+          
+          .plan-header h3 {
+            font-size: 1.3rem;
+          }
+          
+          .price {
+            font-size: 1.8rem;
+          }
+          
+          .price-description {
+            font-size: 0.8rem;
+          }
+          
+          .features-list li {
+            padding: 8px 0;
+            font-size: 0.9rem;
+          }
+          
+          .cta-button {
+            padding: 12px 15px;
+            font-size: 0.9rem;
+          }
+          
+          .cta-button.large {
+            padding: 14px 20px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+          }
+          
+          /* Feature Comparison Mobile */
+          .feature-comparison {
+            padding: 20px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+          
+          .feature-comparison h2 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
             text-align: center;
           }
           
+          .comparison-table {
+            min-width: 600px;
+            margin: 0 10px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+          }
+          
+          .comparison-table::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+            pointer-events: none;
+          }
+          
+          .table-header, .table-row {
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+          }
+          
           .feature-column, .plan-column {
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
             justify-content: center;
           }
           
-          .table-header .plan-column,
-          .table-row .plan-column {
-            display: none;
+          .table-header .feature-column,
+          .table-header .plan-column {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
           
-          .table-header .plan-column:first-child,
+          .table-row .feature-column {
+            justify-content: flex-start;
+            font-weight: 600;
+            background: #f8f9fa;
+          }
+          
+          .table-row .plan-column {
+            background: white;
+            border-left: 1px solid #e2e8f0;
+          }
+          
           .table-row .plan-column:first-child {
+            border-left: none;
+          }
+          
+          /* FAQ Mobile */
+          .faq-section {
+            padding: 50px 0;
+          }
+          
+          .faq-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+          }
+          
+          .faq-item {
+            padding: 12px 15px;
+          }
+          
+          .faq-question {
+            font-size: 0.9rem;
+            gap: 8px;
+          }
+          
+          .chevron-icon {
+            font-size: 1.2rem;
+            width: 30px;
+            height: 30px;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.3s ease;
+            line-height: 1;
+          }
+          
+          .faq-answer {
+            font-size: 0.85rem;
+            padding-top: 12px;
+          }
+          
+          /* Final CTA Mobile */
+          .final-cta {
+            padding: 40px 0;
+          }
+          
+          .final-cta h2 {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+          }
+          
+          .final-cta p {
+            font-size: 1rem;
+            margin-bottom: 25px;
           }
         }
-      `}</style>
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 10px;
+            margin-top: 30px;
+          }
+          
+          /* Extra Small Mobile */
+          .pricing-header {
+            padding: 50px 0 30px;
+          }
+          
+          .pricing-header h1 {
+            font-size: 1.5rem;
+          }
+          
+          .pricing-header p {
+            font-size: 0.9rem;
+          }
+          
+          .billing-toggle {
+            gap: 12px;
+            flex-direction: row;
+          }
+          
+          .billing-toggle span {
+            font-size: 0.8rem;
+          }
+          
+          .pricing-card {
+            padding: 15px;
+          }
+          
+          .plan-header h3 {
+            font-size: 1.2rem;
+          }
+          
+          .price {
+            font-size: 1.6rem;
+          }
+          
+          .features-list li {
+            padding: 6px 0;
+            font-size: 0.85rem;
+          }
+          
+          .cta-button {
+            padding: 10px 12px;
+            font-size: 0.85rem;
+          }
+          
+          .feature-comparison h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+          }
+          
+          .comparison-table {
+            min-width: 500px;
+            margin: 0 5px;
+            border-radius: 8px;
+          }
+          
+          .feature-column, .plan-column {
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            min-height: 45px;
+          }
+          
+          .table-header .feature-column,
+          .table-header .plan-column {
+            font-size: 0.75rem;
+            letter-spacing: 0.3px;
+          }
+          
+          .faq-section h2 {
+            font-size: 1.5rem;
+          }
+          
+          .faq-item {
+            padding: 10px 12px;
+          }
+          
+          .faq-question {
+            font-size: 0.85rem;
+          }
+          
+          .faq-answer {
+            font-size: 0.8rem;
+          }
+          
+          .final-cta h2 {
+            font-size: 1.4rem;
+          }
+          
+          .final-cta p {
+            font-size: 0.9rem;
+          }
+        }
+      `}
+      </style>
     </div>
   );
 };

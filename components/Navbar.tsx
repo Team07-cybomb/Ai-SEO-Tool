@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Search } from "lucide-react";
@@ -9,6 +10,7 @@ import { Menu, Search } from "lucide-react";
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,8 +18,23 @@ export default function Navbar() {
     };
 
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Hide scrollbar on /profile route
+  useEffect(() => {
+    if (pathname.startsWith("/profile")) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [pathname]);
+
+  // Hide Navbar on /profile route
+  if (pathname.startsWith("/profile")) {
+    return null;
+  }
 
   return (
     <nav
@@ -34,13 +51,15 @@ export default function Navbar() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Search className="w-5 h-5 text-primary-foreground" />
             </div>
-            <Link href={"/"}><span
-              className={`text-xl font-bold ${
-                isScrolledPastBanner ? "text-foreground" : "text-gray-900"
-              }`}
-            >
-              SEO Audit Pro
-            </span></Link>
+            <Link href={"/"}>
+              <span
+                className={`text-xl font-bold ${
+                  isScrolledPastBanner ? "text-foreground" : "text-gray-900"
+                }`}
+              >
+                SEO Audit Pro
+              </span>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -55,16 +74,6 @@ export default function Navbar() {
             >
               Pricing
             </Link>
-            {/* <Link
-              href="/support"
-              className={`transition-colors ${
-                isScrolledPastBanner
-                  ? "text-muted-foreground hover:text-foreground"
-                  : "text-gray-700 hover:text-gray-900"
-              }`}
-            >
-              Support
-            </Link> */}
             <Link
               href="/about-us"
               className={`transition-colors ${
@@ -76,12 +85,16 @@ export default function Navbar() {
               About Us
             </Link>
             <Button
+              asChild
               variant={isScrolledPastBanner ? "outline" : "ghost"}
               size="sm"
             >
-              Sign In
+              <Link href="/login">Sign In</Link>
             </Button>
-            <Button size="sm">Get Started</Button>
+
+            <Button asChild size="sm">
+              <Link href="/signup">Get Started</Link>
+            </Button>
           </div>
 
           {/* Mobile Navigation */}
@@ -107,13 +120,15 @@ export default function Navbar() {
                     <div className="mx-3 w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                       <Search className="w-5 h-5 text-primary-foreground" />
                     </div>
-                    <Link href={"/"}><span
-              className={`text-xl font-bold ${
-                isScrolledPastBanner ? "text-foreground" : "text-gray-900"
-              }`}
-            >
-              SEO Audit Pro
-            </span></Link>
+                    <Link href={"/"}>
+                      <span
+                        className={`text-xl font-bold ${
+                          isScrolledPastBanner ? "text-foreground" : "text-gray-900"
+                        }`}
+                      >
+                        SEO Audit Pro
+                      </span>
+                    </Link>
                   </div>
                   <div className="mx-5 flex flex-col">
                     <Link
@@ -122,13 +137,6 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Pricing
-                    </Link>
-                    <Link
-                      href="/support"
-                      className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Support
                     </Link>
                     <Link
                       href="/about-us"
