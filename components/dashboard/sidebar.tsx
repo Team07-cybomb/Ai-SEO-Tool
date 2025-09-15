@@ -15,7 +15,8 @@ import {
   Menu,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
 import { useState } from "react";
 
 const sidebarItems = [
@@ -53,6 +54,17 @@ const sidebarItems = [
 
 function SidebarContent() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Handle sign-out logic
+  const handleSignOut = () => {
+    // Clear any session or authentication token
+    localStorage.removeItem("authToken"); // Clear from localStorage
+    sessionStorage.removeItem("authToken"); // Clear from sessionStorage
+
+    // Redirect to the sign-in page
+    router.push("/login"); // Redirect to Sign In page
+  };
 
   return (
     <div className="flex flex-col h-full ">
@@ -114,10 +126,12 @@ function SidebarContent() {
             </p>
           </div>
         </div>
+        {/* Sign Out Button */}
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          onClick={handleSignOut} // Add onClick to call sign-out function
         >
           <LogOut className="w-4 h-4 mr-3" />
           Sign Out
