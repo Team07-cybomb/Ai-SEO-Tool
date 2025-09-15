@@ -13,8 +13,8 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center  min-h-screen bg-blue-50 p-4">
-      <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full relative">
+    <div className="flex items-center justify-center  min-h-screen bg-blue-50 p-4 mt-10">
+      <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full relative ">
 
 
         {/* Logo */}
