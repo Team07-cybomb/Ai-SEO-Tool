@@ -2,25 +2,43 @@
 import React, { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";  // <-- for navigation
+import { useRouter } from "next/navigation"; // <-- for navigation
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const router = useRouter();  // <-- Initialize router
+  const router = useRouter(); // <-- Initialize router
 
-  const handleNext = (e: FormEvent) => {
+  const handleNext = async (e: FormEvent) => {
     e.preventDefault();
+
     if (!showPassword) {
       setShowPassword(true);
     } else {
-      // Static validation for now
       if (email && password) {
-        console.log("Login attempt with:", { email, password });
+        try {
+          const API_URL = process.env.NEXT_PUBLIC_API_URL;
+          const res = await fetch(`${API_URL}/api/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }), // Send email and password to API
+          });
+          const data = await res.json();
 
-        // Redirect to profile page
-        router.push("/profile");
+          if (res.ok) {
+            // If login is successful, redirect to profile page
+            alert("Login successful!");
+            router.push("/profile");
+          } else {
+            // Show error message if credentials are invalid
+            alert(data.message || "Invalid credentials");
+          }
+        } catch (error) {
+          alert("Error logging in");
+        }
       } else {
         alert("Please enter both email and password!");
       }
@@ -48,7 +66,9 @@ const LoginPage = () => {
               />
             </svg>
           </div>
-          <span className="text-xl font-bold text-foreground ml-2">SEO Audit Pro</span>
+          <span className="text-xl font-bold text-foreground ml-2">
+            SEO Audit Pro
+          </span>
         </div>
 
         {/* Title */}
@@ -109,7 +129,10 @@ const LoginPage = () => {
               transition={{ duration: 0.3 }}
               className="flex justify-center mt-4"
             >
-              <Link href="/forgotpassword" className="text-sm text-blue-600 font-medium hover:underline">
+              <Link
+                href="/forgotpassword"
+                className="text-sm text-blue-600 font-medium hover:underline"
+              >
                 Forgotten your password?
               </Link>
             </motion.div>
