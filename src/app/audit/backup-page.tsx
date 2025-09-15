@@ -176,7 +176,7 @@ const previousScores = radarData.some((item) => item.previous !== undefined);
     abortControllerRef.current = controller;
 
     try {
-      const response = await fetch("https://n8n.cybomb.com/webhook/Audit-GPSI", {
+      const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
