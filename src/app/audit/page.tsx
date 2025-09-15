@@ -191,7 +191,7 @@ Your actual report will include detailed recommendations tailored to your websit
     abortControllerRef.current = controller;
 
     try {
-      const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
+      const response = await fetch("https://n8n.cybomb.com/webhook/Audit-GPSI", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
