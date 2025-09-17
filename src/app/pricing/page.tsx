@@ -328,6 +328,7 @@ const PricingPage: React.FC = () => {
         .pricing-header h1 {
           font-size: 2.5rem;
           margin-bottom: 15px;
+          margin-top:40px;
           color: #1a202c;
         }
         
@@ -410,7 +411,7 @@ const PricingPage: React.FC = () => {
         
         /* Pricing Plans */
         .pricing-plans {
-          padding: 30px 0;
+          padding: 70px 0;
         }
         
         .plans-grid {
@@ -537,9 +538,9 @@ const PricingPage: React.FC = () => {
         }
         
         .cta-button.large {
-          padding: 16px 5px;
+          padding: 10px 5px;
           font-size: 1.1rem;
-          width:400px;
+          width:200px;
         }
         
         /* Feature Comparison */
@@ -577,7 +578,7 @@ const PricingPage: React.FC = () => {
         
         .table-row {
           border-bottom: 1px solid #e2e8f0;
-        }
+        }.cta-button.large
         
         .table-row:last-child {
           border-bottom: none;
@@ -591,7 +592,7 @@ const PricingPage: React.FC = () => {
         
         .table-header .feature-column,
         .table-header .plan-column {
-          justify-content: center;
+          justify-content: left;
           text-align: center;
         }
         
@@ -759,7 +760,7 @@ const PricingPage: React.FC = () => {
           
           /* Header Mobile */
           .pricing-header {
-            padding: 60px 0 40px;
+            padding: 60px 0 60px;
           }
           
           .pricing-header h1 {
@@ -984,7 +985,7 @@ const PricingPage: React.FC = () => {
           
           /* Extra Small Mobile */
           .pricing-header {
-            padding: 50px 0 30px;
+            padding: 50px 0 50px;
           }
           
           .pricing-header h1 {

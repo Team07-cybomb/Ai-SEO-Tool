@@ -232,38 +232,35 @@ Your actual report will include detailed recommendations tailored to your websit
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    try {
-      const response = await fetch(
-        "https://n8n.cybomb.com/webhook/Audit-GPSI",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-          signal: controller.signal,
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch audit report");
-      const data = await response.json();
-
-      // Save audit result to DB
-      await fetch("http://localhost:5000/api/audits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      setReport(data);
-      setAuditCount((prev) => prev + 1);
-      setAuditDone(true);
-      stopProgressAnimation(true);
-    } catch (err: any) {
-      console.error(err);
-      alert("❌ Error analyzing the website.");
-      stopProgressAnimation();
-    } finally {
-      setLoading(false);
-    }
+try {
+  const response = await fetch("https://n8n.cybomb.com/webhook/Audit-GPSI", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+    signal: controller.signal,
+  });
+ 
+  if (!response.ok) throw new Error("Failed to fetch audit report");
+  const data = await response.json();
+ 
+  // Save audit result to DB
+  await fetch("http://localhost:5000/api/audits", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+ 
+  setReport(data);
+  setAuditCount((prev) => prev + 1);
+  setAuditDone(true);
+  stopProgressAnimation(true);
+} catch (err: any) {
+  console.error(err);
+  alert("❌ Error analyzing the website.");
+  stopProgressAnimation();
+} finally {
+  setLoading(false);
+}
   };
 
   const handleStopAudit = () => {
