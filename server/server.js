@@ -4,10 +4,10 @@ const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
  
-// const adminRoutes = require("./routes/adminRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const pricingRoutes = require("./routes/pricingRoutes");
 const auditRoutes = require("./routes/auditRoutes");
- 
+const subscriptionRoutes = require("./routes/subscriptionRoutes"); 
  
  
 require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
@@ -26,9 +26,10 @@ connectDB();
 // Use the authentication routes
 app.use('/api', authRoutes);
  
-// app.use("/api", adminRoutes);
+app.use("/api", adminRoutes);
 app.use("/api/pricing", pricingRoutes);
 app.use("/api", auditRoutes);
+app.use("/api", subscriptionRoutes);
  
  
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

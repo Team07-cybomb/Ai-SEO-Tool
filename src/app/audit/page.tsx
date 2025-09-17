@@ -150,26 +150,6 @@ Your actual report will include detailed recommendations tailored to your websit
   );
   const previousScores = radarData.some((item) => item.previous !== undefined);
 
-  // NEW FUNCTION: Check and update audit count
-  const checkAuditCount = () => {
-    const today = new Date().toLocaleDateString();
-    const lastAuditDate = localStorage.getItem("lastAuditDate");
-    const storedCount = localStorage.getItem("auditCount");
-
-    // Reset count if it's a new day
-    if (lastAuditDate !== today) {
-      localStorage.setItem("auditCount", "0");
-      localStorage.setItem("lastAuditDate", today);
-      setAuditCount(0);
-      return 0;
-    }
-
-    // Get current count
-    const currentCount = storedCount ? parseInt(storedCount, 10) : 0;
-    setAuditCount(currentCount);
-    return currentCount;
-  };
-
   // Check audit count on component mount
   useEffect(() => {
     const count = checkAuditCount();
@@ -179,6 +159,24 @@ Your actual report will include detailed recommendations tailored to your websit
       router.push("/login");
     }
   }, []); // Run only on mount
+
+  // Migrate existing user IDs from old format to new persistent format
+  useEffect(() => {
+    // Check if user has an old ID format and migrate it
+    const oldUserId = localStorage.getItem("oldUserId");
+    const currentUserId = localStorage.getItem("userId");
+
+    if (oldUserId && !currentUserId) {
+      // Migrate from old format to new
+      localStorage.setItem("userId", oldUserId);
+      sessionStorage.setItem("userId", oldUserId);
+
+      // Clean up the old key to avoid future migrations
+      localStorage.removeItem("oldUserId");
+
+      console.log("Migrated user ID to persistent storage");
+    }
+  }, []); // Run only once on mount
 
   const isValidUrl = (str: string) => {
     try {
@@ -208,6 +206,89 @@ Your actual report will include detailed recommendations tailored to your websit
     if (complete) setLoadingStep("Audit complete!");
   };
 
+  const getUserId = () => {
+    let userId =
+      localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    if (!userId && typeof document !== "undefined") {
+      const cookieMatch = document.cookie.match(/userId=([^;]+)/);
+      if (cookieMatch) {
+        userId = cookieMatch[1];
+        localStorage.setItem("userId", userId);
+        sessionStorage.setItem("userId", userId);
+      }
+    }
+
+    // Generate new ID if none exists
+    if (!userId) {
+      userId =
+        "user_" +
+        Math.random().toString(36).substring(2) +
+        Date.now().toString(36);
+
+      localStorage.setItem("userId", userId);
+      sessionStorage.setItem("userId", userId);
+
+      if (typeof document !== "undefined") {
+        document.cookie = `userId=${userId}; max-age=31536000; path=/; samesite=lax`;
+      }
+    }
+
+    return userId;
+  };
+
+  const checkAuditCount = () => {
+    const today = new Date().toLocaleDateString();
+
+    const lastAuditDate =
+      localStorage.getItem("lastAuditDate") ||
+      sessionStorage.getItem("lastAuditDate");
+
+    const obfuscatedCount =
+      localStorage.getItem("auditData") || sessionStorage.getItem("auditData");
+
+    let currentCount = 0;
+
+    if (obfuscatedCount) {
+      try {
+        const decoded = JSON.parse(atob(obfuscatedCount));
+        if (decoded.date === today && typeof decoded.count === "number") {
+          currentCount = decoded.count;
+        }
+      } catch (e) {
+        // If tampering detected, reset count
+        currentCount = 0;
+      }
+    }
+
+    // Reset count if it's a new day
+    if (lastAuditDate !== today) {
+      currentCount = 0;
+    }
+
+    setAuditCount(currentCount);
+    return currentCount;
+  };
+
+  const updateAuditCount = (count: number) => {
+    const today = new Date().toLocaleDateString();
+
+    localStorage.setItem("lastAuditDate", today);
+    sessionStorage.setItem("lastAuditDate", today);
+
+    const dataToStore = btoa(
+      JSON.stringify({
+        count,
+        date: today,
+        salt: Math.random().toString(36).substring(2),
+      })
+    );
+
+    localStorage.setItem("auditData", dataToStore);
+    sessionStorage.setItem("auditData", dataToStore);
+
+    setAuditCount(count);
+  };
+
   const handleAudit = async () => {
     // Check audit count before proceeding
     const currentCount = checkAuditCount();
@@ -215,7 +296,7 @@ Your actual report will include detailed recommendations tailored to your websit
     // Check if the user has reached the audit limit (3 free audits)
     if (currentCount >= 3 && !isLoggedIn) {
       alert("🚀 Free audits used up! Please sign in to continue.");
-      router.push("/login"); // Redirect to login if the user has reached the limit
+      router.push("/login");
       return;
     }
 
@@ -232,35 +313,48 @@ Your actual report will include detailed recommendations tailored to your websit
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-try {
-  const response = await fetch("https://n8n.cybomb.com/webhook/Audit-GPSI", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
-    signal: controller.signal,
-  });
- 
-  if (!response.ok) throw new Error("Failed to fetch audit report");
-  const data = await response.json();
- 
-  // Save audit result to DB
-  await fetch("http://localhost:5000/api/audits", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
- 
-  setReport(data);
-  setAuditCount((prev) => prev + 1);
-  setAuditDone(true);
-  stopProgressAnimation(true);
-} catch (err: any) {
-  console.error(err);
-  alert("❌ Error analyzing the website.");
-  stopProgressAnimation();
-} finally {
-  setLoading(false);
-}
+    try {
+      const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          auditCount: currentCount,
+          userId: getUserId(),
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch audit report");
+      const data = await response.json();
+      setReport(data);
+
+      // Increment audit count using the secure update function
+      const updatedCount = currentCount + 1;
+      updateAuditCount(updatedCount);
+
+      // Save audit result to DB
+      await fetch("http://localhost:5000/api/audits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      setAuditDone(true);
+      stopProgressAnimation(true);
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        console.log("Audit aborted by user.");
+        setReport(sampleReport);
+        setShowSampleReport(true);
+      } else {
+        console.error(err);
+        alert("❌ Error analyzing the website.");
+      }
+      stopProgressAnimation();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStopAudit = () => {
@@ -272,7 +366,6 @@ try {
   };
 
   const handleSignIn = () => {
-    // Redirect user to login page
     router.push("/login");
   };
 
