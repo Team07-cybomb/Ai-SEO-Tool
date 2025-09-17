@@ -1,6 +1,4 @@
-// server/controllers/adminController.js
 const Admin = require("../models/Admin");
-const Audit = require("../models/Audit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
