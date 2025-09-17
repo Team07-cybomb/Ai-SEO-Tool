@@ -4,7 +4,7 @@ const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
  
-// const adminRoutes = require("./routes/adminRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const pricingRoutes = require("./routes/pricingRoutes");
 const auditRoutes = require("./routes/auditRoutes");
  
@@ -26,7 +26,7 @@ connectDB();
 // Use the authentication routes
 app.use('/api', authRoutes);
  
-// app.use("/api", adminRoutes);
+app.use("/api", adminRoutes);
 app.use("/api/pricing", pricingRoutes);
 app.use("/api", auditRoutes);
  
