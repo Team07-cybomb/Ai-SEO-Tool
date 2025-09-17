@@ -1,11 +1,11 @@
 "use client";
-
+ 
 import React, { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+ 
 // Base URL of your Express backend
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
+ 
 const SignupPage = () => {
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [signupFormData, setSignupFormData] = useState({
@@ -20,18 +20,18 @@ const SignupPage = () => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
-
+ 
   // Handle social login redirects and token storage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-
+ 
     if (token) {
       localStorage.setItem("token", token);
       router.push("/profile");
     }
   }, [router]);
-
+ 
   // Handle form field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,12 +42,12 @@ const SignupPage = () => {
     }
     setErrors({}); // Clear errors on change
   };
-
+ 
   // Handle traditional form validation (for signup and login)
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+ 
     if (!isLoginMode && !signupFormData.name.trim()) {
       newErrors.name = "Full Name is required.";
     }
@@ -57,30 +57,30 @@ const SignupPage = () => {
     if (isLoginMode && !loginFormData.password.trim()) {
       newErrors.password = "Password is required.";
     }
-
+ 
     const emailToValidate = isLoginMode
       ? loginFormData.email
       : signupFormData.email;
     if (!emailRegex.test(emailToValidate)) {
       newErrors.email = "Please enter a valid email address.";
     }
-
+ 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+ 
   // Handle traditional sign-up form submission
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+ 
     try {
       const res = await fetch(`${API_URL}/api/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(signupFormData),
       });
-
+ 
       const data = await res.json();
       if (res.ok) {
         alert("User created successfully!");
@@ -92,19 +92,19 @@ const SignupPage = () => {
       alert("Error signing up.");
     }
   };
-
+ 
   // Handle traditional login form submission
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+ 
     try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginFormData),
       });
-
+ 
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("token", data.token);
@@ -117,22 +117,22 @@ const SignupPage = () => {
       alert("Error logging in.");
     }
   };
-
+ 
   // Handlers for social sign-in buttons (simple redirects)
   const handleSocialLogin = (provider: "google" | "github") => {
     window.location.href = `${API_URL}/api/auth/${provider}`;
   };
-
+ 
   const socialButtonClass =
     "flex items-center justify-center w-full py-2 px-4 bg-gray-100 text-gray-800 rounded-full font-semibold transition-transform transform hover:scale-105 duration-200 cursor-pointer shadow-md";
-
+ 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">
           {isLoginMode ? "Login to your Account" : "Create an Account"}
         </h2>
-
+ 
         {/* Traditional Form */}
         <form onSubmit={isLoginMode ? handleLogin : handleSignup} className="space-y-4">
           {!isLoginMode && (
@@ -145,7 +145,7 @@ const SignupPage = () => {
               className="w-full px-4 py-2 border rounded-lg"
             />
           )}
-
+ 
           <div>
             <input
               type="email"
@@ -159,7 +159,7 @@ const SignupPage = () => {
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
-
+ 
           {!isLoginMode && (
             <div>
               <input
@@ -175,7 +175,7 @@ const SignupPage = () => {
               )}
             </div>
           )}
-
+ 
           <input
             type="password"
             name="password"
@@ -187,7 +187,7 @@ const SignupPage = () => {
           {errors.password && (
             <p className="text-red-500 text-sm mt-1">{errors.password}</p>
           )}
-
+ 
           <button
             type="submit"
             className="w-full py-3 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500"
@@ -195,7 +195,7 @@ const SignupPage = () => {
             {isLoginMode ? "Login" : "Sign Up"}
           </button>
         </form>
-
+ 
         <p className="text-center text-sm mt-4">
           {isLoginMode ? (
             <>
@@ -219,14 +219,14 @@ const SignupPage = () => {
             </>
           )}
         </p>
-
+ 
         {/* Divider */}
         <div className="flex items-center my-4">
           <hr className="flex-grow border-gray-300" />
           <span className="px-2 text-gray-500">OR</span>
           <hr className="flex-grow border-gray-300" />
         </div>
-
+ 
         {/* Social Sign-in Buttons */}
         <div className="space-y-4">
           <button
@@ -252,5 +252,6 @@ const SignupPage = () => {
     </div>
   );
 };
-
+ 
 export default SignupPage;
+ 
