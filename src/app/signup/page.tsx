@@ -1,5 +1,4 @@
 "use client";
- 
 import React, { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
  
@@ -254,4 +253,3 @@ const SignupPage = () => {
 };
  
 export default SignupPage;
- 
