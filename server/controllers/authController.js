@@ -1,35 +1,204 @@
-const User = require("../models/User");
-const connectDB = require("../config/db");
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const path = require('path');
 
-exports.signup = async (req, res) => {
-  await connectDB();
-  const { name, email, phone, password } = req.body;
-  try {
-    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+// ADD THIS LINE: Ensure environment variables are loaded in this module
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const NEXT_PUBLIC_CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL;
+
+const GITHUB_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github/callback`;
+const GOOGLE_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback`;
+
+
+const signup = async (req, res) => {
+    const { name, email, mobile, password } = req.body;
+    try {
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ msg: 'User already exists' });
+        }
+        user = new User({ name, email, mobile, password });
+        await user.save();
+        res.status(201).json({ msg: 'User registered successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
     }
-    const user = new User({ name, email, phone, password });
-    await user.save();
-    res.status(201).json({ message: "User created successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
-exports.login = async (req, res) => {
-  await connectDB();
-  const { email, phone, emailOrPhone, password } = req.body;
-  try {
-    const identifier = emailOrPhone || email || phone;
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { phone: identifier }]
-    });
-    if (!user) return res.status(400).json({ message: "User not found" });
-    if (user.password !== password)
-      return res.status(400).json({ message: "Wrong password" });
-    res.json({ message: "Login successful", user });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+const login = async (req, res) => {
+    const { email, password } = req.body;
+    
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ msg: 'Invalid credentials' });
+        }
+
+        if (!user.password) {
+            return res.status(400).json({ msg: 'Please log in with your social provider.' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Invalid credentials' });
+        }
+
+        const payload = { user: { id: user.id } };
+        jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+            if (err) {
+                console.error('JWT signing error:', err);
+                throw err;
+            }
+            res.json({ token });
+        });
+    } catch (err) {
+        console.error('Server error during login:', err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+const getProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+const githubAuth = (req, res) => {
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=user:email`;
+    res.redirect(githubAuthUrl);
+};
+
+const githubCallback = async (req, res) => {
+    const { code } = req.query;
+    try {
+        const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
+            client_id: GITHUB_CLIENT_ID,
+            client_secret: GITHUB_CLIENT_SECRET,
+            code,
+            redirect_uri: GITHUB_REDIRECT_URI,
+        }, {
+            headers: { Accept: 'application/json' }
+        });
+        const { access_token } = tokenResponse.data;
+        const userResponse = await axios.get('https://api.github.com/user', {
+            headers: { Authorization: `Bearer ${access_token}` }
+        });
+        const githubUser = userResponse.data;
+        const emailResponse = await axios.get('https://api.github.com/user/emails', {
+            headers: { Authorization: `Bearer ${access_token}` }
+        });
+        const primaryEmailObj = emailResponse.data.find(emailObj => emailObj.primary && emailObj.verified);
+        const email = primaryEmailObj ? primaryEmailObj.email : null;
+        if (!email) {
+            return res.status(400).send('No primary, verified email found for GitHub user.');
+        }
+        const user = await User.findOneAndUpdate(
+            { githubId: githubUser.id }, 
+            {
+                githubId: githubUser.id,
+                name: githubUser.name || githubUser.login,
+                email,
+                profilePicture: githubUser.avatar_url,
+                password: null,
+            },
+            { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+        const payload = { user: { id: user.id } };
+        jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+            if (err) throw err;
+            res.redirect(`${NEXT_PUBLIC_CLIENT_URL}/profile?token=${token}`);
+        });
+    } catch (err) {
+        console.error("Server error during GitHub auth:", err.response ? err.response.data : err.message);
+        res.status(500).send('Server error during GitHub auth');
+    }
+};
+
+const googleAuth = (req, res) => {
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
+    res.redirect(googleAuthUrl);
+};
+
+const googleCallback = async (req, res) => {
+    const { code } = req.query;
+    try {
+        console.log('1. Receiving code from Google:', code);
+
+        const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+            client_id: GOOGLE_CLIENT_ID,
+            client_secret: GOOGLE_CLIENT_SECRET,
+            code,
+            redirect_uri: GOOGLE_REDIRECT_URI,
+            grant_type: 'authorization_code'
+        });
+        console.log('2. Successfully exchanged code for access token.');
+
+        const { access_token } = tokenResponse.data;
+        const userResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${access_token}` }
+        });
+        console.log('3. Successfully fetched user info from Google.');
+
+        const googleUser = userResponse.data;
+        
+        let user = await User.findOne({ googleId: googleUser.sub });
+        console.log('4. Looked for user with googleId. Found:', !!user);
+
+        if (user) {
+        } else {
+            user = await User.findOne({ email: googleUser.email });
+            console.log('5. Looked for user with email. Found:', !!user);
+            
+            if (user) {
+                user.googleId = googleUser.sub;
+                await user.save();
+                console.log('6. Updated existing user with googleId.');
+            } else {
+                user = new User({
+                    name: googleUser.name,
+                    email: googleUser.email,
+                    profilePicture: googleUser.picture,
+                    googleId: googleUser.sub,
+                    password: null,
+                });
+                await user.save();
+                console.log('7. Created a new user.');
+            }
+        }
+        
+        const payload = { user: { id: user.id } };
+        jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+            if (err) throw err;
+            console.log('8. Successfully signed JWT and redirecting.');
+            res.redirect(`${NEXT_PUBLIC_CLIENT_URL}/profile?token=${token}`);
+        });
+    } catch (err) {
+        console.error("Server error during Google auth:", err);
+        res.status(500).send('Server error during Google auth');
+    }
+};
+
+module.exports = {
+    signup,
+    login,
+    getProfile,
+    githubAuth,
+    githubCallback,
+    googleAuth,
+    googleCallback
 };
