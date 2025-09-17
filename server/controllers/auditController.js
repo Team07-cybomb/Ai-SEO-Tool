@@ -2,9 +2,14 @@ const Audit = require("../models/auditModel");
  
 exports.saveAudit = async (req, res) => {
   try {
-    const auditData = req.body;
+    const auditData = {
+      ...req.body,
+      userId: req.user._id, // ✅ add userId from logged-in user
+    };
+
     const audit = new Audit(auditData);
     await audit.save();
+
     res.status(201).json({ message: "Audit saved successfully", audit });
   } catch (err) {
     res.status(500).json({ message: "Error saving audit", error: err.message });
@@ -13,12 +18,19 @@ exports.saveAudit = async (req, res) => {
  
 exports.getAudits = async (req, res) => {
   try {
-    const audits = await Audit.find().sort({ createdAt: -1 });
+    const userId = req.user._id; // ✅ JWT middleware மூலம் வந்த userId
+
+    // அந்த user-க்கு மட்டும் audits எடுத்துக்கோ
+    const audits = await Audit.find({ userId }).sort({ createdAt: -1 });
+
     res.json(audits);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching audits", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching audits", error: err.message });
   }
 };
+
 
 // // Create new audit report
 // exports.createAudit = async (req, res) => {
