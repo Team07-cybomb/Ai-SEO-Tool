@@ -22,14 +22,21 @@ app.use(cors());
  
 // Connect to MongoDB
 connectDB();
- 
-// Use the authentication routes
-app.use('/api', authRoutes);
- 
-app.use("/api", adminRoutes);
-app.use("/api/pricing", pricingRoutes);
-app.use("/api", auditRoutes);
-app.use("/api", subscriptionRoutes);
- 
- 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", time: new Date() });
+});
+
+// ✅ Root route to check backend
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
+});
+
+// Routes
+app.use("/api", authRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);

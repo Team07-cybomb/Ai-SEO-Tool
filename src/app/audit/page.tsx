@@ -321,6 +321,7 @@ Your actual report will include detailed recommendations tailored to your websit
           url,
           auditCount: currentCount,
           userId: getUserId(),
+
         }),
         signal: controller.signal,
       });
@@ -336,8 +337,15 @@ Your actual report will include detailed recommendations tailored to your websit
       // Save audit result to DB
       await fetch("http://localhost:5000/api/audits", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}` // ✅ send token
+  },
+        body: JSON.stringify({
+    ...data,
+    date: new Date().toLocaleDateString(), // optional, if you want server default
+  }),
+
       });
 
       setAuditDone(true);
