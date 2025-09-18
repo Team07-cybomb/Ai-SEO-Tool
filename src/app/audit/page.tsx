@@ -324,6 +324,7 @@ Your actual report will include detailed recommendations tailored to your websit
           url,
           auditCount: currentCount,
           userId: getUserId(),
+
         }),
         signal: controller.signal,
       });
@@ -343,7 +344,11 @@ Your actual report will include detailed recommendations tailored to your websit
     "Content-Type": "application/json",
     "Authorization": `Bearer ${token}` // ✅ send token
   },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+    ...data,
+    date: new Date().toLocaleDateString(), // optional, if you want server default
+  }),
+        
       });
  
       setAuditDone(true);
