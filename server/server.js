@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const http = require("http"); // ⬅️ Add this
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
@@ -33,6 +34,13 @@ app.get("/", (req, res) => {
 app.use("/api", authRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+
+// ⬇️ Create HTTP server and set timeout
+const server = http.createServer(app);
+
+// default in Node is 2 minutes, increase to 5 minutes (300000 ms)
+server.setTimeout(5 * 60 * 1000);
+
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
