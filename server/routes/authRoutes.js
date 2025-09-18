@@ -10,5 +10,7 @@ router.get('/auth/google', authController.googleAuth);
 router.get('/auth/google/callback', authController.googleCallback);
 router.get('/auth/github', authController.githubAuth);
 router.get('/auth/github/callback', authController.githubCallback);
+// Logout route
+router.post("/logout", authController.logoutUser);
 
 module.exports = router;

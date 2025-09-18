@@ -57,13 +57,36 @@ function SidebarContent() {
   const router = useRouter();
 
   // Handle sign-out logic
-  const handleSignOut = () => {
-    // Clear any session or authentication token
-    localStorage.removeItem("authToken"); // Clear from localStorage
-    sessionStorage.removeItem("authToken"); // Clear from sessionStorage
+  const handleSignOut = async () => {
+     console.log("Sign out clicked");
+    try {
+      const token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token");
 
-    // Redirect to the sign-in page
-    router.push("/login"); // Redirect to Sign In page
+      if (token) {
+        // Call backend logout API
+        await fetch("http://localhost:5000/api/auth/logout", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      // Always clear tokens from storage
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
+      // Redirect to the sign-in page
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Fallback: clear tokens + redirect anyway
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      router.push("/login");
+    }
   };
 
   return (
@@ -85,7 +108,7 @@ function SidebarContent() {
         {sidebarItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-
+            
           return (
             <Link
               key={item.href}
@@ -131,7 +154,7 @@ function SidebarContent() {
           variant="ghost"
           size="sm"
           className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          onClick={handleSignOut} // Add onClick to call sign-out function
+          onClick={handleSignOut}
         >
           <LogOut className="w-4 h-4 mr-3" />
           Sign Out
