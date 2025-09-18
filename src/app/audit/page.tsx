@@ -348,7 +348,7 @@ Your actual report will include detailed recommendations tailored to your websit
     ...data,
     date: new Date().toLocaleDateString(), // optional, if you want server default
   }),
-        
+
       });
  
       setAuditDone(true);
