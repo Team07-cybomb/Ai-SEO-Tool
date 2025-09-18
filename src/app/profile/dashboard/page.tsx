@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,10 +93,12 @@ export default function DashboardPage() {
             Welcome back! Here's your SEO performance overview.
           </p>
         </div>
+        <Link href="/audit">
         <Button className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           New Audit
         </Button>
+        </Link>
       </div>
 
       {/* Stats Cards */}
