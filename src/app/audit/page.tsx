@@ -313,10 +313,13 @@ Your actual report will include detailed recommendations tailored to your websit
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
+    const token = localStorage.getItem("token");
+
     try {
       const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        
         body: JSON.stringify({
           url,
           auditCount: currentCount,
@@ -334,9 +337,12 @@ Your actual report will include detailed recommendations tailored to your websit
       updateAuditCount(updatedCount);
 
       // Save audit result to DB
-      await fetch("http://localhost:5000/api/audits", {
+      await fetch("http://localhost:5000/api/create-audits", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}` // ✅ send token
+  },
         body: JSON.stringify(data),
       });
 
