@@ -20,7 +20,7 @@ const auditSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
  
   // 👇 User ID reference
-  // userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 });
  
 module.exports = mongoose.model("newAudit", auditSchema);
