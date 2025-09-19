@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { saveAudit, getAudits } = require("../controllers/auditController");
-const { verifyUser } = require("../middleware/auditMiddleware"); // 👈 user middleware
+const { verifyUser } = require("../middleware/auditMiddleware");
 
-// ✅ Attach middleware to routes
-router.post("/create-audits", verifyUser, saveAudit); // saveAudit only for logged-in user
-router.get("/audits", verifyUser, getAudits);        // getAudits only for logged-in user
+// ✅ Secure routes with middleware
+router.post("/create-audits", verifyUser, saveAudit);
+router.get("/audits", verifyUser, getAudits);
 
 module.exports = router;
 

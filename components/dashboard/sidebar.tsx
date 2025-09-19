@@ -35,16 +35,16 @@ const sidebarItems = [
     href: "/profile/reports",
     icon: FileText,
   },
-  {
-    title: "History",
-    href: "/profile/history",
-    icon: History,
-  },
-  {
-    title: "Purchase/Billing",
-    href: "/profile/billing",
-    icon: CreditCard,
-  },
+  // {
+  //   title: "History",
+  //   href: "/profile/history",
+  //   icon: History,
+  // },
+  // {
+  //   title: "Purchase/Billing",
+  //   href: "/profile/billing",
+  //   icon: CreditCard,
+  // },
   {
     title: "Support",
     href: "/profile/support",

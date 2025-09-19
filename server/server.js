@@ -36,6 +36,10 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api", authRoutes);
 app.use("/api", auditRoutes);
+app.use("/api", adminRoutes);
+app.use("/api", pricingRoutes);
+app.use("/api", subscriptionRoutes);
+
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
