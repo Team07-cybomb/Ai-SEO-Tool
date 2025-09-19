@@ -11,12 +11,12 @@ const verifyUser = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretkey");
 
-    // ✅ Ensure correct user structure in JWT
-    if (!decoded?.user?.id) {
-      return res.status(401).json({ message: "Invalid token payload" });
-    }
+    // ✅ Fix: use decoded.user.id instead of decoded.id
+    req.user = {
+  _id: decoded.user?.id || decoded.id,
+  role: decoded.user?.role || decoded.role || "user",
+};
 
-    req.user = { _id: decoded.user.id, role: decoded.user.role || "user" };
     next();
   } catch (err) {
     console.error("JWT Error:", err.message);
