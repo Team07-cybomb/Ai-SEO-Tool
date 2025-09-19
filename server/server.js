@@ -1,16 +1,16 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const auditRoutes = require('./routes/auditRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const pricingRoutes = require('./routes/pricingRoutes');
-const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const auditRoutes = require("./routes/auditRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const pricingRoutes = require("./routes/pricingRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
 
-require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
 
-console.log('JWT_SECRET loaded:', process.env.JWT_SECRET);
+console.log("JWT_SECRET loaded:", process.env.JWT_SECRET);
 
 const app = express();
 const PORT = process.env.PORT || 5000;

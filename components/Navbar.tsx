@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Search } from "lucide-react";
+import Image from "next/image";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,19 +47,16 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Search className="w-5 h-5 text-primary-foreground" />
-            </div>
             <Link href={"/"}>
-              <span
-                className={`text-xl font-bold ${
-                  isScrolledPastBanner ? "text-foreground" : "text-gray-900"
-                }`}
-              >
-                SEO Audit Pro
-              </span>
+              <Image
+                src="/SEO_LOGO.png"
+                alt="SEO-AUDIT LOGO"
+                width={100}
+                height={35}
+                priority
+                className={isScrolledPastBanner ? "opacity-90" : "opacity-100"}
+              />
             </Link>
           </div>
 
@@ -104,30 +102,28 @@ export default function Navbar() {
                 <Button variant="ghost" size="sm">
                   <Menu
                     className={`w-5 h-5 ${
-                      isScrolledPastBanner
-                        ? "text-foreground"
-                        : "text-gray-900"
+                      isScrolledPastBanner ? "text-foreground" : "text-gray-900"
                     }`}
                   />
                 </Button>
               </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="w-[300px] sm:w-[400px]"
-              >
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-6 mt-6">
                   <div className="flex items-center space-x-2">
                     <div className="mx-3 w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                       <Search className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <Link href={"/"}>
-                      <span
-                        className={`text-xl font-bold ${
-                          isScrolledPastBanner ? "text-foreground" : "text-gray-900"
-                        }`}
-                      >
-                        SEO Audit Pro
-                      </span>
+                      <Image
+                        src="/SEO_LOGO.png"
+                        alt="SEO-AUDIT LOGO"
+                        width={90}
+                        height={35}
+                        priority
+                        className={
+                          isScrolledPastBanner ? "opacity-90" : "opacity-100"
+                        }
+                      />
                     </Link>
                   </div>
                   <div className="mx-5 flex flex-col">
@@ -146,10 +142,17 @@ export default function Navbar() {
                       About Us
                     </Link>
                     <div className="flex flex-row gap-3 pt-4">
-                      <Button variant="outline" className="w-1/2 bg-transparent">
-                        Sign In
-                      </Button>
-                      <Button className="w-1/2">Get Started</Button>
+                      <Link href="/login">
+                        <Button
+                          variant="outline"
+                          className="w-1/2 bg-transparent"
+                        >
+                          Sign In
+                        </Button>
+                      </Link>
+                      <Link href="/signup">
+                        <Button className="w-1/2">Get Started</Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
