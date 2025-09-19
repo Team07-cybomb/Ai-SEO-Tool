@@ -12,7 +12,10 @@ const verifyUser = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretkey");
 
     // ✅ Fix: use decoded.user.id instead of decoded.id
-    req.user = { _id: decoded.user.id, role: decoded.user.role || "user" };
+    req.user = {
+  _id: decoded.user?.id || decoded.id,
+  role: decoded.user?.role || decoded.role || "user",
+};
 
     next();
   } catch (err) {
