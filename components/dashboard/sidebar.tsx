@@ -16,73 +16,75 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
-import { useState } from "react";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const sidebarItems = [
-  {
-    title: "Overview",
-    href: "/profile",
-    icon: User,
-  },
-  {
-    title: "Dashboard",
-    href: "/profile/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Reports",
-    href: "/profile/reports",
-    icon: FileText,
-  },
-  {
-    title: "History",
-    href: "/profile/history",
-    icon: History,
-  },
-  {
-    title: "Purchase/Billing",
-    href: "/profile/billing",
-    icon: CreditCard,
-  },
-  {
-    title: "Support",
-    href: "/profile/support",
-    icon: HelpCircle,
-  },
+  { title: "Overview", href: "/profile", icon: User },
+  { title: "Dashboard", href: "/profile/dashboard", icon: LayoutDashboard },
+  { title: "Reports", href: "/profile/reports", icon: FileText },
+  { title: "History", href: "/profile/history", icon: History },
+  { title: "Purchase/Billing", href: "/profile/billing", icon: CreditCard },
+  { title: "Support", href: "/profile/support", icon: HelpCircle },
 ];
 
 function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Handle sign-out logic
+  // ✅ Move state inside component
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/profile`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch profile");
+
+        const data = await res.json();
+        setUserData({
+          name: data.name || "N/A",
+          email: data.email || "N/A",
+        });
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        localStorage.removeItem("token");
+        router.push("/login");
+      }
+    };
+    fetchProfile();
+  }, [router]);
+
   const handleSignOut = async () => {
-     console.log("Sign out clicked");
     try {
       const token =
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token");
+        localStorage.getItem("token") || sessionStorage.getItem("token");
 
       if (token) {
-        // Call backend logout API
-        await fetch("http://localhost:5000/api/auth/logout", {
+        await fetch(`${API_URL}/api/auth/logout`, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
 
-      // Always clear tokens from storage
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
-
-      // Redirect to the sign-in page
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Fallback: clear tokens + redirect anyway
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       router.push("/login");
@@ -108,13 +110,9 @@ function SidebarContent() {
         {sidebarItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-            
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{ padding: "20px 0px" }}
-            >
+            <Link key={item.href} href={item.href} style={{ padding: "20px 0px" }}>
               <Button
                 variant="ghost"
                 className={cn(
@@ -137,18 +135,19 @@ function SidebarContent() {
         <div className="flex items-center space-x-3 mb-3">
           <div className="w-8 h-8 bg-sidebar-accent rounded-full flex items-center justify-center">
             <span className="text-sm font-medium text-sidebar-accent-foreground">
-              JD
+              {userData.name ? userData.name[0] : "?"}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">
-              John Doe
+              {userData.name || "Guest"}
             </p>
             <p className="text-xs text-sidebar-foreground/60 truncate">
-              john@example.com
+              {userData.email || "guest@example.com"}
             </p>
           </div>
         </div>
+
         {/* Sign Out Button */}
         <Button
           variant="ghost"

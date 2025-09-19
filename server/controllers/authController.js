@@ -120,7 +120,6 @@ const githubCallback = async (req, res) => {
             {
                 githubId: githubUser.id,
                 name: githubUser.name || githubUser.login,
-                email,
                 profilePicture: githubUser.avatar_url,
                 password: null,
             },
