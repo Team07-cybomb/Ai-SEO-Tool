@@ -16,8 +16,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
-import { useState } from "react";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const sidebarItems = [
   {
@@ -56,14 +57,62 @@ function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Handle sign-out logic
-  const handleSignOut = () => {
-    // Clear any session or authentication token
-    localStorage.removeItem("authToken"); // Clear from localStorage
-    sessionStorage.removeItem("authToken"); // Clear from sessionStorage
+  // ✅ Move state inside component
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+  });
 
-    // Redirect to the sign-in page
-    router.push("/login"); // Redirect to Sign In page
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/profile`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch profile");
+
+        const data = await res.json();
+        setUserData({
+          name: data.name || "N/A",
+          email: data.email || "N/A",
+        });
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        localStorage.removeItem("token");
+        router.push("/login");
+      }
+    };
+    fetchProfile();
+  }, [router]);
+
+  const handleSignOut = async () => {
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      if (token) {
+        await fetch(`${API_URL}/api/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      router.push("/login");
+    }
   };
 
   return (
@@ -87,11 +136,7 @@ function SidebarContent() {
           const Icon = item.icon;
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{ padding: "20px 0px" }}
-            >
+            <Link key={item.href} href={item.href} style={{ padding: "20px 0px" }}>
               <Button
                 variant="ghost"
                 className={cn(
@@ -114,24 +159,25 @@ function SidebarContent() {
         <div className="flex items-center space-x-3 mb-3">
           <div className="w-8 h-8 bg-sidebar-accent rounded-full flex items-center justify-center">
             <span className="text-sm font-medium text-sidebar-accent-foreground">
-              JD
+              {userData.name ? userData.name[0] : "?"}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">
-              John Doe
+              {userData.name || "Guest"}
             </p>
             <p className="text-xs text-sidebar-foreground/60 truncate">
-              john@example.com
+              {userData.email || "guest@example.com"}
             </p>
           </div>
         </div>
+
         {/* Sign Out Button */}
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          onClick={handleSignOut} // Add onClick to call sign-out function
+          onClick={handleSignOut}
         >
           <LogOut className="w-4 h-4 mr-3" />
           Sign Out

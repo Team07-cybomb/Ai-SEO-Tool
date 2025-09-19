@@ -17,6 +17,7 @@ const NEXT_PUBLIC_CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL;
 const GITHUB_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github/callback`;
 const GOOGLE_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback`;
 
+let tokenBlacklist = [];
 const signup = async (req, res) => {
     const { name, email, mobile, password } = req.body;
     try {
@@ -69,6 +70,14 @@ const getProfile = async (req, res) => {
     }
 };
 
+const logoutUser = (req, res) => {
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (token) {
+        tokenBlacklist.push(token);
+    }
+    res.json({ msg: "Logged out successfully" });
+};
+
 const githubAuth = (req, res) => {
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=user:email`;
     res.redirect(githubAuthUrl);
@@ -107,7 +116,6 @@ const githubCallback = async (req, res) => {
             {
                 githubId: githubUser.id,
                 name: githubUser.name || githubUser.login,
-                email,
                 profilePicture: githubUser.avatar_url,
                 password: null,
             },
@@ -187,8 +195,10 @@ module.exports = {
     signup,
     login,
     getProfile,
+    logoutUser,
     githubAuth,
     githubCallback,
     googleAuth,
-    googleCallback
+    googleCallback,
+    tokenBlacklist
 };

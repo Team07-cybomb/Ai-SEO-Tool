@@ -1,20 +1,28 @@
 const jwt = require('jsonwebtoken');
+const { tokenBlacklist } = require("../controllers/authController");
 require('dotenv').config();
 
-// The JWT_SECRET must be defined here, as this file
-// is executed independently when required by server.js
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const auth = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
         return res.status(401).json({ msg: 'No token, authorization denied' });
     }
+
+    // 🔹 Step 1: Check if token is blacklisted
+    if (tokenBlacklist.includes(token)) {
+        return res.status(401).json({ msg: 'Token has been logged out. Please log in again.' });
+    }
+
     try {
-        // Add a console.log to confirm the value right before use
+        // Debugging log
         console.log('JWT_SECRET inside middleware:', JWT_SECRET);
-        
+
+        // 🔹 Step 2: Verify token
         const decoded = jwt.verify(token, JWT_SECRET);
+
+        // 🔹 Step 3: Attach user info to request
         req.user = decoded.user;
         next();
     } catch (e) {
