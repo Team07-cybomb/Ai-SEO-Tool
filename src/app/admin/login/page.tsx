@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
 
 export default function AdminLogin() {
@@ -30,11 +30,11 @@ export default function AdminLogin() {
         localStorage.setItem("adminToken", data.token);
         router.push("/admin/dashboard");
       } else {
-        alert(data.message || "Login failed");
+        showErrorAlert(data.message || "Login failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Network error");
+      showErrorAlert("Network error");
     } finally {
       setLoading(false);
     }

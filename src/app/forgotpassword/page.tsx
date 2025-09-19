@@ -2,7 +2,7 @@
 import React, { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState<string>("");
     const [otp, setOtp] = useState<string>("");
@@ -25,7 +25,7 @@ const ForgotPasswordPage = () => {
             setShowOtp(false);
         } else if (showReset) {
             if (newPassword !== confirmPassword) {
-                alert("Passwords do not match!");
+                showWarningAlert("Passwords do not match!");
                 return;
             }
             console.log("Reset Password:", { email, newPassword });

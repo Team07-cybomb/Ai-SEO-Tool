@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { showSuccessAlert, showErrorAlert } from "../../utils/alert-util"; // Correct import
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util"; // Correct import
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -70,13 +70,13 @@ const SignupPage = () => {
 
       const data = await res.json();
       if (res.ok) {
-        showSuccessAlert("Success!", "User created successfully!");
+        showSuccessAlert("Success! User created successfully!");
         setIsLoginMode(true);
       } else {
-        showErrorAlert("Error", data.msg || "Error signing up.");
+        showErrorAlert(data.msg || "Error signing up.");
       }
     } catch (error) {
-      showErrorAlert("Error", "Error signing up.");
+      showErrorAlert("Error signing up.");
     }
   };
 
@@ -94,13 +94,13 @@ const SignupPage = () => {
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("token", data.token);
-        showSuccessAlert("Success!", "Login successful!");
+        showSuccessAlert("Login successful!");
         router.push("/profile");
       } else {
-        showErrorAlert("Error", data.msg || "Login failed.");
+        showErrorAlert(data.msg || "Login failed.");
       }
     } catch (error) {
-      showErrorAlert("Error", "Error logging in.");
+      showErrorAlert("Error logging in.");
     }
   };
 

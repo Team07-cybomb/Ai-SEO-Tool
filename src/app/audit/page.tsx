@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { ScoreCard, DetailedAnalysis, Recommendations } from "./frontend";
 import PDFGenerator from "./pdf";
 import { runAudit } from "./backend";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
 
 interface DecodedToken {
   user: {
@@ -58,7 +59,7 @@ export default function AuditPage() {
       });
 
       if (response.status === 403) {
-        alert("🚀 Free audits used up for today! Please login.");
+        showWarningAlert("🚀 Free audits used up for today! Please login.");
         router.push("/login");
         return;
       }
@@ -67,7 +68,7 @@ export default function AuditPage() {
       setReport(data.audit || data);
     } catch (err) {
       console.error("⚠️ Audit failed:", err);
-      alert("Something went wrong while running the audit");
+      showErrorAlert("Something went wrong while running the audit");
     } finally {
       setLoading(false);
     }
