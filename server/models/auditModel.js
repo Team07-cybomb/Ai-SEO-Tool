@@ -1,14 +1,14 @@
-// models/newAudit.js
+// models/auditModel.js
 const mongoose = require("mongoose");
- 
+
 const auditSchema = new mongoose.Schema({
   url: { type: String, required: true },
   date: { type: String, required: true },
   scores: {
-    performance: Number,
-    seo: Number,
-    accessibility: Number,
-    bestPractices: Number,
+    performance: { type: Number, default: 0 },
+    seo: { type: Number, default: 0 },
+    accessibility: { type: Number, default: 0 },
+    bestPractices: { type: Number, default: 0 },
   },
   recommendations: [
     {
@@ -16,11 +16,11 @@ const auditSchema = new mongoose.Schema({
       priority: String,
     },
   ],
-  analysis: String,
+  analysis: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
- 
-  // 👇 User ID reference
-   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+
+  // Link audit to logged-in user
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 });
- 
+
 module.exports = mongoose.model("newAudit", auditSchema);

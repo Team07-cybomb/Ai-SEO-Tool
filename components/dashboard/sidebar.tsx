@@ -21,12 +21,36 @@ import { useState, useEffect } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const sidebarItems = [
-  { title: "Overview", href: "/profile", icon: User },
-  { title: "Dashboard", href: "/profile/dashboard", icon: LayoutDashboard },
-  { title: "Reports", href: "/profile/reports", icon: FileText },
-  { title: "History", href: "/profile/history", icon: History },
-  { title: "Purchase/Billing", href: "/profile/billing", icon: CreditCard },
-  { title: "Support", href: "/profile/support", icon: HelpCircle },
+  {
+    title: "Overview",
+    href: "/profile",
+    icon: User,
+  },
+  {
+    title: "Dashboard",
+    href: "/profile/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Reports",
+    href: "/profile/reports",
+    icon: FileText,
+  },
+  // {
+  //   title: "History",
+  //   href: "/profile/history",
+  //   icon: History,
+  // },
+  // {
+  //   title: "Purchase/Billing",
+  //   href: "/profile/billing",
+  //   icon: CreditCard,
+  // },
+  {
+    title: "Support",
+    href: "/profile/support",
+    icon: HelpCircle,
+  },
 ];
 
 function SidebarContent() {

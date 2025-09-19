@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -6,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
@@ -27,48 +27,58 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DashboardPage() {
-  // Recent audits data
-  const recentAudits = [
-    {
-      website: "example.com",
-      seo: 85,
-      speed: 72,
-      date: "2024-01-15",
-      status: "completed",
-    },
-    {
-      website: "mystore.com",
-      seo: 78,
-      speed: 68,
-      date: "2024-01-14",
-      status: "completed",
-    },
-    {
-      website: "blogsite.net",
-      seo: 92,
-      speed: 88,
-      date: "2024-01-13",
-      status: "completed",
-    },
-    {
-      website: "business.co",
-      seo: 65,
-      speed: 55,
-      date: "2024-01-12",
-      status: "processing",
-    },
-  ];
+  const [recentAudits, setRecentAudits] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Use recent audits for the chart
+  // ✅ Fetch audits dynamically
+  useEffect(() => {
+    const fetchAudits = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch(`${API_URL}/api/audits`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch audits");
+        const data = await res.json();
+
+        // ✅ Map backend fields to UI-friendly fields safely
+        const formattedData = (
+          Array.isArray(data) ? data : data.audits || []
+        ).map((audit: any) => ({
+          website: audit.url || "Unknown",
+          seo: audit.scores?.seo ?? 0,
+          speed: audit.scores?.performance ?? 0,
+          date: audit.date || new Date().toLocaleDateString("en-GB"),
+          status: audit.status || "completed",
+        }));
+
+        setRecentAudits(formattedData);
+      } catch (err) {
+        console.error("Error fetching audits:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAudits();
+  }, []);
+
+  // ✅ Chart data
   const chartData = recentAudits.map((audit) => ({
     name: audit.website,
     seo: audit.seo,
     speed: audit.speed,
   }));
 
-  // Badge colors
+  // ✅ Badge colors
   const getScoreColor = (score: number) => {
     if (score >= 80) return "bg-green-100 text-green-700";
     if (score >= 60) return "bg-yellow-100 text-yellow-700";
@@ -82,10 +92,10 @@ export default function DashboardPage() {
   };
 
   return (
-<div className="p-4 sm:p-6 space-y-6 ">
-  {/* Header */}
-  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ">
-            <div>
+    <div className="p-4 sm:p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Dashboard
           </h1>
@@ -93,24 +103,25 @@ export default function DashboardPage() {
             Welcome back! Here's your SEO performance overview.
           </p>
         </div>
-        <Link href= "/audit">
-        <Button className="w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          New Audit
-        </Button>
+        <Link href="/audit">
+          <Button className="w-full sm:w-auto">
+            <Plus className="w-4 h-4 mr-2" />
+            New Audit
+          </Button>
         </Link>
-        
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Audits</CardTitle>
             <BarChart3 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">24</div>
+            <div className="text-xl sm:text-2xl font-bold">
+              {recentAudits.length}
+            </div>
             <p className="text-xs text-green-600">+3 from last month</p>
           </CardContent>
         </Card>
@@ -123,14 +134,19 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold">78</div>
-            <p className="text-xs text-green-600">
-              +5 points from last audit
-            </p>
+            <div className="text-xl sm:text-2xl font-bold">
+              {recentAudits.length > 0
+                ? Math.round(
+                    recentAudits.reduce((sum, a) => sum + a.seo, 0) /
+                      recentAudits.length
+                  )
+                : 0}
+            </div>
+            <p className="text-xs text-green-600">+5 points from last audit</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Issues Found</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -143,21 +159,19 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Issues Resolved
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Issues Resolved</CardTitle>
             <CheckCircle className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold">156</div>
             <p className="text-xs text-green-600">+23 this month</p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Performance Analysis Graph */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Performance Trends Graph - 1 column */}
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+        {/* Performance Trends Graph */}
         <Card>
           <CardHeader>
             <CardTitle>Performance Trends</CardTitle>
@@ -190,14 +204,12 @@ export default function DashboardPage() {
                     type="monotone"
                     dataKey="seo"
                     stroke="#3b82f6"
-                    fillOpacity={1}
                     fill="url(#colorSEO)"
                   />
                   <Area
                     type="monotone"
                     dataKey="speed"
                     stroke="#10b981"
-                    fillOpacity={1}
                     fill="url(#colorSpeed)"
                   />
                 </AreaChart>
@@ -206,8 +218,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions Section - 1 column */}
-        <Card>
+        {/* Quick Actions */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Perform tasks with a single click</CardDescription>
@@ -227,7 +239,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Recent Audits Table */}
@@ -248,53 +260,57 @@ export default function DashboardPage() {
                   <th className="py-3 px-4">SPEED SCORE</th>
                   <th className="py-3 px-4">DATE</th>
                   <th className="py-3 px-4">STATUS</th>
-                  <th className="py-3 px-4 text-center">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {recentAudits.map((audit, index) => (
-                  <tr key={index} className="border-t hover:bg-gray-50">
-                    <td className="py-3 px-4">{audit.website}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getScoreColor(
-                          audit.seo
-                        )}`}
-                      >
-                        {audit.seo}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getScoreColor(
-                          audit.speed
-                        )}`}
-                      >
-                        {audit.speed}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{audit.date}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          audit.status
-                        )}`}
-                      >
-                        {audit.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-3">
-                        <button className="text-blue-600 hover:text-blue-800">
-                          <Eye size={16} />
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-800">
-                          <Settings size={16} />
-                        </button>
-                      </div>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-4">
+                      Loading...
                     </td>
                   </tr>
-                ))}
+                ) : recentAudits.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-4">
+                      No audits found
+                    </td>
+                  </tr>
+                ) : (
+                  recentAudits.map((audit, index) => (
+                    <tr key={index} className="border-t hover:bg-gray-50">
+                      <td className="py-3 px-4">{audit.website}</td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getScoreColor(
+                            audit.seo
+                          )}`}
+                        >
+                          {audit.seo}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getScoreColor(
+                            audit.speed
+                          )}`}
+                        >
+                          {audit.speed}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">{audit.date}</td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            audit.status
+                          )}`}
+                        >
+                          {audit.status}
+                        </span>
+                      </td>
+                      
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
