@@ -6,10 +6,10 @@ const { checkAuditLimit } = require("../middleware/checkAuditLimit");
 
 
 // ✅ Attach middleware to routes
-router.post("/create-audits", verifyUser, saveAudit); // saveAudit only for logged-in user
-router.get("/audits", verifyUser, getAudits);        // getAudits only for logged-in user
+router.post("/create-audits", verifyUser, saveAudit); 
+router.get("/audits", verifyUser, getAudits);        
 router.post("/guest-audits", checkAuditLimit, saveAudit);
-router.get("/audits", getAudits);
+
 
 module.exports = router;
 

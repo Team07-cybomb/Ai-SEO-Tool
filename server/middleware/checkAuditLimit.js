@@ -5,30 +5,29 @@ async function checkAuditLimit(req, res, next) {
   try {
     const today = new Date().toLocaleDateString();
 
+    // Logged-in user? ✅ skip limit
     if (req.user) {
       return next();
     }
 
-    // const guestId = req.cookies.guestId || req.body.guestId;
-    const guestId = req.body?.guestId;
+    // Get client IP
+    const ip =
+      req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
 
-if (!guestId) {
-  console.error("Audit limit check failed: guestId is missing", req.body);
-  return res.status(400).json({ success: false, message: "guestId is required" });
-}
-
-    if (!guestId) {
-      return res.status(400).json({ message: "Missing guestId" });
+    if (!ip) {
+      console.error("❌ Could not detect IP");
+      return res.status(400).json({ success: false, message: "IP is required" });
     }
 
-    let guest = await GuestUsage.findOne({ guestId });
+    let guest = await GuestUsage.findOne({ ip });
 
     if (!guest) {
-      guest = new GuestUsage({ guestId, count: 1, date: today });
+      guest = new GuestUsage({ ip, count: 1, date: today });
       await guest.save();
       return next();
     }
 
+    // Reset count if new day
     if (guest.date !== today) {
       guest.count = 0;
       guest.date = today;
@@ -37,7 +36,7 @@ if (!guestId) {
     if (guest.count >= 3) {
       return res
         .status(403)
-        .json({ message: "🚀 Free audits used up! Please login to continue." });
+        .json({ success: false, message: "🚀 Free audits used up! Please login to continue." });
     }
 
     guest.count += 1;

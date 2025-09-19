@@ -1,41 +1,29 @@
 const Audit = require("../models/auditModel");
-const GuestUsage = require("../models/guestUsageModel"); // ✅ new guest usage model
+const GuestUsage = require("../models/guestUsageModel");
 
-// ---------------- Save Audit ----------------
 exports.saveAudit = async (req, res) => {
   try {
     const today = new Date().toLocaleDateString("en-GB");
+    const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-    // ✅ If no logged-in user, treat as guest
+    // ✅ Guest logic (if no logged-in user)
     if (!req.user || !req.user._id) {
-      const guestId = req.body.guestId || req.cookies.guestId;
-      if (!guestId) {
-        return res.status(400).json({ success: false, message: "Missing guestId" });
-      }
-
-      let guest = await GuestUsage.findOne({ guestId });
+      let guest = await GuestUsage.findOne({ ip, date: today });
 
       if (!guest) {
-        guest = new GuestUsage({ guestId, count: 1, date: today });
+        guest = new GuestUsage({ ip, count: 1, date: today });
         await guest.save();
       } else {
-        // reset if new day
-        if (guest.date !== today) {
-          guest.count = 0;
-          guest.date = today;
-        }
-
         if (guest.count >= 3) {
-          return res
-            .status(403)
-            .json({ success: false, message: "🚀 Free audits used up. Please login." });
+          return res.status(403).json({
+            success: false,
+            message: "🚀 Free audits used up for today. Please login or register.",
+          });
         }
-
         guest.count += 1;
         await guest.save();
       }
 
-      // Don’t save audit in DB for guests, just return the data
       return res.status(200).json({
         success: true,
         message: `Guest audit #${guest.count} completed`,
@@ -43,30 +31,48 @@ exports.saveAudit = async (req, res) => {
       });
     }
 
-    // ✅ Logged-in user: save audit in DB
-    const { url, seo, performance, accessibility, bestPractices, recommendations, analysis } = req.body;
+    // ✅ Logged-in user: save audit normally
+const { url, scores, recommendations, analysis, performance, seo, accessibility, bestPractices } = req.body;
+ 
+const auditData = {
 
-    const auditData = {
-      url,
-      seo,
-      performance,
-      accessibility,
-      bestPractices,
-      recommendations,
-      analysis,
-      userId: req.user._id, // always from JWT
-      date: today,
-    };
+  url,
 
+  date: new Date().toLocaleDateString("en-GB"),
+
+  scores: {
+
+    performance: scores?.performance || performance || 0,
+
+    seo: scores?.seo || seo || 0,
+
+    accessibility: scores?.accessibility || accessibility || 0,
+
+    bestPractices: scores?.bestPractices || bestPractices || 0,
+
+  },
+
+  recommendations: recommendations || [],
+
+  analysis: analysis || "",
+
+  userId: req.user._id,
+
+  date: today,
+
+};
+ 
     const audit = new Audit(auditData);
     await audit.save();
 
-    res.status(201).json({ success: true, message: "Audit saved successfully", audit });
+    res.status(201).json({ success: true, message: "Audit saved successfully", audit:req.body });
+
   } catch (err) {
     console.error("Save Audit Error:", err);
     res.status(500).json({ success: false, message: "Error saving audit", error: err.message });
   }
 };
+
 
 // ---------------- Get Audits ----------------
 exports.getAudits = async (req, res) => {
