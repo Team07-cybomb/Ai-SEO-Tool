@@ -144,8 +144,11 @@ const handleSignOut = async () => {
             <Search className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
           <span className="text-lg font-bold text-sidebar-foreground">
-            SEO Audit Pro
-          </span> */}
+
+            RankSeo.in
+          </span>
+
+
         </Link>
       </div>
 
