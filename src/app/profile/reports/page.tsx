@@ -1,14 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Eye, Search, Filter, Plus, MoreHorizontal, TrendingUp, TrendingDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Download,
+  Eye,
+  Search,
+  Filter,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  X,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -24,14 +63,43 @@ function getScoreBadgeVariant(score: number) {
   return "destructive";
 }
 
+function getPriorityColor(priority: string) {
+  switch (priority.toLowerCase()) {
+    case "high":
+      return "text-red-600";
+    case "medium":
+      return "text-yellow-600";
+    case "low":
+      return "text-green-600";
+    default:
+      return "text-gray-600";
+  }
+}
+
+// Function to format analysis text into bullet points
+function formatAnalysis(analysis: string) {
+  if (!analysis) return [];
+  
+  // Split by common bullet point indicators
+  const points = analysis.split(/\n|•|\*| - /).filter(point => 
+    point.trim().length > 0 && 
+    !point.toLowerCase().includes("analysis:") &&
+    !point.toLowerCase().includes("detailed analysis:")
+  );
+  
+  return points.length > 0 ? points : [analysis];
+}
+
 export default function ReportsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("date");
+  const [dateFilter, setDateFilter] = useState("");
   const [auditReports, setAuditReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // ✅ Fetch data from the same API as dashboard
+  // ✅ Fetch data from API
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -49,15 +117,17 @@ export default function ReportsPage() {
           id: audit.id || idx + 1,
           website: audit.url || "Unknown",
           url: audit.url || "N/A",
-          date: audit.date || new Date().toLocaleDateString("en-GB"),
+          date: audit.date || new Date().toLocaleDateString("en-GB"), // format: DD/MM/YYYY
           time: audit.time || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           seoScore: audit.scores?.seo ?? 0,
           speedScore: audit.scores?.performance ?? 0,
           accessibilityScore: audit.scores?.accessibility ?? 0,
           bestPracticesScore: audit.scores?.bestPractices ?? 0,
-          issues: audit.issues || 0,
+          issues: audit.issues ?? 0,
           status: audit.status || "completed",
           trend: audit.trend || (audit.scores?.seo > 70 ? "up" : "down"),
+          recommendations: audit.recommendations || [],
+          analysis: audit.analysis || "",
         }));
 
         setAuditReports(formattedData);
@@ -71,13 +141,31 @@ export default function ReportsPage() {
     fetchReports();
   }, []);
 
+  // ✅ Convert DD/MM/YYYY → YYYY-MM-DD for date comparison
+  const formatDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split("/");
+    return `${year}-${month}-${day}`;
+  };
+
+  // ✅ Filtering logic with Date filter
   const filteredReports = auditReports.filter((report) => {
     const matchesSearch =
       report.website.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.url.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || report.status === statusFilter;
-    return matchesSearch && matchesStatus;
+
+    const matchesStatus =
+      statusFilter === "all" || report.status === statusFilter;
+
+    const matchesDate = !dateFilter || formatDate(report.date) === dateFilter;
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
+
+  // ✅ Handle view report
+  const handleViewReport = (report: any) => {
+    setSelectedReport(report);
+    setIsDialogOpen(true);
+  };
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
@@ -88,8 +176,7 @@ export default function ReportsPage() {
           <p className="text-muted-foreground">View and manage your SEO audit reports</p>
         </div>
         <Button className="w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          New Audit
+          <Plus className="w-4 h-4 mr-2" /> New Audit
         </Button>
       </div>
 
@@ -113,10 +200,10 @@ export default function ReportsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Avg SEO Score</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Recent SEO Score</p>
                 <p className="text-xl sm:text-2xl font-bold">
                   {auditReports.length > 0
-                    ? Math.round(auditReports.reduce((sum, r) => sum + r.seoScore, 0) / auditReports.length)
+                    ? auditReports[0].seoScore
                     : 0}
                 </p>
               </div>
@@ -131,10 +218,10 @@ export default function ReportsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">Avg Speed Score</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Recent Speed Score</p>
                 <p className="text-xl sm:text-2xl font-bold">
                   {auditReports.length > 0
-                    ? Math.round(auditReports.reduce((sum, r) => sum + r.speedScore, 0) / auditReports.length)
+                    ? auditReports[0].speedScore
                     : 0}
                 </p>
               </div>
@@ -151,7 +238,13 @@ export default function ReportsPage() {
               <div>
                 <p className="text-xs sm:text-sm text-muted-foreground">Total Issues</p>
                 <p className="text-xl sm:text-2xl font-bold">
-                  {auditReports.reduce((sum, r) => sum + r.issues, 0)}
+                  {auditReports.filter(
+                    (r) =>
+                      r.seoScore === 0 &&
+                      r.speedScore === 0 &&
+                      r.accessibilityScore === 0 &&
+                      r.bestPracticesScore === 0
+                  ).length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-destructive/10 rounded-lg flex items-center justify-center">
@@ -162,34 +255,18 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      {/* Filters + Table with Static Grade Sheet */}
+      {/* Filters */}
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
             <CardTitle>Audit Reports</CardTitle>
             <CardDescription>Detailed view of all your website audits</CardDescription>
           </div>
-
-          {/* Grade Sheet - Static */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4">
-            <div className="flex flex-col items-center border rounded-lg p-2 sm:p-4">
-              <span className="text-lg font-bold text-green-600">Good</span>
-              <p className="text-xs sm:text-sm text-muted-foreground">90 - 100</p>
-            </div>
-            <div className="flex flex-col items-center border rounded-lg p-2 sm:p-4">
-              <span className="text-lg font-bold text-yellow-600">Avg</span>
-              <p className="text-xs sm:text-sm text-muted-foreground">70 - 89</p>
-            </div>
-            <div className="flex flex-col items-center border rounded-lg p-2 sm:p-4">
-              <span className="text-lg font-bold text-red-600">Bad</span>
-              <p className="text-xs sm:text-sm text-muted-foreground">Below 70</p>
-            </div>
-          </div>
         </CardHeader>
 
         <CardContent>
-          {/* Search + Filter */}
-          <div className="flex flex-col gap-4 mb-6">
+          {/* Search + Status + Date Filter */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
@@ -199,20 +276,14 @@ export default function ReportsPage() {
                 className="pl-10"
               />
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+            {/* Date Filter */}
+            <Input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-full sm:w-48"
+            />
           </div>
 
           {/* Reports Table */}
@@ -221,17 +292,15 @@ export default function ReportsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[200px]">Website</TableHead>
-                  <TableHead className="min-w-[120px]">Date & Time</TableHead>
-                  <TableHead className="text-center min-w-[100px]">SEO Score</TableHead>
-                  <TableHead className="text-center min-w-[100px]">Speed Score</TableHead>
-                  <TableHead className="text-center min-w-[120px] hidden sm:table-cell">Accessibility</TableHead>
-                  <TableHead className="text-center min-w-[120px] hidden md:table-cell">Best Practices</TableHead>
-                  <TableHead className="text-center min-w-[80px] hidden lg:table-cell">Issues</TableHead>
-                  <TableHead className="text-center min-w-[80px] hidden lg:table-cell">Trend</TableHead>
-                  <TableHead className="text-center min-w-[120px]">Actions</TableHead>
+                  <TableHead className="text-center">Date</TableHead>
+                  <TableHead className="text-center">SEO Score</TableHead>
+                  <TableHead className="text-center">Speed Score</TableHead>
+                  <TableHead className="text-center hidden sm:table-cell">Accessibility</TableHead>
+                  <TableHead className="text-center hidden md:table-cell">Best Practices</TableHead>
+                  <TableHead className="text-center hidden lg:table-cell">Trend</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {loading ? (
                   <TableRow>
@@ -248,17 +317,10 @@ export default function ReportsPage() {
                 ) : (
                   filteredReports.map((report) => (
                     <TableRow key={report.id}>
+                      <TableCell>{report.website}</TableCell>
                       <TableCell>
-                        <div>
-                          <p className="font-medium text-foreground">{report.website}</p>
-
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="text-sm font-medium">{report.date}</p>
-                          <p className="text-xs text-muted-foreground">{report.time}</p>
-                        </div>
+                        <p className="text-center text-sm font-medium">{report.date}</p>
+                        {/* <p className="text-xs text-muted-foreground">{report.time}</p> */}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant={getScoreBadgeVariant(report.seoScore)} className={getScoreColor(report.seoScore)}>
@@ -271,18 +333,22 @@ export default function ReportsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center hidden sm:table-cell">
-                        <Badge variant={getScoreBadgeVariant(report.accessibilityScore)} className={getScoreColor(report.accessibilityScore)}>
+                        <Badge
+                          variant={getScoreBadgeVariant(report.accessibilityScore)}
+                          className={getScoreColor(report.accessibilityScore)}
+                        >
                           {report.accessibilityScore}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center hidden md:table-cell">
-                        <Badge variant={getScoreBadgeVariant(report.bestPracticesScore)} className={getScoreColor(report.bestPracticesScore)}>
+                        <Badge
+                          variant={getScoreBadgeVariant(report.bestPracticesScore)}
+                          className={getScoreColor(report.bestPracticesScore)}
+                        >
                           {report.bestPracticesScore}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center hidden lg:table-cell">
-                        <span className="text-sm font-medium">{report.issues}</span>
-                      </TableCell>
+
                       <TableCell className="text-center hidden lg:table-cell">
                         {report.trend === "up" ? (
                           <TrendingUp className="w-4 h-4 text-green-600 mx-auto" />
@@ -290,18 +356,14 @@ export default function ReportsPage() {
                           <TrendingDown className="w-4 h-4 text-red-600 mx-auto" />
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          <Button variant="ghost" size="sm" className="hidden sm:flex">
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button variant="ghost" size="sm" className="hidden sm:flex">
-                            <Download className="w-4 h-4 mr-1" />
-                            PDF
-                          </Button>
-
-                        </div>
+                      <TableCell className="text-center">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewReport(report)}
+                        >
+                          <Eye className="w-4 h-4 mr-1" /> View
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -311,6 +373,183 @@ export default function ReportsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Report Detail Dialog - Increased width */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-20xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Audit Report: {selectedReport?.website}</span>
+              {/* <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button> */}
+            </DialogTitle>
+            <DialogDescription>
+              Detailed analysis for {selectedReport?.url}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedReport && (
+            <div className="space-y-6 py-4">
+              {/* Summary Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle>Performance Summary</CardTitle>
+                  <CardDescription>Overall website performance scores</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">SEO Score</p>
+                      <div className="flex items-center gap-2">
+                        <Progress value={selectedReport.seoScore} className="h-2" />
+                        <Badge variant={getScoreBadgeVariant(selectedReport.seoScore)}>
+                          {selectedReport.seoScore}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Speed Score</p>
+                      <div className="flex items-center gap-2">
+                        <Progress value={selectedReport.speedScore} className="h-2" />
+                        <Badge variant={getScoreBadgeVariant(selectedReport.speedScore)}>
+                          {selectedReport.speedScore}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Accessibility</p>
+                      <div className="flex items-center gap-2">
+                        <Progress value={selectedReport.accessibilityScore} className="h-2" />
+                        <Badge variant={getScoreBadgeVariant(selectedReport.accessibilityScore)}>
+                          {selectedReport.accessibilityScore}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Best Practices</p>
+                      <div className="flex items-center gap-2">
+                        <Progress value={selectedReport.bestPracticesScore} className="h-2" />
+                        <Badge variant={getScoreBadgeVariant(selectedReport.bestPracticesScore)}>
+                          {selectedReport.bestPracticesScore}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tabs for different sections */}
+              <Tabs defaultValue="recommendations" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+                  <TabsTrigger value="analysis">Detailed Analysis</TabsTrigger>
+                  <TabsTrigger value="technical">Technical Details</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="recommendations" className="space-y-4 pt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Actionable Recommendations</CardTitle>
+                      <CardDescription>
+                        Prioritized list of improvements for your website
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {selectedReport.recommendations && selectedReport.recommendations.length > 0 ? (
+                        selectedReport.recommendations.map((rec: any, index: number) => (
+                          <div key={index} className="flex items-start gap-4 p-4 border rounded-lg">
+                            <div className={`p-2 rounded-full ${getPriorityColor(rec.priority)} bg-opacity-20`}>
+                              {rec.priority === "high" ? (
+                                <AlertCircle className="h-5 w-5" />
+                              ) : rec.priority === "medium" ? (
+                                <Clock className="h-5 w-5" />
+                              ) : (
+                                <CheckCircle className="h-5 w-5" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold capitalize">{rec.priority} Priority</h4>
+                              <p className="text-sm text-muted-foreground">{rec.text}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground">No recommendations available for this audit.</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="analysis" className="space-y-4 pt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Detailed Analysis</CardTitle>
+                      <CardDescription>
+                        Comprehensive breakdown of the audit results
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedReport.analysis ? (
+                        <div className="space-y-3">
+                          {formatAnalysis(selectedReport.analysis).map((point, index) => (
+                            <div key={index} className="flex items-start">
+                              <div className="w-2 h-2 rounded-full bg-primary mt-2 mr-3 flex-shrink-0"></div>
+                              <p className="text-sm">{point.trim()}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground">No detailed analysis available for this audit.</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="technical" className="space-y-4 pt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Technical Details</CardTitle>
+                      <CardDescription>
+                        Metadata and technical information about this audit
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium text-sm">Audit Date</h4>
+                          <p className="text-sm text-muted-foreground">{selectedReport.date}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm">Audit Time</h4>
+                          <p className="text-sm text-muted-foreground">{selectedReport.time}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm">Website URL</h4>
+                          <p className="text-sm text-muted-foreground break-all">{selectedReport.url}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm">Status</h4>
+                          <Badge variant={selectedReport.status === "completed" ? "default" : "secondary"}>
+                            {selectedReport.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+{/* 
+              <div className="flex justify-end gap-2">
+                <Button variant="outline">
+                  <Download className="w-4 h-4 mr-2" /> Download PDF
+                </Button>
+                <Button>Run New Audit</Button>
+              </div> */}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

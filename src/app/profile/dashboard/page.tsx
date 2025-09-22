@@ -72,11 +72,12 @@ export default function DashboardPage() {
   }, []);
 
   // ✅ Chart data
-  const chartData = recentAudits.map((audit) => ({
-    name: audit.website,
-    seo: audit.seo,
-    speed: audit.speed,
-  }));
+const chartData = recentAudits.slice(0,3).map((audit) => ({
+  name: audit.website,
+  seo: audit.seo,
+  speed: audit.speed,
+}));
+
 
   // ✅ Badge colors
   const getScoreColor = (score: number) => {
@@ -115,12 +116,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Audits</CardTitle>
+            <CardTitle className="text-sm font-medium">Recent 3 Audits</CardTitle>
             <BarChart3 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold">
-              {recentAudits.length}
+              {recentAudits.slice(0, 3).length}
             </div>
             <p className="text-xs text-green-600">+3 from last month</p>
           </CardContent>
@@ -135,13 +136,13 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold">
-              {recentAudits.length > 0
+              {recentAudits.slice(0, 3).length > 0
                 ? Math.round(
-                    recentAudits.reduce((sum, a) => sum + a.seo, 0) /
-                      recentAudits.length
-                  )
-                : 0}
-            </div>
+                recentAudits.slice(0, 3).reduce((sum, a) => sum + a.seo, 0) /
+                recentAudits.slice(0, 3).length
+                )
+            : 0}
+          </div>
             <p className="text-xs text-green-600">+5 points from last audit</p>
           </CardContent>
         </Card>
@@ -197,9 +198,32 @@ export default function DashboardPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
+<XAxis
+  dataKey="name"
+  interval={0}
+  tick={{ fontSize: 13, fill: "#374151" }} // darker readable text
+  height={50}
+  tickFormatter={(url) => {
+    try {
+      // Extract clean domain name only
+      return new URL(url).hostname;
+    } catch {
+      return url;
+    }
+  }}
+/>
                   <YAxis />
-                  <Tooltip />
+<Tooltip
+  contentStyle={{
+    backgroundColor: "#fff",
+    borderRadius: "8px",
+    border: "1px solid #e5e7eb",
+    color: "#111",
+  }}
+  labelStyle={{ fontWeight: "bold" }}
+  formatter={(value, name) => [value, name]}
+  labelFormatter={(label) => `Website: ${label}`}
+/>
                   <Area
                     type="monotone"
                     dataKey="seo"
@@ -276,7 +300,7 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                 ) : (
-                  recentAudits.map((audit, index) => (
+                  recentAudits.slice(0, 3).map((audit, index) => (
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="py-3 px-4">{audit.website}</td>
                       <td className="py-3 px-4">

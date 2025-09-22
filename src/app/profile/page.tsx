@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Edit2, Save, Upload, MapPin, Briefcase, Calendar, Globe, Lock, Eye, EyeOff } from "lucide-react";
+import {
+  Edit2,
+  Save,
+  Upload,
+  MapPin,
+  Briefcase,
+  Calendar,
+  Globe,
+  Lock,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
+import {
+  showSuccessAlert,
+  showErrorAlert,
+  showWarningAlert,
+} from "@/components/Utils/alert-util";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const UserOverview = () => {
@@ -80,7 +96,9 @@ const UserOverview = () => {
     fetchProfile();
   }, [router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setUserData({ ...userData, [name]: value });
   };
@@ -100,7 +118,10 @@ const UserOverview = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setUserData({ ...userData, profilePicture: e.target?.result as string });
+        setUserData({
+          ...userData,
+          profilePicture: e.target?.result as string,
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -111,7 +132,9 @@ const UserOverview = () => {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="text-gray-600 mt-2">Manage your personal and professional information</p>
+          <p className="text-gray-600 mt-2">
+            Manage your personal and professional information
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -122,10 +145,13 @@ const UserOverview = () => {
                 <div className="flex flex-col items-center">
                   <div className="relative mb-5">
                     <Avatar className="w-36 h-36">
-                      <AvatarImage src={userData.profilePicture} alt={userData.name} />
+                      <AvatarImage
+                        src={userData.profilePicture}
+                        alt={userData.name}
+                      />
                       <AvatarFallback className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-white text-5xl font-semibold">
                         {userData.name?.charAt(0).toUpperCase() || "U"}
-                      </AvatarFallback> 
+                      </AvatarFallback>
                     </Avatar>
                     {isEditing && (
                       <label className="absolute bottom-2 right-2 bg-emerald-600 p-2 rounded-full cursor-pointer shadow-md hover:bg-emerald-700 transition-colors">
@@ -139,12 +165,17 @@ const UserOverview = () => {
                       </label>
                     )}
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-800 text-center">{userData.name}</h2>
-                  <p className="text-gray-600 mt-1 text-center">{userData.title}</p>
-                  <div className="flex items-center mt-2 text-gray-500">
+                  <h2 className="text-xl font-semibold text-gray-800 text-center">
+                    {userData.name}
+                  </h2>
+                  <p className="text-gray-600 mt-1 text-center">
+                    {userData.title}
+                  </p>
+                  {/* <div className="flex items-center mt-2 text-gray-500">
                     <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                     <span className="text-sm truncate">{userData.location}</span>
-                  </div>
+                  </div> */}
+                  <Link href="/forgotpassword">Change password</Link>
                 </div>
               </CardContent>
             </Card>
@@ -155,19 +186,32 @@ const UserOverview = () => {
             <Card className="shadow-md border-0 rounded-xl overflow-hidden">
               <CardHeader className="border-b border-gray-200 bg-gray-50 py-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <CardTitle className="text-xl font-semibold text-gray-800">Profile Information</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-gray-800">
+                    Profile Information
+                  </CardTitle>
                   {isEditing ? (
                     <div className="flex gap-2">
-                      <Button onClick={() => setIsEditing(false)} variant="outline" className="border-gray-300">
+                      <Button
+                        onClick={() => setIsEditing(false)}
+                        variant="outline"
+                        className="border-gray-300"
+                      >
                         Cancel
                       </Button>
-                      <Button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 shadow-sm">
+                      <Button
+                        onClick={handleSave}
+                        className="bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+                      >
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
                     </div>
                   ) : (
-                    <Button onClick={handleEdit} variant="outline" className="border-gray-300">
+                    <Button
+                      onClick={handleEdit}
+                      variant="outline"
+                      className="border-gray-300"
+                    >
                       <Edit2 className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
@@ -176,7 +220,11 @@ const UserOverview = () => {
               </CardHeader>
 
               <CardContent className="p-0">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
                   <TabsList className="w-full justify-start border-b border-gray-200 rounded-none px-6 bg-white">
                     <TabsTrigger
                       value="profile"
@@ -185,20 +233,22 @@ const UserOverview = () => {
                       Personal Info
                     </TabsTrigger>
 
-                    {userData.provider === "local" && (
+                    {/* {userData.provider === "local" && (
                       <TabsTrigger
                         value="security"
                         className="py-4 data-[state=active]:border-b-2 data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 rounded-none"
                       >
                         Security
                       </TabsTrigger>
-                    )}
+                    )} */}
                   </TabsList>
 
                   <TabsContent value="profile" className="p-6 m-0">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Full Name</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Full Name
+                        </label>
                         <Input
                           type="text"
                           name="name"
@@ -210,7 +260,9 @@ const UserOverview = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Email Address</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Email Address
+                        </label>
                         <Input
                           type="email"
                           name="email"
@@ -222,7 +274,9 @@ const UserOverview = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Phone Number
+                        </label>
                         <Input
                           type="text"
                           name="phone"
@@ -234,7 +288,9 @@ const UserOverview = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Website</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Website
+                        </label>
                         <div className="relative">
                           <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
@@ -249,7 +305,9 @@ const UserOverview = () => {
                       </div>
 
                       <div className="md:col-span-2 space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Bio</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Bio
+                        </label>
                         <textarea
                           name="bio"
                           value={userData.bio}
@@ -262,9 +320,7 @@ const UserOverview = () => {
                     </div>
                   </TabsContent>
 
-
-
-                  <TabsContent value="security" className="p-6 m-0">
+                  {/* <TabsContent value="security" className="p-6 m-0">
                     <div className="space-y-8">
                       <div>
                         <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
@@ -331,7 +387,7 @@ const UserOverview = () => {
 
 
                     </div>
-                  </TabsContent>
+                  </TabsContent> */}
                 </Tabs>
               </CardContent>
             </Card>
