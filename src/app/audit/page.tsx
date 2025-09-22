@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { ScoreCard, DetailedAnalysis, Recommendations, HeaderSection, PerformanceMetrics } from "./frontend";
+import { ScoreCard, DetailedAnalysis, Recommendations, HeaderSection, PerformanceMetrics, ScoresRadar, ScoreTrends } from "./frontend";
 import PDFGenerator from "./pdf";
 import { runAudit } from "./backend";
- 
+
 interface DecodedToken {
   user: {
     id: string;
@@ -27,7 +27,13 @@ interface AuditReport {
   analysis?: string;
   recommendations?: Recommendation[];
   backlinks?: number;
-  history?: { date: string; seo: number; performance: number; accessibility: number; bestPractices: number }[];
+  history?: { 
+    date: string; 
+    seo: number; 
+    performance: number; 
+    accessibility: number; 
+    bestPractices: number 
+  }[];
   issues?: { category: string; count: number }[];
   loadingTime?: number;
   pageSize?: number;
@@ -74,7 +80,10 @@ export default function AuditPage() {
   };
  
   const stopProgressAnimation = (complete = false) => {
-    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
     setProgress(complete ? 100 : 0);
     if (complete) setLoadingStep("Audit complete!");
   };
@@ -100,6 +109,8 @@ export default function AuditPage() {
     }
  
     setLoading(true);
+    // Create new AbortController for this audit
+    abortControllerRef.current = new AbortController();
     startProgressAnimation();
  
     const token = localStorage.getItem("token");
@@ -117,8 +128,18 @@ export default function AuditPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
  
     try {
-      // ✅ Run local audit
-      const auditResults = await runAudit(url, userId || "", token || undefined);
+      // ✅ Run local audit with abort signal
+      const auditResults = await runAudit(
+        url, 
+        userId || "", 
+        token || undefined,
+        abortControllerRef.current.signal
+      );
+ 
+      // Check if audit was aborted
+      if (abortControllerRef.current.signal.aborted) {
+        return;
+      }
  
       // ✅ Decide endpoint: logged-in → save, guest → per-IP guest audits
       const endpoint = token
@@ -134,6 +155,7 @@ export default function AuditPage() {
         },
         body: JSON.stringify({ url, ...auditResults }),
         credentials: "include",
+        signal: abortControllerRef.current.signal,
       });
  
       if (response.status === 403) {
@@ -156,15 +178,17 @@ export default function AuditPage() {
       stopProgressAnimation();
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
   };
  
   const handleStopAudit = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      setLoading(false);
-      stopProgressAnimation();
+      console.log("Audit stopping...");
     }
+    setLoading(false);
+    stopProgressAnimation();
   };
  
   return (
@@ -180,16 +204,48 @@ export default function AuditPage() {
         progress={progress}
         loadingStep={loadingStep}
       />
- 
+      {/* 🔹 Sample Report Section */}
+{!report && !loading &&  (
+  <div className="container mx-auto py-8 sm:py-12 px-4 sm:px-6">
+    <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 sm:mb-8">
+      <div className="p-4 sm:p-6 bg-gradient-to-r from-gray-400 to-gray-600 text-white">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
+          Sample Audit Report
+        </h2>
+        <p className="mt-1 sm:mt-2 opacity-80 text-sm sm:text-base">
+          This is a preview of how the audit report will appear for {url}.
+        </p>
+      </div>
+      
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <ScoreCard label="SEO" score={82} />
+          <ScoreCard label="Performance" score={74} />
+          <ScoreCard label="Accessibility" score={65} />
+          <ScoreCard label="Best Practices" score={90} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+          <ScoresRadar scores={{ seo: 82, performance: 74, accessibility: 65, bestPractices: 90 }} />
+          <ScoreTrends history={[
+            { date: '2025-09-01', seo: 75, performance: 70, accessibility: 60, bestPractices: 85 },
+            { date: '2025-09-15', seo: 82, performance: 74, accessibility: 65, bestPractices: 90 },
+          ]} />
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
       {/* 🔹 Report Section */}
       {report && (
-        <div className="container mx-auto py-12 px-4 sm:px-6">
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div className="p-6 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
-              <h2 className="text-2xl md:text-3xl font-bold">
+        <div className="container mx-auto py-8 sm:py-12 px-4 sm:px-6">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 sm:mb-8">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
                 Audit Report for: {url}
               </h2>
-              <p className="mt-2 opacity-90">
+              <p className="mt-1 sm:mt-2 opacity-90 text-sm sm:text-base">
                 Generated on {new Date().toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -200,32 +256,27 @@ export default function AuditPage() {
  
             {/* Navigation Tabs */}
             <div className="flex border-b border-gray-200 overflow-x-auto">
-              <button
-                className={`px-6 py-3 font-medium text-sm ${activeTab === 'overview' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setActiveTab('overview')}
-              >
-                Overview
-              </button>
-              <button
-                className={`px-6 py-3 font-medium text-sm ${activeTab === 'analysis' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setActiveTab('analysis')}
-              >
-                Detailed Analysis
-              </button>
-              <button
-                className={`px-6 py-3 font-medium text-sm ${activeTab === 'recommendations' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setActiveTab('recommendations')}
-              >
-                Recommendations
-              </button>
+              {['overview', 'analysis', 'recommendations'].map((tab) => (
+                <button
+                  key={tab}
+                  className={`px-4 sm:px-6 py-3 font-medium text-sm whitespace-nowrap ${
+                    activeTab === tab 
+                      ? 'text-teal-600 border-b-2 border-teal-600' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
             </div>
  
             {/* Tab Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {activeTab === 'overview' && (
                 <>
                   {/* SCORE OVERVIEW */}
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     <ScoreCard label="SEO" score={report.seo ?? 0} />
                     <ScoreCard label="Performance" score={report.performance ?? 0} />
                     <ScoreCard label="Accessibility" score={report.accessibility ?? 0} />
@@ -236,9 +287,44 @@ export default function AuditPage() {
                   {(report.loadingTime || report.pageSize || report.requests) && (
                     <PerformanceMetrics report={report} />
                   )}
-                </>
-              )}
- 
+                  
+                  {/* Dynamic Content Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                    
+                    {/* Radar Chart Comparison - FIXED */}
+                      <ScoresRadar scores={{
+                        seo: report.seo ?? 0,
+                        performance: report.performance ?? 0,
+                        accessibility: report.accessibility ?? 0,
+                        bestPractices: report.bestPractices ?? 0
+                      }} />
+
+                      {/* Historical Trends - FIXED */}
+                      <ScoreTrends history={report.history || []} />
+                  </div>
+                  
+                  {/* Quick Actions */}
+              <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
+                <PDFGenerator report={report} url={url} />
+                {/* <button className="px-4 sm:px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 text-sm sm:text-base">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  Share Report
+                </button> */}
+              </div>
+              </>
+             )}
               {activeTab === 'analysis' && (
                 <DetailedAnalysis text={report.analysis} url={url} />
               )}
@@ -246,11 +332,6 @@ export default function AuditPage() {
               {activeTab === 'recommendations' && (
                 <Recommendations list={report.recommendations} />
               )}
-            </div>
- 
-            {/* Download Button */}
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <PDFGenerator report={report} url={url} />
             </div>
           </div>
         </div>
