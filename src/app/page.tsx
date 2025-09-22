@@ -52,9 +52,9 @@ export default function LandingPage() {
                   Start Free Audit
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent  sm:w-auto">
+              {/* <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent  sm:w-auto">
               View Sample Report
-            </Button>
+            </Button> */}
           </div>
 
           {/* Stats Row */}

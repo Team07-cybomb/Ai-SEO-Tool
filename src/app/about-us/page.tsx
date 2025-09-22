@@ -12,7 +12,7 @@ const AboutPage = () => {
         style={{ backgroundColor: "var(--primary)" }}
       >
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-snug">
-          AI Landing Page Optimizer
+          RANK SEO 
         </h1>
         <p className="max-w-3xl mx-auto text-base sm:text-lg lg:text-xl leading-snug text-gray-200 tracking-wide">
           The AI-powered solution that audits and optimizes your landing pages

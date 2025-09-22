@@ -100,7 +100,7 @@ const LoginPage = () => {
             </svg>
           </div>
           <span className="text-xl font-bold text-gray-900 ml-2">
-            SEO Audit Pro
+            RankSeo
           </span>
         </div>
         <h1 className="text-3xl font-bold text-center mb-6">Sign in</h1>

@@ -7,9 +7,12 @@ import Navbar from "@/components/Navbar"; // ✅ import navbar
 import Footer from "@/components/Footer"; // ✅ import footer
 import { UserProvider } from "@/components/context/UserContext";
 export const metadata: Metadata = {
-  title: "AI SEO Audit",
+  title: "RankSEO - AI Powered SEO Tool",
   description: "Created by Cybomb",
   generator: "Cybomb",
+  icons: {
+    icon: "/icon.png", // Add this line to specify your favicon
+  },
 };
 
 export const viewport = {
