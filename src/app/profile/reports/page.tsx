@@ -376,7 +376,11 @@ export default function ReportsPage() {
 
       {/* Report Detail Dialog - Increased width */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-20xl max-h-[90vh] overflow-y-auto">
+         <DialogContent
+    className="w-[70vw] max-w-[70vw] h-[95vh] overflow-y-auto text-xl"
+    style={{ maxWidth: "70vw" }} // Extra safeguard if Tailwind is overridden
+  >
+
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Audit Report: {selectedReport?.website}</span>
@@ -388,7 +392,7 @@ export default function ReportsPage() {
               Detailed analysis for {selectedReport?.url}
             </DialogDescription>
           </DialogHeader>
-
+          
           {selectedReport && (
             <div className="space-y-6 py-4">
               {/* Summary Card */}
@@ -400,7 +404,7 @@ export default function ReportsPage() {
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">SEO Score</p>
+                      <p className="text-xl font-medium">SEO Score</p>
                       <div className="flex items-center gap-2">
                         <Progress value={selectedReport.seoScore} className="h-2" />
                         <Badge variant={getScoreBadgeVariant(selectedReport.seoScore)}>
@@ -409,7 +413,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Speed Score</p>
+                      <p className="text-xl font-medium">Speed Score</p>
                       <div className="flex items-center gap-2">
                         <Progress value={selectedReport.speedScore} className="h-2" />
                         <Badge variant={getScoreBadgeVariant(selectedReport.speedScore)}>
@@ -418,7 +422,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Accessibility</p>
+                      <p className="text-xl font-medium">Accessibility</p>
                       <div className="flex items-center gap-2">
                         <Progress value={selectedReport.accessibilityScore} className="h-2" />
                         <Badge variant={getScoreBadgeVariant(selectedReport.accessibilityScore)}>
@@ -427,7 +431,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Best Practices</p>
+                      <p className="text-xl font-medium">Best Practices</p>
                       <div className="flex items-center gap-2">
                         <Progress value={selectedReport.bestPracticesScore} className="h-2" />
                         <Badge variant={getScoreBadgeVariant(selectedReport.bestPracticesScore)}>
@@ -470,7 +474,7 @@ export default function ReportsPage() {
                             </div>
                             <div className="flex-1">
                               <h4 className="font-semibold capitalize">{rec.priority} Priority</h4>
-                              <p className="text-sm text-muted-foreground">{rec.text}</p>
+                              <p className="text-xl text-muted-foreground">{rec.text}</p>
                             </div>
                           </div>
                         ))
@@ -495,7 +499,7 @@ export default function ReportsPage() {
                           {formatAnalysis(selectedReport.analysis).map((point, index) => (
                             <div key={index} className="flex items-start">
                               <div className="w-2 h-2 rounded-full bg-primary mt-2 mr-3 flex-shrink-0"></div>
-                              <p className="text-sm">{point.trim()}</p>
+                              <p className="text-xl pt-1.5" >{point.replace(/#/g, "").trim()}</p>
                             </div>
                           ))}
                         </div>
@@ -506,7 +510,7 @@ export default function ReportsPage() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="technical" className="space-y-4 pt-4">
+                <TabsContent value="technical" className="space-y-4 pt-4 text-xl">
                   <Card>
                     <CardHeader>
                       <CardTitle>Technical Details</CardTitle>
@@ -517,19 +521,19 @@ export default function ReportsPage() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <h4 className="font-medium text-sm">Audit Date</h4>
-                          <p className="text-sm text-muted-foreground">{selectedReport.date}</p>
+                          <h4 className="font-medium text-xl">Audit Date</h4>
+                          <p className="text-xl text-muted-foreground">{selectedReport.date}</p>
                         </div>
                         <div>
-                          <h4 className="font-medium text-sm">Audit Time</h4>
-                          <p className="text-sm text-muted-foreground">{selectedReport.time}</p>
+                          <h4 className="font-medium text-xl">Audit Time</h4>
+                          <p className="text-xl text-muted-foreground">{selectedReport.time}</p>
                         </div>
                         <div>
-                          <h4 className="font-medium text-sm">Website URL</h4>
-                          <p className="text-sm text-muted-foreground break-all">{selectedReport.url}</p>
+                          <h4 className="font-medium text-xl">Website URL</h4>
+                          <p className="text-xl text-muted-foreground break-all">{selectedReport.url}</p>
                         </div>
                         <div>
-                          <h4 className="font-medium text-sm">Status</h4>
+                          <h4 className="font-medium text-xl">Status</h4>
                           <Badge variant={selectedReport.status === "completed" ? "default" : "secondary"}>
                             {selectedReport.status}
                           </Badge>
