@@ -36,26 +36,95 @@ export default function AuditPage() {
         console.error("❌ Invalid token:", err);
       }
     }
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
- 
+
+
+    // Reset count if it's a new day
+    if (lastAuditDate !== today) {
+      currentCount = 0;
+    }
+
+    setAuditCount(currentCount);
+    return currentCount;
+  };
+
+  const updateAuditCount = (count: number) => {
+    const today = new Date().toLocaleDateString();
+
+    localStorage.setItem("lastAuditDate", today);
+    sessionStorage.setItem("lastAuditDate", today);
+
+    const dataToStore = btoa(
+      JSON.stringify({
+        count,
+        date: today,
+        salt: Math.random().toString(36).substring(2),
+      })
+    );
+
+    localStorage.setItem("auditData", dataToStore);
+    sessionStorage.setItem("auditData", dataToStore);
+
+    setAuditCount(count);
+  };
+
+  const handleAudit = async () => {
+    // Check audit count before proceeding
+    const currentCount = checkAuditCount();
+
+    // Check if the user has reached the audit limit (3 free audits)
+    if (currentCount >= 3 && !isLoggedIn) {
+      alert("🚀 Free audits used up! Please sign in to continue.");
+      router.push("/login");
+      return;
+    }
+
+    if (!url || !isValidUrl(url)) {
+      alert("⚠️ Please enter a valid website URL");
+      return;
+    }
+
+    setLoading(true);
+    setShowSampleReport(false);
+    setAuditDone(false);
+    startProgressAnimation();
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const token = localStorage.getItem("token");
+
     try {
-      // ✅ Run local audit
-      const auditResults = await runAudit(url, userId || "", token || undefined);
+      const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        
+        body: JSON.stringify({
+          url,
+          auditCount: currentCount,
+          userId: getUserId(),
+        }),
+        signal: controller.signal,
+      });
 
       // ✅ Decide endpoint: logged-in → save, guest → per-IP guest audits
       const endpoint = token
         ? `${API_URL}/api/create-audits`
         : `${API_URL}/api/guest-audits`;
 
-      // ✅ Save audit (or guest audit check)
-      const response = await fetch(endpoint, {
+
+      // Increment audit count using the secure update function
+      const updatedCount = currentCount + 1;
+      updateAuditCount(updatedCount);
+
+      // Save audit result to DB
+      await fetch("http://localhost:5000/api/create-audits", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ url, ...auditResults }),
-        credentials: "include",
+        headers: { 
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}` // ✅ send token
+  },
+        body: JSON.stringify(data),
+
       });
 
       if (response.status === 403) {
