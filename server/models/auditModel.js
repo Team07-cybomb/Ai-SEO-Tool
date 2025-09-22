@@ -18,6 +18,8 @@ const auditSchema = new mongoose.Schema({
   ],
   analysis: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
+ 
+  // 👇 User ID reference
 
   // Link audit to logged-in user
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
