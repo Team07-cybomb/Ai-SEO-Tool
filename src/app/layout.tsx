@@ -21,17 +21,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-         <UserProvider>
-          {children}
+        <UserProvider>
+          {/* ✅ Navbar and Footer must be inside the provider */}
+          <Navbar />
+
+          {/* ✅ Page Content */}
+          <main>{children}</main>
+
+          <Footer />
         </UserProvider>
-        {/* ✅ Shared Navbar */}
-        <Navbar />
-
-        {/* ✅ Page Content */}
-        <main>{children}</main>
-
-        {/* ✅ Shared Footer */}
-        <Footer />
       </body>
     </html>
   );
