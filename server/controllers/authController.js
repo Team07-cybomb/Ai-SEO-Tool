@@ -38,16 +38,16 @@ const transporter = nodemailer.createTransport({
 });
 
 // Function to send OTP email
-const sendOtpEmail = async (email, otp) => {
+const sendOtpEmail = async (email, otp, name) => {
     try {
         const mailOptions = {
-            from: `"Your App" <${SMTP_USER}>`,
+            from: `"RankSeo.in" <${SMTP_USER}>`,
             to: email,
             subject: 'Your OTP for Verification',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
                     <h2 style="text-align: center; color: #10B981;">OTP Verification</h2>
-                    <p style="font-size: 16px;">Hello,</p>
+                    <p style="font-size: 16px;">Hi, </p>
                     <p style="font-size: 16px;">Your One-Time Password (OTP) for verification is:</p>
                     <h1 style="text-align: center; font-size: 36px; color: #10B981; letter-spacing: 5px;">${otp}</h1>
                     <p style="font-size: 14px; color: #666;">This OTP is valid for 10 minutes. Do not share it with anyone.</p>
