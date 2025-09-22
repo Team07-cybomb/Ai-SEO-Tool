@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const path = require('path');
+const nodemailer = require('nodemailer');
+const otpGenerator = require('otp-generator');
 
 // Load environment variables
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
@@ -14,10 +16,53 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const NEXT_PUBLIC_CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL;
 
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = process.env.SMTP_PORT;
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+
 const GITHUB_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github/callback`;
 const GOOGLE_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback`;
 
 let tokenBlacklist = [];
+
+// Nodemailer transporter
+const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: true,
+    auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+    },
+});
+
+// Function to send OTP email
+const sendOtpEmail = async (email, otp) => {
+    try {
+        const mailOptions = {
+            from: `"Your App" <${SMTP_USER}>`,
+            to: email,
+            subject: 'Your OTP for Verification',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                    <h2 style="text-align: center; color: #10B981;">OTP Verification</h2>
+                    <p style="font-size: 16px;">Hello,</p>
+                    <p style="font-size: 16px;">Your One-Time Password (OTP) for verification is:</p>
+                    <h1 style="text-align: center; font-size: 36px; color: #10B981; letter-spacing: 5px;">${otp}</h1>
+                    <p style="font-size: 14px; color: #666;">This OTP is valid for 10 minutes. Do not share it with anyone.</p>
+                    <hr style="margin-top: 20px; border-color: #ddd;">
+                    <p style="text-align: center; font-size: 12px; color: #aaa;">Thank you!</p>
+                </div>
+            `,
+        };
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Error sending OTP email:', error);
+        throw new Error('Failed to send OTP email.');
+    }
+};
+
 const signup = async (req, res) => {
     const { name, email, mobile, password } = req.body;
     try {
@@ -25,9 +70,54 @@ const signup = async (req, res) => {
         if (user) {
             return res.status(400).json({ msg: 'User already exists' });
         }
-        user = new User({ name, email, mobile, password });
+
+        const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        user = new User({
+            name,
+            email,
+            mobile,
+            password,
+            otp,
+            otpExpiresAt,
+        });
+
         await user.save();
-        res.status(201).json({ msg: 'User registered successfully' });
+        await sendOtpEmail(email, otp);
+
+        res.status(201).json({ msg: 'OTP sent to your email. Please verify to complete signup.' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+const verifyOtpAndSignup = async (req, res) => {
+    const { email, otp } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ msg: 'User not found.' });
+        }
+        if (user.otp !== otp || user.otpExpiresAt < Date.now()) {
+            return res.status(400).json({ msg: 'Invalid or expired OTP.' });
+        }
+
+        // OTP is correct, save the user with a hashed password
+        user.isVerified = true;
+        user.otp = null;
+        user.otpExpiresAt = null;
+
+        await user.save();
+
+        const token = jwt.sign(
+            { user: { id: user._id, role: user.role || "user" } },
+            JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.status(200).json({ msg: 'Email verified and signup successful!', token });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -36,17 +126,14 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     const { email, password } = req.body;
-
     try {
         const user = await User.findOne({ email });
-
         if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
         if (!user.password) return res.status(400).json({ msg: 'Please log in with your social provider.' });
-
+        
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
-        // ✅ Fix JWT to include id + role
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
@@ -59,6 +146,67 @@ const login = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'No user found with that email.' });
+        }
+
+        const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        user.otp = otp;
+        user.otpExpiresAt = otpExpiresAt;
+        await user.save();
+        
+        await sendOtpEmail(email, otp);
+
+        res.status(200).json({ msg: 'OTP sent to your email for password reset.' });
+    } catch (err) {
+        console.error('Server error during forgot password:', err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found.' });
+        }
+
+        if (user.otp !== otp || user.otpExpiresAt < Date.now()) {
+            return res.status(400).json({ msg: 'Invalid or expired OTP.' });
+        }
+
+        // Hash the new password and update the user document atomically
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Find the user again and update all fields in a single query
+        await User.findOneAndUpdate(
+            { email: email },
+            {
+                $set: {
+                    password: hashedPassword,
+                    otp: null,
+                    otpExpiresAt: null,
+                },
+            },
+            { new: true }
+        );
+
+        res.status(200).json({ msg: 'Password has been successfully reset.' });
+    } catch (err) {
+        console.error('Server error during password reset:', err.message);
+        res.status(500).send('Server error');
+    }
+};
+
 
 const getProfile = async (req, res) => {
     try {
@@ -122,7 +270,6 @@ const githubCallback = async (req, res) => {
             { new: true, upsert: true, setDefaultsOnInsert: true }
         );
 
-        // ✅ Fix JWT for GitHub auth
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
@@ -177,7 +324,6 @@ const googleCallback = async (req, res) => {
             }
         }
 
-        // ✅ Fix JWT for Google auth
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
@@ -193,7 +339,10 @@ const googleCallback = async (req, res) => {
 
 module.exports = {
     signup,
+    verifyOtpAndSignup,
     login,
+    forgotPassword,
+    resetPassword,
     getProfile,
     logoutUser,
     githubAuth,
