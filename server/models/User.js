@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
+ 
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
-        
+       
     },
     email: {
         type: String,
@@ -14,11 +14,11 @@ const UserSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        required: false 
+        required: false
     },
     password: {
         type: String,
-        required: false 
+        required: false
     },
     profilePicture: {
         type: String,
@@ -37,7 +37,7 @@ const UserSchema = new mongoose.Schema({
         sparse: true
     }
 });
-
+ 
 // A pre-save hook that hashes the password before saving a user.
 UserSchema.pre('save', async function(next) {
     if (!this.isModified('password') || !this.password) {
@@ -47,7 +47,7 @@ UserSchema.pre('save', async function(next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
-
+ 
 const User = mongoose.model('User', UserSchema);
-
+ 
 module.exports = User;
