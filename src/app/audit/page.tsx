@@ -6,7 +6,6 @@ import { jwtDecode } from "jwt-decode";
 import { ScoreCard, DetailedAnalysis, Recommendations } from "./frontend";
 import PDFGenerator from "./pdf";
 import { runAudit } from "./backend";
-import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
 
 interface DecodedToken {
   user: {
@@ -36,99 +35,30 @@ export default function AuditPage() {
         console.error("❌ Invalid token:", err);
       }
     }
-
-
-    // Reset count if it's a new day
-    if (lastAuditDate !== today) {
-      currentCount = 0;
-    }
-
-    setAuditCount(currentCount);
-    return currentCount;
-  };
-
-  const updateAuditCount = (count: number) => {
-    const today = new Date().toLocaleDateString();
-
-    localStorage.setItem("lastAuditDate", today);
-    sessionStorage.setItem("lastAuditDate", today);
-
-    const dataToStore = btoa(
-      JSON.stringify({
-        count,
-        date: today,
-        salt: Math.random().toString(36).substring(2),
-      })
-    );
-
-    localStorage.setItem("auditData", dataToStore);
-    sessionStorage.setItem("auditData", dataToStore);
-
-    setAuditCount(count);
-  };
-
-  const handleAudit = async () => {
-    // Check audit count before proceeding
-    const currentCount = checkAuditCount();
-
-    // Check if the user has reached the audit limit (3 free audits)
-    if (currentCount >= 3 && !isLoggedIn) {
-      alert("🚀 Free audits used up! Please sign in to continue.");
-      router.push("/login");
-      return;
-    }
-
-    if (!url || !isValidUrl(url)) {
-      alert("⚠️ Please enter a valid website URL");
-      return;
-    }
-
-    setLoading(true);
-    setShowSampleReport(false);
-    setAuditDone(false);
-    startProgressAnimation();
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    const token = localStorage.getItem("token");
-
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+ 
     try {
-      const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        
-        body: JSON.stringify({
-          url,
-          auditCount: currentCount,
-          userId: getUserId(),
-        }),
-        signal: controller.signal,
-      });
+      // ✅ Run local audit
+      const auditResults = await runAudit(url, userId || "", token || undefined);
 
       // ✅ Decide endpoint: logged-in → save, guest → per-IP guest audits
       const endpoint = token
         ? `${API_URL}/api/create-audits`
         : `${API_URL}/api/guest-audits`;
 
-
-      // Increment audit count using the secure update function
-      const updatedCount = currentCount + 1;
-      updateAuditCount(updatedCount);
-
-      // Save audit result to DB
-      await fetch("http://localhost:5000/api/create-audits", {
+      // ✅ Save audit (or guest audit check)
+      const response = await fetch(endpoint, {
         method: "POST",
-        headers: { 
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}` // ✅ send token
-  },
-        body: JSON.stringify(data),
-
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ url, ...auditResults }),
+        credentials: "include",
       });
 
       if (response.status === 403) {
-        showWarningAlert("🚀 Free audits used up for today! Please login.");
+        alert("🚀 Free audits used up for today! Please login.");
         router.push("/login");
         return;
       }
@@ -137,7 +67,7 @@ export default function AuditPage() {
       setReport(data.audit || data);
     } catch (err) {
       console.error("⚠️ Audit failed:", err);
-      showErrorAlert("Something went wrong while running the audit");
+      alert("Something went wrong while running the audit");
     } finally {
       setLoading(false);
     }
