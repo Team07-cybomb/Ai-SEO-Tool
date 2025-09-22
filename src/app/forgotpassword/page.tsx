@@ -2,6 +2,9 @@
 import React, { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState<string>("");
@@ -12,24 +15,57 @@ const ForgotPasswordPage = () => {
     const [showOtp, setShowOtp] = useState<boolean>(false);
     const [showReset, setShowReset] = useState<boolean>(false);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!showOtp && !showReset) {
-            console.log("Send OTP to:", email);
-            setShowOtp(true);
+            // Stage 1: Send OTP
+            try {
+                const res = await fetch(`${API_URL}/api/forgot-password`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showSuccessAlert(data.msg);
+                    setShowOtp(true);
+                } else {
+                    showErrorAlert(data.msg || "Failed to send OTP.");
+                }
+            } catch (error) {
+                showErrorAlert("Error sending OTP.");
+            }
         } else if (showOtp && !showReset) {
-            console.log("Verify OTP:", { email, otp });
-            // ✅ if OTP is correct → move to reset password stage
+            // Stage 2: Verify OTP
             setShowReset(true);
             setShowOtp(false);
         } else if (showReset) {
+            // Stage 3: Reset Password
             if (newPassword !== confirmPassword) {
-                alert("Passwords do not match!");
+                showWarningAlert("Passwords do not match!");
                 return;
             }
-            console.log("Reset Password:", { email, newPassword });
-            // ✅ Add reset password logic here
+
+            try {
+                const res = await fetch(`${API_URL}/api/reset-password`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, otp, newPassword }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showSuccessAlert(data.msg);
+                    setTimeout(() => {
+                        window.location.href = "/login";
+                    }, 2000);
+                } else {
+                    showErrorAlert(data.msg || "Password reset failed.");
+                }
+            } catch (error) {
+                showErrorAlert("Error resetting password.");
+            }
         }
     };
 
