@@ -3,6 +3,7 @@ import React, { useState, FormEvent, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -40,16 +41,16 @@ const LoginPage = () => {
 
           if (res.ok) {
             localStorage.setItem("token", data.token);
-            alert("Login successful!");
+            Swal.fire("Login successful!");
             router.push("/profile");
           } else {
-            alert(data.msg || "Invalid credentials");
+            Swal.fire(data.msg || "Invalid credentials");
           }
         } catch (error) {
-          alert("Error logging in");
+          Swal.fire("Error logging in");
         }
       } else {
-        alert("Please enter both email and password!");
+        Swal.fire("Please enter both email and password!");
       }
     }
   };

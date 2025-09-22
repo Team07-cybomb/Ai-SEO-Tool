@@ -52,16 +52,16 @@ export default function SupportPage() {
               <HelpCircle className="w-4 h-4 mr-2" />
               FAQ
             </Button>
-            <Button variant="outline" className="w-full justify-start bg-transparent">
+            {/* <Button variant="outline" className="w-full justify-start bg-transparent">
               <MessageCircle className="w-4 h-4 mr-2" />
               Live Chat
-            </Button>
+            </Button> */}
           </CardContent>
         </Card>
       </div>
 
       {/* Support Tickets */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Your Support Tickets</CardTitle>
           <CardDescription>Track your previous support requests</CardDescription>
@@ -85,7 +85,7 @@ export default function SupportPage() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

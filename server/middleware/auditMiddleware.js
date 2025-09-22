@@ -10,9 +10,16 @@ const verifyUser = (req, res, next) => {
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretkey");
-    req.user = { _id: decoded.id, role: decoded.role || "user" };
+
+    // ✅ Fix: use decoded.user.id instead of decoded.id
+    req.user = {
+  _id: decoded.user?.id || decoded.id,
+  role: decoded.user?.role || decoded.role || "user",
+};
+
     next();
   } catch (err) {
+    console.error("JWT Error:", err.message);
     return res.status(403).json({ message: "Forbidden - invalid token" });
   }
 };
