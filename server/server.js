@@ -21,10 +21,11 @@ app.use(express.json());
 // CORS - allow frontend to send credentials
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin: ["http://localhost:3001", "https://rankseo.in"],
     credentials: true,
   })
 );
+
 
 // Connect to MongoDB
 connectDB();
