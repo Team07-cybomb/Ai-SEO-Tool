@@ -13,14 +13,20 @@ import {
   Search,
   LogOut,
   Menu,
+  Home,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-
+import { useUser } from "@/components/context/UserContext";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const sidebarItems = [
+    {
+    title: "Home",
+    href: "/",
+    icon: Home,
+  },
   {
     title: "Overview",
     href: "/profile",
@@ -92,28 +98,41 @@ function SidebarContent() {
     fetchProfile();
   }, [router]);
 
-  const handleSignOut = async () => {
-    try {
-      const token =
-        localStorage.getItem("token") || sessionStorage.getItem("token");
+ const { setUser } = useUser(); // ✅ get from context
 
-      if (token) {
-        await fetch(`${API_URL}/api/auth/logout`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+const handleSignOut = async () => {
+  try {
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
 
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
-      router.push("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
-      router.push("/login");
+    if (token) {
+      await fetch(`${API_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
     }
-  };
+
+    // ✅ clear tokens
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+
+    // ✅ reset context immediately so Navbar re-renders
+    setUser(null);
+
+    router.push("/");
+  } catch (error) {
+    console.error("Logout failed:", error);
+
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+
+    // ✅ reset context even if API fails
+    setUser(null);
+
+    router.push("/");
+  }
+};
+
 
   return (
     <div className="flex flex-col h-full ">
