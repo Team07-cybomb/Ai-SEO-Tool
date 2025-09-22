@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Edit2, Save, Upload, MapPin, Briefcase, Calendar, Globe, Lock, Eye, EyeOff } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const UserOverview = () => {
@@ -87,7 +88,7 @@ const UserOverview = () => {
   const handleSave = () => {
     console.log("User Data Saved:", userData);
     setIsEditing(false);
-    alert("Changes saved successfully!");
+    showSuccessAlert("Changes saved successfully!");
   };
 
   const handleEdit = () => {

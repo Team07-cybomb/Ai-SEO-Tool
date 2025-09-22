@@ -5,7 +5,6 @@ const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
-        
     },
     email: {
         type: String,
@@ -14,11 +13,11 @@ const UserSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        required: false 
+        required: false
     },
     password: {
         type: String,
-        required: false 
+        required: false
     },
     profilePicture: {
         type: String,
@@ -30,15 +29,23 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         sparse: true
     },
-    googleId: { // Added for consistency
+    googleId: {
         type: String,
         required: false,
         unique: true,
         sparse: true
+    },
+    otp: {
+        type: String,
+        required: false,
+    },
+    otpExpiresAt: {
+        type: Date,
+        required: false,
     }
 });
 
-// A pre-save hook that hashes the password before saving a user.
+// Remove the pre-save hook as password hashing is now handled in the controller.
 UserSchema.pre('save', async function(next) {
     if (!this.isModified('password') || !this.password) {
         return next();
