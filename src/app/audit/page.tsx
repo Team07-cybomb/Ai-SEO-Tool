@@ -1,12 +1,12 @@
 "use client";
-
-import { useState } from "react";
+ 
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { ScoreCard, DetailedAnalysis, Recommendations } from "./frontend";
+import { ScoreCard, DetailedAnalysis, Recommendations, HeaderSection, PerformanceMetrics } from "./frontend";
 import PDFGenerator from "./pdf";
 import { runAudit } from "./backend";
-
+ 
 interface DecodedToken {
   user: {
     id: string;
@@ -14,18 +14,97 @@ interface DecodedToken {
   };
 }
 
+interface Recommendation {
+  text: string;
+  priority: "High" | "Medium" | "Low";
+}
+
+interface AuditReport {
+  seo?: number;
+  performance?: number;
+  accessibility?: number;
+  bestPractices?: number;
+  analysis?: string;
+  recommendations?: Recommendation[];
+  backlinks?: number;
+  history?: { date: string; seo: number; performance: number; accessibility: number; bestPractices: number }[];
+  issues?: { category: string; count: number }[];
+  loadingTime?: number;
+  pageSize?: number;
+  requests?: number;
+}
+ 
 export default function AuditPage() {
   const [url, setUrl] = useState("");
-  const [report, setReport] = useState<any>(null);
+  const [report, setReport] = useState<AuditReport | null>(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [loadingStep, setLoadingStep] = useState("Initializing audit...");
+  const [auditCount, setAuditCount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const router = useRouter();
+  
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+ 
+  useEffect(() => {
+    const storedCount = localStorage.getItem("auditCount");
+    if (storedCount) setAuditCount(parseInt(storedCount, 10));
+    
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+ 
+  useEffect(() => {
+    localStorage.setItem("auditCount", auditCount.toString());
+  }, [auditCount]);
 
+  const startProgressAnimation = () => {
+    setProgress(0);
+    setLoadingStep("Running Lighthouse tests...");
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = setInterval(() => {
+      setProgress((prev) => (prev < 90 ? prev + Math.random() * 7 : prev));
+      if (progress > 30) setLoadingStep("Analyzing SEO and content...");
+      if (progress > 60) setLoadingStep("Checking accessibility and performance...");
+      if (progress > 85) setLoadingStep("Generating recommendations...");
+    }, 700);
+  };
+ 
+  const stopProgressAnimation = (complete = false) => {
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    setProgress(complete ? 100 : 0);
+    if (complete) setLoadingStep("Audit complete!");
+  };
+ 
   const handleAudit = async () => {
+    if (!url) {
+      alert("⚠️ Please enter a website URL");
+      return;
+    }
+    
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch {
+      alert("⚠️ Please enter a valid website URL");
+      return;
+    }
+    
+    if (!isLoggedIn && auditCount >= 3) {
+      alert("🚀 Free audits used up! Please sign in to continue.");
+      router.push("/login");
+      return;
+    }
+ 
     setLoading(true);
-
+    startProgressAnimation();
+ 
     const token = localStorage.getItem("token");
     let userId: string | null = null;
-
+ 
     // 🔑 Decode token if available
     if (token) {
       try {
@@ -35,159 +114,144 @@ export default function AuditPage() {
         console.error("❌ Invalid token:", err);
       }
     }
-
-
-    // Reset count if it's a new day
-    if (lastAuditDate !== today) {
-      currentCount = 0;
-    }
-
-    setAuditCount(currentCount);
-    return currentCount;
-  };
-
-  const updateAuditCount = (count: number) => {
-    const today = new Date().toLocaleDateString();
-
-    localStorage.setItem("lastAuditDate", today);
-    sessionStorage.setItem("lastAuditDate", today);
-
-    const dataToStore = btoa(
-      JSON.stringify({
-        count,
-        date: today,
-        salt: Math.random().toString(36).substring(2),
-      })
-    );
-
-    localStorage.setItem("auditData", dataToStore);
-    sessionStorage.setItem("auditData", dataToStore);
-
-    setAuditCount(count);
-  };
-
-  const handleAudit = async () => {
-    // Check audit count before proceeding
-    const currentCount = checkAuditCount();
-
-    // Check if the user has reached the audit limit (3 free audits)
-    if (currentCount >= 3 && !isLoggedIn) {
-      alert("🚀 Free audits used up! Please sign in to continue.");
-      router.push("/login");
-      return;
-    }
-
-    if (!url || !isValidUrl(url)) {
-      alert("⚠️ Please enter a valid website URL");
-      return;
-    }
-
-    setLoading(true);
-    setShowSampleReport(false);
-    setAuditDone(false);
-    startProgressAnimation();
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    const token = localStorage.getItem("token");
-
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+ 
     try {
-      const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        
-        body: JSON.stringify({
-          url,
-          auditCount: currentCount,
-          userId: getUserId(),
-        }),
-        signal: controller.signal,
-      });
-
+      // ✅ Run local audit
+      const auditResults = await runAudit(url, userId || "", token || undefined);
+ 
       // ✅ Decide endpoint: logged-in → save, guest → per-IP guest audits
       const endpoint = token
         ? `${API_URL}/api/create-audits`
         : `${API_URL}/api/guest-audits`;
-
-
-      // Increment audit count using the secure update function
-      const updatedCount = currentCount + 1;
-      updateAuditCount(updatedCount);
-
-      // Save audit result to DB
-      await fetch("http://localhost:5000/api/create-audits", {
+ 
+      // ✅ Save audit (or guest audit check)
+      const response = await fetch(endpoint, {
         method: "POST",
-        headers: { 
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}` // ✅ send token
-  },
-        body: JSON.stringify(data),
-
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ url, ...auditResults }),
+        credentials: "include",
       });
-
+ 
       if (response.status === 403) {
         alert("🚀 Free audits used up for today! Please login.");
         router.push("/login");
         return;
       }
-
+ 
       const data = await response.json();
       setReport(data.audit || data);
-    } catch (err) {
-      console.error("⚠️ Audit failed:", err);
-      alert("Something went wrong while running the audit");
+      setAuditCount((prev) => prev + 1);
+      stopProgressAnimation(true);
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        console.log("Audit aborted by user.");
+      } else {
+        console.error("⚠️ Audit failed:", err);
+        alert("Something went wrong while running the audit");
+      }
+      stopProgressAnimation();
     } finally {
       setLoading(false);
     }
   };
-
+ 
+  const handleStopAudit = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setLoading(false);
+      stopProgressAnimation();
+    }
+  };
+ 
   return (
-    <div className="min-h-screen pt-15 bg-gray-50">
-      {/* 🔹 Hero Section */}
-      <div className="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 text-white py-16 text-center px-4">
-        <h1 className="text-4xl font-extrabold">Analyze Your Website Performance</h1>
-        <p className="mt-2 text-gray-300">
-          SEO, Performance, Accessibility, Best Practices
-        </p>
-
-        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-2 max-w-xl mx-auto w-full">
-          <input
-            type="url"
-            placeholder="https://example.com"
-            className="flex-1 w-full px-4 py-3 rounded-lg text-black bg-white focus:ring-2 focus:ring-teal-500"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-          <button
-            onClick={handleAudit}
-            disabled={loading || !url}
-            className="px-6 py-3 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-md disabled:opacity-50"
-          >
-            {loading ? "Running..." : "Start Audit"}
-          </button>
-        </div>
-      </div>
-
+    <div className="min-h-screen pt-15 bg-gradient-to-br from-gray-50 to-teal-50">
+      <HeaderSection 
+        url={url} 
+        setUrl={setUrl} 
+        loading={loading} 
+        handleAudit={handleAudit} 
+        handleStopAudit={handleStopAudit} 
+        isLoggedIn={isLoggedIn} 
+        auditCount={auditCount}
+        progress={progress}
+        loadingStep={loadingStep}
+      />
+ 
       {/* 🔹 Report Section */}
       {report && (
-        <div className="container mx-auto py-12 px-6">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-            Audit Report for: {url}
-          </h2>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <ScoreCard label="SEO" score={report.seo ?? 0} />
-            <ScoreCard label="Performance" score={report.performance ?? 0} />
-            <ScoreCard label="Accessibility" score={report.accessibility ?? 0} />
-            <ScoreCard label="Best Practices" score={report.bestPractices ?? 0} />
-          </div>
-
-          <DetailedAnalysis text={report.analysis} />
-          <Recommendations list={report.recommendations} />
-
-          <div className="mt-12 flex justify-center">
-            <PDFGenerator report={report} url={url} />
+        <div className="container mx-auto py-12 px-4 sm:px-6">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div className="p-6 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
+              <h2 className="text-2xl md:text-3xl font-bold">
+                Audit Report for: {url}
+              </h2>
+              <p className="mt-2 opacity-90">
+                Generated on {new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+ 
+            {/* Navigation Tabs */}
+            <div className="flex border-b border-gray-200 overflow-x-auto">
+              <button
+                className={`px-6 py-3 font-medium text-sm ${activeTab === 'overview' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                onClick={() => setActiveTab('overview')}
+              >
+                Overview
+              </button>
+              <button
+                className={`px-6 py-3 font-medium text-sm ${activeTab === 'analysis' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                onClick={() => setActiveTab('analysis')}
+              >
+                Detailed Analysis
+              </button>
+              <button
+                className={`px-6 py-3 font-medium text-sm ${activeTab === 'recommendations' ? 'text-teal-600 border-b-2 border-teal-600' : 'text-gray-500 hover:text-gray-700'}`}
+                onClick={() => setActiveTab('recommendations')}
+              >
+                Recommendations
+              </button>
+            </div>
+ 
+            {/* Tab Content */}
+            <div className="p-6">
+              {activeTab === 'overview' && (
+                <>
+                  {/* SCORE OVERVIEW */}
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <ScoreCard label="SEO" score={report.seo ?? 0} />
+                    <ScoreCard label="Performance" score={report.performance ?? 0} />
+                    <ScoreCard label="Accessibility" score={report.accessibility ?? 0} />
+                    <ScoreCard label="Best Practices" score={report.bestPractices ?? 0} />
+                  </div>
+                  
+                  {/* Performance Metrics */}
+                  {(report.loadingTime || report.pageSize || report.requests) && (
+                    <PerformanceMetrics report={report} />
+                  )}
+                </>
+              )}
+ 
+              {activeTab === 'analysis' && (
+                <DetailedAnalysis text={report.analysis} url={url} />
+              )}
+ 
+              {activeTab === 'recommendations' && (
+                <Recommendations list={report.recommendations} />
+              )}
+            </div>
+ 
+            {/* Download Button */}
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <PDFGenerator report={report} url={url} />
+            </div>
           </div>
         </div>
       )}
