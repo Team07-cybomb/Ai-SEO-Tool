@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
- 
+
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
-       
     },
     email: {
         type: String,
@@ -30,15 +29,23 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         sparse: true
     },
-    googleId: { // Added for consistency
+    googleId: {
         type: String,
         required: false,
         unique: true,
         sparse: true
+    },
+    otp: {
+        type: String,
+        required: false,
+    },
+    otpExpiresAt: {
+        type: Date,
+        required: false,
     }
 });
- 
-// A pre-save hook that hashes the password before saving a user.
+
+// Remove the pre-save hook as password hashing is now handled in the controller.
 UserSchema.pre('save', async function(next) {
     if (!this.isModified('password') || !this.password) {
         return next();
@@ -47,7 +54,7 @@ UserSchema.pre('save', async function(next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
- 
+
 const User = mongoose.model('User', UserSchema);
- 
+
 module.exports = User;

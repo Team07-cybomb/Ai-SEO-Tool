@@ -1,12 +1,15 @@
 "use client";
 import React, { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util"; // Correct import
+import { showSuccessAlert, showErrorAlert } from "@/components/Utils/alert-util";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const SignupPage = () => {
   const [isLoginMode, setIsLoginMode] = useState(false);
+  const [showOtpField, setShowOtpField] = useState(false);
+  const [otp, setOtp] = useState("");
+  
   const [signupFormData, setSignupFormData] = useState({
     name: "",
     email: "",
@@ -20,8 +23,6 @@ const SignupPage = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
 
-  // The social login redirect useEffect has been moved to layout.tsx
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (isLoginMode) {
@@ -35,27 +36,26 @@ const SignupPage = () => {
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!isLoginMode && !signupFormData.name.trim()) {
+  
+    if (!isLoginMode && !showOtpField && !signupFormData.name.trim()) {
       newErrors.name = "Full Name is required.";
     }
-    if (!isLoginMode && !signupFormData.password.trim()) {
+    if (!isLoginMode && !showOtpField && !signupFormData.password.trim()) {
       newErrors.password = "Password is required.";
     }
     if (isLoginMode && !loginFormData.password.trim()) {
       newErrors.password = "Password is required.";
     }
-
-    const emailToValidate = isLoginMode
-      ? loginFormData.email
-      : signupFormData.email;
+  
+    const emailToValidate = isLoginMode ? loginFormData.email : signupFormData.email;
     if (!emailRegex.test(emailToValidate)) {
       newErrors.email = "Please enter a valid email address.";
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  
 
   const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
@@ -70,13 +70,35 @@ const SignupPage = () => {
 
       const data = await res.json();
       if (res.ok) {
-        showSuccessAlert("Success! User created successfully!");
-        setIsLoginMode(true);
+        showSuccessAlert(data.msg);
+        setShowOtpField(true);
       } else {
         showErrorAlert(data.msg || "Error signing up.");
       }
     } catch (error) {
       showErrorAlert("Error signing up.");
+    }
+  };
+
+  const handleVerifyOtp = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/api/signup/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: signupFormData.email, otp }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        showSuccessAlert(data.msg);
+        router.push("/profile");
+      } else {
+        showErrorAlert(data.msg || "OTP verification failed.");
+      }
+    } catch (error) {
+      showErrorAlert("Error verifying OTP.");
     }
   };
 
@@ -117,35 +139,17 @@ const SignupPage = () => {
         <h2 className="text-2xl font-bold text-center mb-6">
           {isLoginMode ? "Login to your Account" : "Create an Account"}
         </h2>
-
-        <form onSubmit={isLoginMode ? handleLogin : handleSignup} className="space-y-4">
-          {!isLoginMode && (
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={signupFormData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
-            />
-          )}
-
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={isLoginMode ? loginFormData.email : signupFormData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          {!isLoginMode && (
-            <div>
+        <form onSubmit={isLoginMode ? handleLogin : showOtpField ? handleVerifyOtp : handleSignup} className="space-y-4">
+          {!isLoginMode && !showOtpField && (
+            <>
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={signupFormData.name}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
               <input
                 type="text"
                 name="phone"
@@ -154,29 +158,66 @@ const SignupPage = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border rounded-lg"
               />
-              {errors.phone && (
-                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-              )}
-            </div>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={signupFormData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={signupFormData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </>
           )}
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={isLoginMode ? loginFormData.password : signupFormData.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg"
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+          {isLoginMode && (
+            <>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={loginFormData.email}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={loginFormData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </>
+          )}
+
+          {showOtpField && (
+            <input
+              type="text"
+              name="otp"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg"
+            />
           )}
 
           <button
             type="submit"
             className="w-full py-3 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500"
           >
-            {isLoginMode ? "Login" : "Sign Up"}
+            {isLoginMode ? "Login" : showOtpField ? "Verify OTP" : "Sign Up"}
           </button>
         </form>
 
@@ -203,7 +244,7 @@ const SignupPage = () => {
             </>
           )}
         </p>
-
+        
         <div className="flex items-center my-4">
           <hr className="flex-grow border-gray-300" />
           <span className="px-2 text-gray-500">OR</span>
