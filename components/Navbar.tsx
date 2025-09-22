@@ -2,40 +2,38 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Search } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/components/context/UserContext"; // ✅ use context
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false);
+
+  const { user, setUser } = useUser(); // ✅ reactive user
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolledPastBanner(window.scrollY > window.innerHeight * 0.8);
     };
-
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Hide scrollbar on /profile route
-  useEffect(() => {
-    if (pathname.startsWith("/profile")) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-  }, [pathname]);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null); // update context immediately
+    router.push("/"); // redirect
+  };
 
   // Hide Navbar on /profile route
-  if (pathname.startsWith("/profile")) {
-    return null;
-  }
+  if (pathname.startsWith("/profile")) return null;
 
   return (
     <nav
@@ -47,6 +45,7 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Logo */}
           <div className="flex items-center space-x-2">
             <Link href={"/"}>
               <Image
@@ -61,7 +60,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             <Link
               href="/pricing"
               className={`transition-colors ${
@@ -82,17 +81,44 @@ export default function Navbar() {
             >
               About Us
             </Link>
-            <Button
-              asChild
-              variant={isScrolledPastBanner ? "outline" : "ghost"}
-              size="sm"
-            >
-              <Link href="/login">Sign In</Link>
-            </Button>
 
-            <Button asChild size="sm">
-              <Link href="/signup">Get Started</Link>
-            </Button>
+            {!user ? (
+              <>
+                <Button
+                  asChild
+                  variant={isScrolledPastBanner ? "outline" : "ghost"}
+                  size="sm"
+                >
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href="/signup">Get Started</Link>
+                </Button>
+              </>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link href="/profile">
+                  <Avatar className="cursor-pointer w-9 h-9 ring-2 ring-primary">
+                    {user.image ? (
+                      <AvatarImage src={user.image} alt={user.name} />
+                    ) : (
+                      <AvatarFallback className="bg-primary text-white">
+                        {user.name?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex items-center gap-1"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Navigation */}
@@ -109,23 +135,6 @@ export default function Navbar() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-6 mt-6">
-                  <div className="flex items-center space-x-2">
-                    <div className="mx-3 w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                      <Search className="w-5 h-5 text-primary-foreground" />
-                    </div>
-                    <Link href={"/"}>
-                      <Image
-                        src="/SEO_LOGO.png"
-                        alt="SEO-AUDIT LOGO"
-                        width={90}
-                        height={35}
-                        priority
-                        className={
-                          isScrolledPastBanner ? "opacity-90" : "opacity-100"
-                        }
-                      />
-                    </Link>
-                  </div>
                   <div className="mx-5 flex flex-col">
                     <Link
                       href="/pricing"
@@ -141,19 +150,58 @@ export default function Navbar() {
                     >
                       About Us
                     </Link>
-                    <div className="flex flex-row gap-3 pt-4">
-                      <Link href="/login">
+
+                    {!user ? (
+                      <div className="flex flex-row gap-3 pt-4">
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-1/2 bg-transparent"
+                          >
+                            Sign In
+                          </Button>
+                        </Link>
+                        <Link
+                          href="/signup"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Button className="w-1/2">Get Started</Button>
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3 mt-4">
+                        <Link
+                          href="/profile"
+                          className="flex items-center gap-3"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Avatar className="w-10 h-10 ring-2 ring-primary">
+                            {user.image ? (
+                              <AvatarImage src={user.image} alt={user.name} />
+                            ) : (
+                              <AvatarFallback className="bg-primary text-white">
+                                {user.name?.[0]?.toUpperCase()}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <span className="font-medium">{user.name}</span>
+                        </Link>
                         <Button
                           variant="outline"
-                          className="w-1/2 bg-transparent"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            handleLogout();
+                          }}
+                          className="flex items-center gap-2"
                         >
-                          Sign In
+                          <LogOut className="w-4 h-4" />
+                          Logout
                         </Button>
-                      </Link>
-                      <Link href="/signup">
-                        <Button className="w-1/2">Get Started</Button>
-                      </Link>
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </SheetContent>

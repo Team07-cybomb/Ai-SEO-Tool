@@ -106,12 +106,12 @@ function SidebarContent() {
 
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
-      router.push("/login");
+      router.push("/");
     }
   };
 

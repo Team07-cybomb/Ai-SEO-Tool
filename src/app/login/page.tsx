@@ -18,7 +18,7 @@ const LoginPage = () => {
     const token = params.get("token");
     if (token) {
       localStorage.setItem("token", token);
-      router.push("/profile");
+      router.push("/");
     }
   }, [router]);
 
@@ -42,7 +42,7 @@ const LoginPage = () => {
           if (res.ok) {
             localStorage.setItem("token", data.token);
             Swal.fire("Login successful!");
-            router.push("/profile");
+            router.push("/");
           } else {
             Swal.fire(data.msg || "Invalid credentials");
           }

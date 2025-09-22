@@ -5,7 +5,7 @@ import "./globals.css";
 
 import Navbar from "@/components/Navbar"; // ✅ import navbar
 import Footer from "@/components/Footer"; // ✅ import footer
-
+import { UserProvider } from "@/components/context/UserContext";
 export const metadata: Metadata = {
   title: "AI SEO Audit",
   description: "Created by Cybomb",
@@ -21,6 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+         <UserProvider>
+          {children}
+        </UserProvider>
         {/* ✅ Shared Navbar */}
         <Navbar />
 
