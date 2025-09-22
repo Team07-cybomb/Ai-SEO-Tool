@@ -140,6 +140,7 @@ const handleSignOut = async () => {
       <div className="p-6 border-b border-sidebar-border">
         <Link href="/" className="flex items-center space-x-2 cursor-pointer">
           <img src="/SEO_LOGO.png" alt="rank_seo_logo" width="100" height="35"/>
+        </Link>
           {/* <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
             <Search className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
@@ -149,7 +150,7 @@ const handleSignOut = async () => {
           </span>
 
 
-        </Link>
+       
       </div>
 
       {/* Navigation */}
@@ -206,6 +207,7 @@ const handleSignOut = async () => {
           Sign Out
         </Button>
       </div>
+    </div>
     </div>
   );
 }

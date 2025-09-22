@@ -1,4 +1,4 @@
-export const runAudit = async (url: string, userId: string, token?: string) => {
+export const runAudit = async (url: string, userId: string, token?: string, signal?: AbortSignal) => {
   const response = await fetch("https://n8n.cybomb.com/webhook/audit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
