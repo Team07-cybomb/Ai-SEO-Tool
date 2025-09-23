@@ -19,16 +19,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useUser } from "@/components/context/UserContext";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const sidebarItems = [
-    {
+  {
     title: "Home",
     href: "/",
     icon: Home,
   },
   {
-    title: "Overview",
+    title: "Profile",
     href: "/profile",
     icon: User,
   },
@@ -42,16 +43,6 @@ const sidebarItems = [
     href: "/profile/reports",
     icon: FileText,
   },
-  // {
-  //   title: "History",
-  //   href: "/profile/history",
-  //   icon: History,
-  // },
-  // {
-  //   title: "Purchase/Billing",
-  //   href: "/profile/billing",
-  //   icon: CreditCard,
-  // },
   {
     title: "Support",
     href: "/profile/support",
@@ -59,11 +50,11 @@ const sidebarItems = [
   },
 ];
 
-function SidebarContent() {
+// Add onClose prop to SidebarContent
+function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // ✅ Move state inside component
   const [userData, setUserData] = useState({
     name: "",
     email: "",
@@ -98,59 +89,59 @@ function SidebarContent() {
     fetchProfile();
   }, [router]);
 
- const { setUser } = useUser(); // ✅ get from context
+  const { setUser } = useUser();
 
-const handleSignOut = async () => {
-  try {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
+  const handleSignOut = async () => {
+    try {
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    if (token) {
-      await fetch(`${API_URL}/api/auth/logout`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (token) {
+        await fetch(`${API_URL}/api/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      setUser(null);
+
+      // Close sidebar on sign out
+      if (onClose) onClose();
+
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+      setUser(null);
+
+      // Close sidebar on sign out even if API fails
+      if (onClose) onClose();
+
+      router.push("/");
     }
+  };
 
-    // ✅ clear tokens
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-
-    // ✅ reset context immediately so Navbar re-renders
-    setUser(null);
-
-    router.push("/");
-  } catch (error) {
-    console.error("Logout failed:", error);
-
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-
-    // ✅ reset context even if API fails
-    setUser(null);
-
-    router.push("/");
-  }
-};
-
+  // Function to handle navigation item clicks
+  const handleNavigationClick = () => {
+    if (onClose) {
+      onClose(); // Close the sidebar on mobile
+    }
+  };
 
   return (
-    <div className="flex flex-col h-full ">
+    <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
-        <Link href="/" className="flex items-center space-x-2 cursor-pointer">
+        <Link 
+          href="/" 
+          className="flex items-center space-x-2 cursor-pointer"
+          onClick={handleNavigationClick} // Add click handler
+        >
           <img src="/SEO_LOGO.png" alt="rank_seo_logo" width="100" height="35"/>
         </Link>
-          {/* <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-            <Search className="w-5 h-5 text-sidebar-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold text-sidebar-foreground">
-
-            RankSeo.in
-          </span>
-
-
-       
       </div>
 
       {/* Navigation */}
@@ -160,7 +151,12 @@ const handleSignOut = async () => {
           const Icon = item.icon;
 
           return (
-            <Link key={item.href} href={item.href} style={{ padding: "20px 0px" }}>
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              style={{ padding: "20px 0px" }}
+              onClick={handleNavigationClick} // Add click handler
+            >
               <Button
                 variant="ghost"
                 className={cn(
@@ -208,12 +204,16 @@ const handleSignOut = async () => {
         </Button>
       </div>
     </div>
-    </div>
   );
 }
 
 export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Function to close the mobile sidebar
+  const closeSidebar = () => {
+    setMobileOpen(false);
+  };
 
   return (
     <>
@@ -225,12 +225,14 @@ export function Sidebar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0 bg-sidebar">
-            <SidebarContent />
+            {/* Pass the closeSidebar function to SidebarContent */}
+            <SidebarContent onClose={closeSidebar} />
           </SheetContent>
         </Sheet>
       </div>
 
       <div className="hidden lg:block w-64 bg-sidebar border-r border-sidebar-border">
+        {/* No need to pass onClose for desktop */}
         <SidebarContent />
       </div>
     </>

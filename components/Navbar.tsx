@@ -5,16 +5,16 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@/components/context/UserContext"; // ✅ use context
+import { useUser } from "@/components/context/UserContext";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false);
 
-  const { user, setUser } = useUser(); // ✅ reactive user
+  const { user, setUser } = useUser();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -28,8 +28,12 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setUser(null); // update context immediately
-    router.push("/"); // redirect
+    setUser(null);
+    router.push("/");
+  };
+
+  const handleProfileRedirect = () => {
+    router.push("/login");
   };
 
   // Hide Navbar on /profile route
@@ -82,20 +86,7 @@ export default function Navbar() {
               About Us
             </Link>
 
-            {!user ? (
-              <>
-                <Button
-                  asChild
-                  variant={isScrolledPastBanner ? "outline" : "ghost"}
-                  size="sm"
-                >
-                  <Link href="/login">Sign In</Link>
-                </Button>
-                <Button asChild size="sm">
-                  <Link href="/signup">Get Started</Link>
-                </Button>
-              </>
-            ) : (
+            {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/profile">
                   <Avatar className="cursor-pointer w-9 h-9 ring-2 ring-primary">
@@ -116,6 +107,34 @@ export default function Navbar() {
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                {/* Profile Icon that redirects to login */}
+                <Button
+  variant="ghost"
+  size="sm"
+  onClick={handleProfileRedirect}
+  className={`p-2 rounded-full transition-all duration-200
+    ${isScrolledPastBanner 
+      ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
+      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+    }
+    hover:scale-110 hover:shadow-md active:scale-95
+  `}
+>
+  <User className="w-5 h-5 transition-transform duration-200" />
+</Button>
+
+                
+                {/* Login Button */}
+                <Button 
+                  asChild 
+                  variant={isScrolledPastBanner ? "outline" : "default"}
+                  size="sm"
+                >
+                  <Link href="/login">Login</Link>
                 </Button>
               </div>
             )}
@@ -151,27 +170,7 @@ export default function Navbar() {
                       About Us
                     </Link>
 
-                    {!user ? (
-                      <div className="flex flex-row gap-3 pt-4">
-                        <Link
-                          href="/login"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Button
-                            variant="outline"
-                            className="w-1/2 bg-transparent"
-                          >
-                            Sign In
-                          </Button>
-                        </Link>
-                        <Link
-                          href="/signup"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Button className="w-1/2">Get Started</Button>
-                        </Link>
-                      </div>
-                    ) : (
+                    {user ? (
                       <div className="flex flex-col gap-3 mt-4">
                         <Link
                           href="/profile"
@@ -200,6 +199,26 @@ export default function Navbar() {
                           <LogOut className="w-4 h-4" />
                           Logout
                         </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3 pt-4">
+                        {/* Profile Icon in mobile menu */}
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            handleProfileRedirect();
+                          }}
+                          className="flex items-center gap-2 justify-start"
+                        >
+                          <User className="w-4 h-4" />
+                          Profile
+                        </Button>
+                        
+                        {/* Login Button in mobile menu */}
+                        <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                          <Button className="w-full">Login</Button>
+                        </Link>
                       </div>
                     )}
                   </div>
