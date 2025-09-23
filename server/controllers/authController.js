@@ -8,6 +8,7 @@ const otpGenerator = require('otp-generator');
 
 // Load environment variables
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
