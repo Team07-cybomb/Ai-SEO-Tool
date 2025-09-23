@@ -205,7 +205,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="pt-6 mt-6 border-t border-border">
           <p className="text-muted-foreground text-sm text-center">
-            © 2025 RankSeo.in All rights reserved.
+            © 2025 Cybomb Technologies. All rights reserved.
           </p>
         </div>
       </div>

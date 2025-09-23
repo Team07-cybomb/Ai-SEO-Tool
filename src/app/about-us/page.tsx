@@ -2,7 +2,7 @@
 
 import React from "react";
 import { CheckCircle, Zap, Bug, BarChart } from "lucide-react";
-
+import Link from "next/link";
 const AboutPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
@@ -163,13 +163,13 @@ const AboutPage = () => {
           optimization tool. Start improving your SEO and performance today with
           our free audit.
         </p>
-        <a
+        <Link
           href="/audit"
           className="inline-block bg-white px-5 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all text-base sm:text-lg"
           style={{ color: "var(--primary)" }}
         >
           Start Your Free Audit
-        </a>
+        </Link>
       </section>
     </div>
   );

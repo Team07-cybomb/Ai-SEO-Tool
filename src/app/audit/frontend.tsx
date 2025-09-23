@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Eye, EyeOff, Download, TrendingUp, AlertCircle, CheckCircle, Clock, BarChart3, Zap, Shield, Search, Globe, ArrowUp, ArrowDown } from 'lucide-react';
 import { useState } from "react";
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+
 export const getScoreColor = (score: number) => {
   if (score >= 90) return "text-green-600 bg-green-50";
   if (score >= 70) return "text-teal-600 bg-teal-50";
@@ -21,20 +22,20 @@ export const getPriorityColor = (priority: string) => {
 export const ScoreCard = ({ label, score, trend }: { label: string; score: number; trend?: number }) => (
   <motion.div
     whileHover={{ scale: 1.05 }}
-    className={`${getScoreColor(score)} p-4 sm:p-6 rounded-2xl shadow-lg text-center border-2 border-white transition-all duration-300 relative`}
+    className={`${getScoreColor(score)} p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl shadow-lg text-center border-2 border-white transition-all duration-300 relative`}
   >
     <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
       {trend !== undefined && (
         <div className={`flex items-center text-xs font-semibold ${trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : 'text-gray-600'}`}>
-          {trend > 0 ? <ArrowUp size={12} /> : trend < 0 ? <ArrowDown size={12} /> : null}
+          {trend > 0 ? <ArrowUp size={10} className="sm:size-3" /> : trend < 0 ? <ArrowDown size={10} className="sm:size-3" /> : null}
           {trend !== 0 ? `${Math.abs(trend)}%` : 'No change'}
         </div>
       )}
     </div>
     
-    <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3">{label}</h3>
+    <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-2 sm:mb-3">{label}</h3>
     <div className="relative inline-block">
-      <svg className="w-20 h-20 sm:w-28 sm:h-28" viewBox="0 0 36 36">
+      <svg className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28" viewBox="0 0 36 36">
         <path
           d="M18 2.0845
             a 15.9155 15.9155 0 0 1 0 31.831
@@ -53,7 +54,7 @@ export const ScoreCard = ({ label, score, trend }: { label: string; score: numbe
           strokeDasharray={`${score}, 100`}
         />
       </svg>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl sm:text-2xl font-bold">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg sm:text-xl md:text-2xl font-bold">
         {score}
       </div>
     </div>
@@ -196,7 +197,7 @@ const parseAnalysisText = (text: string, url: string) => {
       }
     } else if (currentSection && line.trim()) {
       // Paragraph - remove any * or - from beginning
-      const cleanLine = line.trim().replace(/^[-*]\s*/, "");
+      const cleanLine = line.replaceAll("*", "");
       currentSection.content.push(cleanLine);
     }
   }
@@ -236,7 +237,7 @@ const getSectionIcon = (title: string) => {
 export const Recommendations = ({ list }: { list?: { text: string; priority: string }[] }) => {
   if (!list || list.length === 0) {
     return (
-      <div className="mb-8 sm:mb-12">
+      <div className="mb-6 sm:mb-8 md:mb-12">
         <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6 flex items-center">
           <CheckCircle className="mr-2 text-teal-600" size={20} />
           Recommendations
@@ -254,7 +255,7 @@ export const Recommendations = ({ list }: { list?: { text: string; priority: str
   const lowPriority = list.filter(rec => rec.priority === "Low");
   
   return (
-    <div className="mb-8 sm:mb-12">
+    <div className="mb-6 sm:mb-8 md:mb-12">
       <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6 flex items-center">
         <CheckCircle className="mr-2 text-teal-600" size={20} />
         Recommendations
@@ -264,10 +265,10 @@ export const Recommendations = ({ list }: { list?: { text: string; priority: str
         {highPriority.length > 0 && (
           <div>
             <h4 className="text-base sm:text-lg font-semibold text-red-600 mb-3 sm:mb-4 flex items-center">
-              <AlertCircle size={18} className="mr-2" />
+              <AlertCircle size={16} className="mr-2 sm:size-4" />
               High Priority Issues ({highPriority.length})
             </h4>
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-1">
+            <div className="grid gap-3 sm:gap-4">
               {highPriority.map((rec, idx) => (
                 <RecommendationCard key={idx} recommendation={rec} index={idx} />
               ))}
@@ -278,10 +279,10 @@ export const Recommendations = ({ list }: { list?: { text: string; priority: str
         {mediumPriority.length > 0 && (
           <div>
             <h4 className="text-base sm:text-lg font-semibold text-yellow-600 mb-3 sm:mb-4 flex items-center">
-              <AlertCircle size={18} className="mr-2" />
+              <AlertCircle size={16} className="mr-2 sm:size-4" />
               Medium Priority Improvements ({mediumPriority.length})
             </h4>
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
               {mediumPriority.map((rec, idx) => (
                 <RecommendationCard key={idx} recommendation={rec} index={idx + highPriority.length} />
               ))}
@@ -292,10 +293,10 @@ export const Recommendations = ({ list }: { list?: { text: string; priority: str
         {lowPriority.length > 0 && (
           <div>
             <h4 className="text-base sm:text-lg font-semibold text-green-600 mb-3 sm:mb-4 flex items-center">
-              <TrendingUp size={18} className="mr-2" />
+              <TrendingUp size={16} className="mr-2 sm:size-4" />
               Low Priority Enhancements ({lowPriority.length})
             </h4>
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
               {lowPriority.map((rec, idx) => (
                 <RecommendationCard key={idx} recommendation={rec} index={idx + highPriority.length + mediumPriority.length} />
               ))}
@@ -310,7 +311,7 @@ export const Recommendations = ({ list }: { list?: { text: string; priority: str
 const RecommendationCard = ({ recommendation, index }: { recommendation: { text: string; priority: string }; index: number }) => (
   <motion.div
     whileHover={{ y: -5 }}
-    className={`bg-white p-4 sm:p-5 rounded-xl shadow-lg border-l-4 ${
+    className={`bg-white p-3 sm:p-4 md:p-5 rounded-xl shadow-lg border-l-4 ${
       recommendation.priority === "High" ? "border-red-500" :
       recommendation.priority === "Medium" ? "border-yellow-500" : "border-green-500"
     } transition-all h-full flex flex-col`}
@@ -324,8 +325,8 @@ const RecommendationCard = ({ recommendation, index }: { recommendation: { text:
         {recommendation.priority}
       </span>
     </div>
-    <div className="flex items-center text-xs sm:text-sm text-gray-500 mt-auto pt-3 sm:pt-4">
-      <AlertCircle size={14} className="mr-1 flex-shrink-0" />
+    <div className="flex items-center text-xs sm:text-sm text-gray-500 mt-auto pt-2 sm:pt-3 md:pt-4">
+      <AlertCircle size={12} className="mr-1 flex-shrink-0 sm:size-3" />
       <span>
         {recommendation.priority === "High" ? "Critical issue - fix immediately" :
           recommendation.priority === "Medium" ? "Important improvement needed" :
@@ -345,7 +346,7 @@ export const ProgressBar = ({ progress, loadingStep }: { progress: number; loadi
       />
     </div>
     <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-300 flex items-center justify-center gap-2">
-      <Clock size={14} />
+      <Clock size={12} className="sm:size-3" />
       {loadingStep}
     </p>
   </div>
@@ -372,21 +373,21 @@ export const HeaderSection = ({
   progress?: number;
   loadingStep?: string;
 }) => (
-  <div className="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 text-white py-12 sm:py-16 text-center px-4 relative overflow-hidden">
+  <div className="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 text-white py-8 sm:py-12 md:py-16 text-center px-4 relative overflow-hidden">
     <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
     <div className="container mx-auto relative z-10">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-3 sm:mb-4">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 sm:mb-4">
         Analyze Your Website Performance
       </h1>
-      <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto">
+      <p className="text-gray-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
         Get SEO, Performance, Accessibility, and Best Practices insights instantly
       </p>
 
-      <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center gap-3 max-w-xl mx-auto w-full">
+      <div className="mt-4 sm:mt-6 md:mt-8 flex flex-col sm:flex-row justify-center gap-3 max-w-xl mx-auto w-full">
         <input
           type="url"
           placeholder="https://example.com"
-          className="flex-1 w-full px-4 sm:px-5 py-3 rounded-lg text-black bg-white focus:ring-4 focus:ring-teal-300 focus:outline-none transition-all shadow-lg text-sm sm:text-base"
+          className="flex-1 w-full px-3 sm:px-4 md:px-5 py-2 sm:py-3 rounded-lg text-black bg-white focus:ring-4 focus:ring-teal-300 focus:outline-none transition-all shadow-lg text-sm sm:text-base"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
@@ -394,9 +395,9 @@ export const HeaderSection = ({
         {!loading ? (
           <button
             onClick={handleAudit}
-            className="px-4 sm:px-6 py-3 rounded-lg bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <BarChart3 size={18} />
+            <BarChart3 size={16} className="sm:size-4" />
             Start Audit
           </button>
         ) : (
@@ -404,9 +405,9 @@ export const HeaderSection = ({
             onClick={() => {
               handleStopAudit();
             }}
-            className="px-4 sm:px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <Clock size={18} />
+            <Clock size={16} className="sm:size-4" />
             Stop Audit
           </button>
         )}
@@ -419,41 +420,37 @@ export const HeaderSection = ({
   </div>
 );
 
-
 // New component for performance metrics
-export const PerformanceMetrics = ({ report }: { report: any }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-md border border-gray-100">
-      <div className="flex items-center mb-2 sm:mb-3">
-        <Clock className="text-teal-600 mr-2" size={18} />
-        <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Loading Time</h3>
-      </div>
-      <p className="text-xl sm:text-2xl font-bold text-gray-800">{report.loadingTime || 3.2}s</p>
-      <p className="text-xs sm:text-sm text-gray-500 mt-1">Page load time</p>
-    </div>
+// export const PerformanceMetrics = ({ report }: { report: any }) => (
+//   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-12">
+//     <div className="bg-white p-3 sm:p-4 md:p-5 rounded-xl shadow-md border border-gray-100">
+//       <div className="flex items-center mb-2 sm:mb-3">
+//         <Clock className="text-teal-600 mr-2 sm:size-4" size={16}/>
+//         <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Loading Time</h3>
+//       </div>
+//       <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">{report.loadingTime || 3.2}s</p>
+//       <p className="text-xs sm:text-sm text-gray-500 mt-1">Page load time</p>
+//     </div>
    
-    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-md border border-gray-100">
-      <div className="flex items-center mb-2 sm:mb-3">
-        <TrendingUp className="text-teal-600 mr-2" size={18} />
-        <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Page Size</h3>
-      </div>
-      <p className="text-xl sm:text-2xl font-bold text-gray-800">{report.pageSize || 2.4}MB</p>
-      <p className="text-xs sm:text-sm text-gray-500 mt-1">Total resources</p>
-    </div>
+//     <div className="bg-white p-3 sm:p-4 md:p-5 rounded-xl shadow-md border border-gray-100">
+//       <div className="flex items-center mb-2 sm:mb-3">
+//         <TrendingUp className="text-teal-600 mr-2 sm:size-4" size={16} />
+//         <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Page Size</h3>
+//       </div>
+//       <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">{report.pageSize || 2.4}MB</p>
+//       <p className="text-xs sm:text-sm text-gray-500 mt-1">Total resources</p>
+//     </div>
    
-    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-md border border-gray-100">
-      <div className="flex items-center mb-2 sm:mb-3">
-        <BarChart3 className="text-teal-600 mr-2" size={18} />
-        <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Requests</h3>
-      </div>
-      <p className="text-xl sm:text-2xl font-bold text-gray-800">{report.requests || 78}</p>
-      <p className="text-xs sm:text-sm text-gray-500 mt-1">HTTP requests</p>
-    </div>
-  </div>
-);
-
-// Fixed Radar chart for comparing scores
-
+//     <div className="bg-white p-3 sm:p-4 md:p-5 rounded-xl shadow-md border border-gray-100">
+//       <div className="flex items-center mb-2 sm:mb-3">
+//         <BarChart3 className="text-teal-600 mr-2 sm:size-4" size={16}/>
+//         <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Requests</h3>
+//       </div>
+//       <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">{report.requests || 78}</p>
+//       <p className="text-xs sm:text-sm text-gray-500 mt-1">HTTP requests</p>
+//     </div>
+//   </div>
+// );
 
 interface Scores {
   seo: number;
@@ -464,7 +461,7 @@ interface Scores {
 
 interface ScoresRadarProps {
   scores: Scores;
-  color?: string; // Optional dynamic color
+  color?: string;
 }
 
 export const ScoresRadar = ({ scores, color = '#14b8a6' }: ScoresRadarProps) => {
@@ -476,12 +473,12 @@ export const ScoresRadar = ({ scores, color = '#14b8a6' }: ScoresRadarProps) => 
   ];
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-100 h-64 sm:h-80 lg:h-96">
+    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md border border-gray-100 h-64 sm:h-72 md:h-80 lg:h-96">
       <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4">Score Comparison</h3>
       <ResponsiveContainer width="100%" height="85%">
         <RadarChart data={data}>
           <PolarGrid />
-          <PolarAngleAxis dataKey="subject" />
+          <PolarAngleAxis dataKey="subject" fontSize={12} />
           <PolarRadiusAxis angle={30} domain={[0, 100]} />
           <Radar
             name="Scores"
@@ -492,7 +489,7 @@ export const ScoresRadar = ({ scores, color = '#14b8a6' }: ScoresRadarProps) => 
             animationDuration={1500}
           />
           <Tooltip 
-            contentStyle={{ backgroundColor: 'white', borderRadius: 6, borderColor: '#ddd', fontSize: 14 }}
+            contentStyle={{ backgroundColor: 'white',marginBottom: 5, borderRadius: 6, borderColor: '#ddd', fontSize: 12 }}
             itemStyle={{ color }}
           />
           <Legend verticalAlign="top" height={36} />
@@ -502,85 +499,48 @@ export const ScoresRadar = ({ scores, color = '#14b8a6' }: ScoresRadarProps) => 
   );
 };
 
-
-// Fixed component for dynamic score trends
-export const ScoreTrends = ({ history }: { history?: { date: string; seo: number; performance: number; accessibility: number; bestPractices: number }[] }) => {
-  // If no history or empty array, show empty state
-  if (!history || history.length === 0) {
-    return (
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-100 h-64 sm:h-80 lg:h-96 flex flex-col">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-4 flex items-center">
-          <TrendingUp className="text-teal-600 mr-2" size={20} />
-          Historical Trends
-        </h3>
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <TrendingUp className="text-gray-300 mb-3" size={48} />
-          <p className="text-gray-500 text-sm mb-2">No historical data available</p>
-          <p className="text-gray-400 text-xs">Complete more audits to see trends over time</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Calculate average scores for a simple overview
-  const averageScores = {
-    seo: Math.round(history.reduce((sum, item) => sum + item.seo, 0) / history.length),
-    performance: Math.round(history.reduce((sum, item) => sum + item.performance, 0) / history.length),
-    accessibility: Math.round(history.reduce((sum, item) => sum + item.accessibility, 0) / history.length),
-    bestPractices: Math.round(history.reduce((sum, item) => sum + item.bestPractices, 0) / history.length),
-  };
-
-  const latestScores = history[history.length - 1];
+// New Bar Chart component to replace Historical Trends
+export const ScoresBarChart = ({ scores }: { scores: Scores }) => {
+  const data = [
+    { category: 'SEO', score: scores.seo || 0, fill: '#10b981' },
+    { category: 'Performance', score: scores.performance || 0, fill: '#0ea5e9' },
+    { category: 'Accessibility', score: scores.accessibility || 0, fill: '#8b5cf6' },
+    { category: 'Best Practices', score: scores.bestPractices || 0, fill: '#f59e0b' },
+  ];
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-100 h-64 sm:h-80 lg:h-96">
-      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-4 flex items-center">
-        <TrendingUp className="text-teal-600 mr-2" size={20} />
-        Historical Trends ({history.length} audits)
+    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-md border border-gray-100 h-64 sm:h-72 md:h-80 lg:h-96">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center">
+        <BarChart3 className="text-teal-600 mr-2 sm:size-5" size={18}/>
+        Performance Overview
       </h3>
-      
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        {['seo', 'performance', 'accessibility', 'bestPractices'].map((category) => {
-          const currentScore = latestScores[category as keyof typeof latestScores];
-          const averageScore = averageScores[category as keyof typeof averageScores];
-          const trend = currentScore - averageScore;
-          
-          return (
-            <div key={category} className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-lg font-bold text-teal-600">{currentScore}</div>
-              <div className="text-xs text-gray-500 capitalize mb-1">
-                {category.replace(/([A-Z])/g, ' $1').trim()}
-              </div>
-              <div className={`text-xs font-medium ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)} from avg
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      
-      {/* Simple bar chart visualization */}
-      <div className="mt-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-2">
-          <span>First audit</span>
-          <span>Latest audit</span>
-        </div>
-        <div className="flex items-end justify-between h-20 gap-1">
-          {history.slice(-5).map((audit, index) => (
-            <div key={index} className="flex flex-col items-center flex-1">
-              <div 
-                className="w-full bg-teal-500 rounded-t transition-all duration-300 hover:bg-teal-600"
-                style={{ height: `${(audit.seo + audit.performance + audit.accessibility + audit.bestPractices) / 4}%` }}
-                title={`Avg: ${Math.round((audit.seo + audit.performance + audit.accessibility + audit.bestPractices) / 4)}`}
-              ></div>
-              <span className="text-xs text-gray-400 mt-1">{index + 1}</span>
-            </div>
-          ))}
-        </div>
-        <div className="text-center text-xs text-gray-500 mt-2">
-          Average score trend (last {Math.min(5, history.length)} audits)
-        </div>
-      </div>
+      <ResponsiveContainer width="100%" height="85%">
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis 
+            dataKey="category" 
+            fontSize={12}
+            angle={-25}
+            textAnchor="end"
+            height={60}
+          />
+          <YAxis domain={[0, 100]} fontSize={12} />
+          <Tooltip 
+            formatter={(value) => [`${value}`, 'Score']}
+            contentStyle={{ backgroundColor: 'white', borderRadius: 6, borderColor: '#ddd', fontSize: 12 }}
+          />
+          <Bar 
+            dataKey="score" 
+            fill="#14b8a6"
+            radius={[4, 4, 0, 0]}
+            animationDuration={1500}
+          >
+            {data.map((entry, index) => (
+              <cell key={`cell-${index}`} fill={entry.fill} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 };
