@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-xl font-semibold mt-6 mb-3">9. Contact Us</h2>
         <p className="mb-2">If you have any questions about this Privacy Policy, please contact us:</p>
         <ul className="mb-6">
-          <li>Email: Info@rank.in</li>
+          <li>Email: Info@rankseo.in</li>
           <li>Phone: +91 9715092104</li>
         </ul>
 

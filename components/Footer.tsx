@@ -192,10 +192,10 @@ export default function Footer() {
                   Contact Support
                 </p>
                 <a
-                  href="mailto:Info@rank.in"
+                  href="mailto:Info@rankseo.in"
                   className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors no-underline"
                 >
-                  Info@rank.in
+                  Info@rankseo.in
                 </a>
               </div>
             </div>
