@@ -1,14 +1,27 @@
 "use client";
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // <-- for navigation
+import { useRouter } from "next/navigation";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
+import { useUser } from "@/components/context/UserContext"; // ✅ context
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const router = useRouter(); // <-- Initialize router
+  const router = useRouter();
+  const { setUser } = useUser(); // ✅ use context setter
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      router.push("/");
+    }
+  }, [router]);
 
   const handleNext = async (e: FormEvent) => {
     e.preventDefault();
@@ -18,39 +31,59 @@ const LoginPage = () => {
     } else {
       if (email && password) {
         try {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL;
           const res = await fetch(`${API_URL}/api/login`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }), // Send email and password to API
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
           });
+
           const data = await res.json();
 
           if (res.ok) {
-            // If login is successful, redirect to profile page
-            alert("Login successful!");
-            router.push("/profile");
-          } else {
-            // Show error message if credentials are invalid
-            alert(data.message || "Invalid credentials");
+  localStorage.setItem("token", data.token);
+
+  // ✅ update context immediately
+  if (data.user) {
+    setUser(data.user);
+  } else {
+    // fallback: fetch profile if login API only returns token
+    const meRes = await fetch(`${API_URL}/api/profile`, {
+      headers: { Authorization: `Bearer ${data.token}` },
+    });
+    if (meRes.ok) {
+      const meData = await meRes.json();
+      setUser(meData);
+    }
+  }
+
+  showSuccessAlert("Login successful!");
+  router.push("/");
+}
+ else {
+            showWarningAlert(data.msg || "Invalid credentials");
           }
         } catch (error) {
-          alert("Error logging in");
+          showErrorAlert("Error logging in");
         }
       } else {
-        alert("Please enter both email and password!");
+        showWarningAlert("Please enter both email and password!");
       }
     }
   };
 
+  const handleSocialLogin = (provider: "google" | "github") => {
+    window.location.href = `${API_URL}/api/auth/${provider}`;
+  };
+
+  const socialButtonClass =
+    "flex items-center justify-center w-full py-2 px-4 bg-gray-100 text-gray-800 rounded-full font-semibold transition-transform transform hover:scale-105 duration-200 cursor-pointer shadow-md";
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
       <div className="bg-white text-gray-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full relative">
-        {/* Logo */}
+        {/* Logo and Title */}
         <div className="flex justify-center mb-6">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-white"
@@ -66,12 +99,10 @@ const LoginPage = () => {
               />
             </svg>
           </div>
-          <span className="text-xl font-bold text-foreground ml-2">
-            SEO Audit Pro
+          <span className="text-xl font-bold text-gray-900 ml-2">
+            RankSeo
           </span>
         </div>
-
-        {/* Title */}
         <h1 className="text-3xl font-bold text-center mb-6">Sign in</h1>
 
         {/* Form */}
@@ -119,7 +150,6 @@ const LoginPage = () => {
           </AnimatePresence>
         </form>
 
-        {/* Forgot password */}
         <AnimatePresence>
           {showPassword && (
             <motion.div
@@ -139,13 +169,35 @@ const LoginPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Sign-up link */}
         <p className="mt-8 text-center text-gray-600">
           Don’t have an account?{" "}
           <Link href="/signup" className="text-emerald-600 hover:underline">
             Sign up
           </Link>
         </p>
+
+        <div className="flex items-center my-4">
+          <hr className="flex-grow border-gray-300" />
+          <span className="px-2 text-gray-500">OR</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
+
+        <div className="space-y-4 mb-6">
+          <button
+            onClick={() => handleSocialLogin("google")}
+            className={socialButtonClass}
+          >
+            {/* Google Icon */}
+            Continue with Google
+          </button>
+          <button
+            onClick={() => handleSocialLogin("github")}
+            className={socialButtonClass}
+          >
+            {/* Github Icon */}
+            Continue with Github
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -5,26 +5,34 @@ import "./globals.css";
 
 import Navbar from "@/components/Navbar"; // ✅ import navbar
 import Footer from "@/components/Footer"; // ✅ import footer
-
+import { UserProvider } from "@/components/context/UserContext";
 export const metadata: Metadata = {
-  title: "AI SEO Audit",
+  title: "RankSEO - AI Powered SEO Tool",
   description: "Created by Cybomb",
   generator: "Cybomb",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  icons: {
+    icon: "/icon.png", // Add this line to specify your favicon
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        {/* ✅ Shared Navbar */}
-        <Navbar />
+        <UserProvider>
+          {/* ✅ Navbar and Footer must be inside the provider */}
+          <Navbar />
 
-        {/* ✅ Page Content */}
-        <main>{children}</main>
+          {/* ✅ Page Content */}
+          <main>{children}</main>
 
-        {/* ✅ Shared Footer */}
-        <Footer />
+          <Footer />
+        </UserProvider>
       </body>
     </html>
   );

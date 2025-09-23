@@ -12,7 +12,7 @@ export default function TermsOfServicePage() {
         </p>
 
         <p className="mb-6">
-          Welcome to <strong>SEO Audit Pro</strong>. By accessing or using our
+          Welcome to <strong>RankSeo.in</strong>. By accessing or using our
           AI-powered SEO analysis and landing page optimization tools (the
           “Service”), you agree to be bound by these Terms of Service
           (“Terms”). Please read them carefully before using the Service.
@@ -83,7 +83,7 @@ export default function TermsOfServicePage() {
         <p className="mb-6">
           The Service is provided “as is” without warranties of any kind. We do
           not guarantee specific SEO results, search rankings, or traffic
-          increases. To the maximum extent permitted by law, SEO Audit Pro shall
+          increases. To the maximum extent permitted by law, RankSeo.in shall
           not be liable for any direct, indirect, incidental, or consequential
           damages arising from your use of the Service.
         </p>
@@ -114,12 +114,12 @@ export default function TermsOfServicePage() {
           If you have questions about these Terms, please contact us at:
         </p>
         <ul className="mb-6">
-          <li>Email: support@seoauditpro.com</li>
-          <li>Phone: +1 (234) 567-8901</li>
+          <li>Email: Info@rankseo.in</li>
+          <li>Phone: +91 9715092104</li>
         </ul>
 
         <p className="text-gray-600 text-sm">
-          By using SEO Audit Pro, you acknowledge that you have read and agreed
+          By using RankSeo.in, you acknowledge that you have read and agreed
           to these Terms of Service.
         </p>
       </div>

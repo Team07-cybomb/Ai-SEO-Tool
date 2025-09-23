@@ -8,7 +8,7 @@ export default function PrivacyPolicyPage() {
         <p className="mb-4 text-sm text-gray-500">Last updated: September 1, 2025</p>
 
         <p className="mb-6">
-          At <strong>SEO Audit Pro</strong>, we respect your privacy and are committed
+          At <strong>RankSEO</strong>, we respect your privacy and are committed
           to protecting your personal information. This Privacy Policy explains
           how we collect, use, and safeguard your data when you use our AI-powered
           SEO analysis and landing page optimization tools (the “Service”).
@@ -94,12 +94,12 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-xl font-semibold mt-6 mb-3">9. Contact Us</h2>
         <p className="mb-2">If you have any questions about this Privacy Policy, please contact us:</p>
         <ul className="mb-6">
-          <li>Email: privacy@seoauditpro.com</li>
-          <li>Phone: +1 (234) 567-8901</li>
+          <li>Email: Info@rankseo.in</li>
+          <li>Phone: +91 9715092104</li>
         </ul>
 
         <p className="text-gray-600 text-sm">
-          By using SEO Audit Pro, you consent to the practices described in this
+          By using RankSeo.in, you consent to the practices described in this
           Privacy Policy.
         </p>
       </div>

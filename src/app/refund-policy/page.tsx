@@ -8,7 +8,7 @@ export default function RefundPolicyPage() {
         <p className="mb-4 text-sm text-gray-500">Last updated: September 1, 2025</p>
 
         <p className="mb-6">
-          Thank you for using <strong>SEO Audit Pro</strong>. We strive to provide
+          Thank you for using <strong>RankSeo.in</strong>. We strive to provide
           the best AI-powered SEO analysis and landing page optimization tools.
           This Refund Policy outlines the terms under which refunds may be
           granted for subscription purchases.
@@ -58,12 +58,12 @@ export default function RefundPolicyPage() {
           to us:
         </p>
         <ul className="mb-6">
-          <li>Email: refunds@seoauditpro.com</li>
-          <li>Phone: +1 (234) 567-8901</li>
+          <li>Email: Info@rankseo.in</li>
+          <li>Phone: +91 9715092104</li>
         </ul>
 
         <p className="text-gray-600 text-sm">
-          By subscribing to SEO Audit Pro, you acknowledge that you have read and
+          By subscribing to RankSeo.in, you acknowledge that you have read and
           understood this Refund Policy.
         </p>
       </div>
