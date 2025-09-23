@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { ScoreCard, DetailedAnalysis, Recommendations, HeaderSection, PerformanceMetrics, ScoresRadar, ScoreTrends } from "./frontend";
+import { ScoreCard, DetailedAnalysis, Recommendations, HeaderSection, ScoresRadar, ScoresBarChart } from "./frontend";
 import PDFGenerator from "./pdf";
 import { runAudit } from "./backend";
 
@@ -69,12 +69,12 @@ export default function AuditPage() {
 
   const startProgressAnimation = () => {
     setProgress(0);
-    setLoadingStep("Running Lighthouse tests...");
+    setLoadingStep("Analyzing your website performance...");
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     progressIntervalRef.current = setInterval(() => {
       setProgress((prev) => (prev < 90 ? prev + Math.random() * 7 : prev));
-      if (progress > 30) setLoadingStep("Analyzing SEO and content...");
-      if (progress > 60) setLoadingStep("Checking accessibility and performance...");
+      if (progress > 30) setLoadingStep("Checking your website's health...");
+      if (progress > 60) setLoadingStep("Checking accessibility...");
       if (progress > 85) setLoadingStep("Generating recommendations...");
     }, 700);
   };
@@ -192,7 +192,7 @@ export default function AuditPage() {
   };
  
   return (
-    <div className="min-h-screen pt-15 bg-gradient-to-br from-gray-50 to-teal-50">
+    <div className="min-h-screen pt-12 sm:pt-16 bg-gradient-to-br from-gray-50 to-teal-50">
       <HeaderSection 
         url={url} 
         setUrl={setUrl} 
@@ -204,131 +204,110 @@ export default function AuditPage() {
         progress={progress}
         loadingStep={loadingStep}
       />
-      {/* 🔹 Sample Report Section */}
-{!report && !loading &&  (
-  <div className="container mx-auto py-8 sm:py-12 px-4 sm:px-6">
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 sm:mb-8">
-      <div className="p-4 sm:p-6 bg-gradient-to-r from-gray-400 to-gray-600 text-white">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
-          Sample Audit Report
-        </h2>
-        <p className="mt-1 sm:mt-2 opacity-80 text-sm sm:text-base">
-          This is a preview of how the audit report will appear for {url}.
-        </p>
-      </div>
       
-      <div className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <ScoreCard label="SEO" score={82} />
-          <ScoreCard label="Performance" score={74} />
-          <ScoreCard label="Accessibility" score={65} />
-          <ScoreCard label="Best Practices" score={90} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-          <ScoresRadar scores={{ seo: 82, performance: 74, accessibility: 65, bestPractices: 90 }} />
-          <ScoreTrends history={[
-            { date: '2025-09-01', seo: 75, performance: 70, accessibility: 60, bestPractices: 85 },
-            { date: '2025-09-15', seo: 82, performance: 74, accessibility: 65, bestPractices: 90 },
-          ]} />
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-      {/* 🔹 Report Section */}
-      {report && (
-        <div className="container mx-auto py-8 sm:py-12 px-4 sm:px-6">
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 sm:mb-8">
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">
-                Audit Report for: {url}
+      {/* 🔹 Sample Report Section */}
+      {!report && !loading &&  (
+        <div className="container mx-auto py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6 md:mb-8">
+            <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-r from-gray-400 to-gray-600 text-white">
+              <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
+                Sample Audit Report
               </h2>
-              <p className="mt-1 sm:mt-2 opacity-90 text-sm sm:text-base">
-                Generated on {new Date().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+              <p className="mt-1 sm:mt-2 opacity-80 text-xs sm:text-sm md:text-base">
+                This is a preview of how the audit report will appear for {url || "your website"}.
               </p>
             </div>
- 
-            {/* Navigation Tabs */}
-            <div className="flex border-b border-gray-200 overflow-x-auto">
-              {['overview', 'analysis', 'recommendations'].map((tab) => (
-                <button
-                  key={tab}
-                  className={`px-4 sm:px-6 py-3 font-medium text-sm whitespace-nowrap ${
-                    activeTab === tab 
-                      ? 'text-teal-600 border-b-2 border-teal-600' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </div>
- 
-            {/* Tab Content */}
-            <div className="p-4 sm:p-6">
-              {activeTab === 'overview' && (
-                <>
-                  {/* SCORE OVERVIEW */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <ScoreCard label="SEO" score={report.seo ?? 0} />
-                    <ScoreCard label="Performance" score={report.performance ?? 0} />
-                    <ScoreCard label="Accessibility" score={report.accessibility ?? 0} />
-                    <ScoreCard label="Best Practices" score={report.bestPractices ?? 0} />
-                  </div>
-                  
-                  {/* Performance Metrics */}
-                  {(report.loadingTime || report.pageSize || report.requests) && (
-                    <PerformanceMetrics report={report} />
-                  )}
-                  
-                  {/* Dynamic Content Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                    
-                    {/* Radar Chart Comparison - FIXED */}
-                      <ScoresRadar scores={{
-                        seo: report.seo ?? 0,
-                        performance: report.performance ?? 0,
-                        accessibility: report.accessibility ?? 0,
-                        bestPractices: report.bestPractices ?? 0
-                      }} />
-
-                      {/* Historical Trends - FIXED */}
-                      <ScoreTrends history={report.history || []} />
-                  </div>
-                  
-                  {/* Quick Actions */}
-              <div className="mt-6 sm:mt-8 flex flex-wrap gap-3 sm:gap-4">
-                <PDFGenerator report={report} url={url} />
-                {/* <button className="px-4 sm:px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2 text-sm sm:text-base">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    />
-                  </svg>
-                  Share Report
-                </button> */}
+            
+            <div className="p-3 sm:p-4 md:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+                <ScoreCard label="SEO" score={82} />
+                <ScoreCard label="Performance" score={74} />
+                <ScoreCard label="Accessibility" score={89} />
+                <ScoreCard label="Best Practices" score={91} />
               </div>
-              </>
-             )}
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                <ScoresRadar scores={{ seo: 82, performance: 74, accessibility: 89, bestPractices: 91 }} />
+                <ScoresBarChart scores={{ seo: 82, performance: 74, accessibility: 89, bestPractices: 91 }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+ 
+      {/* 🔹 Main Report Section */}
+      {report && (
+        <div className="container mx-auto py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden mb-4 sm:mb-6 md:mb-8">
+            <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                <div>
+                  <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">
+                    Audit Report for {url}
+                  </h2>
+                  <p className="mt-1 sm:mt-2 opacity-80 text-xs sm:text-sm md:text-base">
+                    Generated on {new Date().toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2 sm:gap-3">
+                  <PDFGenerator report={report} url={url} />
+                </div>
+              </div>
+              
+              {/* Tabs for navigation */}
+              <div className="mt-4 sm:mt-6 flex space-x-1 sm:space-x-2 overflow-x-auto">
+                {['overview', 'analysis', 'recommendations'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                      activeTab === tab 
+                        ? 'bg-white text-teal-700 shadow-md' 
+                        : 'text-white hover:bg-teal-500'
+                    }`}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="p-3 sm:p-4 md:p-6">
+              {/* Overview Tab */}
+              {activeTab === 'overview' && (
+                <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    <ScoreCard label="SEO" score={report.seo || 0} />
+                    <ScoreCard label="Performance" score={report.performance || 0} />
+                    <ScoreCard label="Accessibility" score={report.accessibility || 0} />
+                    <ScoreCard label="Best Practices" score={report.bestPractices || 0} />
+                  </div>
+                  
+                  {/* <PerformanceMetrics report={report} /> */}
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                    <ScoresRadar scores={{
+                      seo: report.seo || 0,
+                      performance: report.performance || 0,
+                      accessibility: report.accessibility || 0,
+                      bestPractices: report.bestPractices || 0
+                    }} />
+                    <ScoresBarChart scores={{
+                      seo: report.seo || 0,
+                      performance: report.performance || 0,
+                      accessibility: report.accessibility || 0,
+                      bestPractices: report.bestPractices || 0
+                    }} />
+                  </div>
+                </div>
+              )}
+              
+              {/* Analysis Tab */}
               {activeTab === 'analysis' && (
                 <DetailedAnalysis text={report.analysis} url={url} />
               )}
- 
+              
+              {/* Recommendations Tab */}
               {activeTab === 'recommendations' && (
                 <Recommendations list={report.recommendations} />
               )}
