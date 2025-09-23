@@ -58,7 +58,7 @@ export default function RefundPolicyPage() {
           to us:
         </p>
         <ul className="mb-6">
-          <li>Email: Info@rank.in</li>
+          <li>Email: Info@rankseo.in</li>
           <li>Phone: +91 9715092104</li>
         </ul>
 
