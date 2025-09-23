@@ -31,6 +31,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* ✅ Page Content */}
           <main>{children}</main>
 
+          <UserProvider>
+          {children}
+        </UserProvider>
+
           <Footer />
         </UserProvider>
       </body>
