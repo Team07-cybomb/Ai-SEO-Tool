@@ -15,15 +15,15 @@ const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const NEXT_PUBLIC_CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL;
+const NEXT_PUBLIC_CLIENT_URL = process.env.CLIENT_URL;
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 
-const GITHUB_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github/callback`;
-const GOOGLE_REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback`;
+const GITHUB_REDIRECT_URI = `${process.env.API_URL}/api/auth/github/callback`;
+const GOOGLE_REDIRECT_URI = `${process.env.API_URL}/api/auth/google/callback`;
 
 let tokenBlacklist = [];
 
