@@ -181,9 +181,9 @@ const parseAnalysisText = (text: string, url: string) => {
     } else if (/^([-*]|\d+\.)/.test(line)) {
       // List item - remove bullet points and numbers
       if (currentSection) {
-        const content = line.replace(/^([-*]|\d+\.)\s+/, "").trim();
+        const content = line.replaceAll("*", "").trim();
         // Remove any remaining * or - from the content
-        const cleanContent = content.replace(/^[-*]\s*/, "").trim();
+        const cleanContent = content.replaceAll("*", "").trim();
         currentSection.content.push(cleanContent);
 
         // Check for metric

@@ -5,28 +5,28 @@ const axios = require('axios');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
-
+ 
 // Load environment variables
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') });
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-
+ 
 const JWT_SECRET = process.env.JWT_SECRET;
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const NEXT_PUBLIC_CLIENT_URL = process.env.CLIENT_URL;
-
+const CLIENT_URL = process.env.CLIENT_URL;
+ 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
-
+ 
 const GITHUB_REDIRECT_URI = `${process.env.API_URL}/api/auth/github/callback`;
 const GOOGLE_REDIRECT_URI = `${process.env.API_URL}/api/auth/google/callback`;
-
+ 
 let tokenBlacklist = [];
-
+ 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
@@ -37,7 +37,7 @@ const transporter = nodemailer.createTransport({
         pass: SMTP_PASS,
     },
 });
-
+ 
 // Function to send OTP email
 const sendOtpEmail = async (email, otp, name) => {
     try {
@@ -63,7 +63,7 @@ const sendOtpEmail = async (email, otp, name) => {
         throw new Error('Failed to send OTP email.');
     }
 };
-
+ 
 const signup = async (req, res) => {
     const { name, email, mobile, password } = req.body;
     try {
@@ -71,10 +71,10 @@ const signup = async (req, res) => {
         if (user) {
             return res.status(400).json({ msg: 'User already exists' });
         }
-
+ 
         const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
         const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
+ 
         user = new User({
             name,
             email,
@@ -83,17 +83,17 @@ const signup = async (req, res) => {
             otp,
             otpExpiresAt,
         });
-
+ 
         await user.save();
         await sendOtpEmail(email, otp);
-
+ 
         res.status(201).json({ msg: 'OTP sent to your email. Please verify to complete signup.' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
     }
 };
-
+ 
 const verifyOtpAndSignup = async (req, res) => {
     const { email, otp } = req.body;
     try {
@@ -104,50 +104,50 @@ const verifyOtpAndSignup = async (req, res) => {
         if (user.otp !== otp || user.otpExpiresAt < Date.now()) {
             return res.status(400).json({ msg: 'Invalid or expired OTP.' });
         }
-
+ 
         // OTP is correct, save the user with a hashed password
         user.isVerified = true;
         user.otp = null;
         user.otpExpiresAt = null;
-
+ 
         await user.save();
-
+ 
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
-
+ 
         res.status(200).json({ msg: 'Email verified and signup successful!', token });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
     }
 };
-
+ 
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
         if (!user.password) return res.status(400).json({ msg: 'Please log in with your social provider.' });
-        
+       
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
-
+ 
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
-
+ 
         res.json({ token });
     } catch (err) {
         console.error('Server error during login:', err.message);
         res.status(500).send('Server error');
     }
 };
-
+ 
 const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
@@ -155,23 +155,23 @@ const forgotPassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ msg: 'No user found with that email.' });
         }
-
+ 
         const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
         const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
+ 
         user.otp = otp;
         user.otpExpiresAt = otpExpiresAt;
         await user.save();
-        
+       
         await sendOtpEmail(email, otp);
-
+ 
         res.status(200).json({ msg: 'OTP sent to your email for password reset.' });
     } catch (err) {
         console.error('Server error during forgot password:', err.message);
         res.status(500).send('Server error');
     }
 };
-
+ 
 const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
     try {
@@ -179,15 +179,15 @@ const resetPassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ msg: 'User not found.' });
         }
-
+ 
         if (user.otp !== otp || user.otpExpiresAt < Date.now()) {
             return res.status(400).json({ msg: 'Invalid or expired OTP.' });
         }
-
+ 
         // Hash the new password and update the user document atomically
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
-
+ 
         // Find the user again and update all fields in a single query
         await User.findOneAndUpdate(
             { email: email },
@@ -200,15 +200,15 @@ const resetPassword = async (req, res) => {
             },
             { new: true }
         );
-
+ 
         res.status(200).json({ msg: 'Password has been successfully reset.' });
     } catch (err) {
         console.error('Server error during password reset:', err.message);
         res.status(500).send('Server error');
     }
 };
-
-
+ 
+ 
 const getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
@@ -218,7 +218,7 @@ const getProfile = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
-
+ 
 const logoutUser = (req, res) => {
     const token = req.headers["authorization"]?.split(" ")[1];
     if (token) {
@@ -226,12 +226,12 @@ const logoutUser = (req, res) => {
     }
     res.json({ msg: "Logged out successfully" });
 };
-
+ 
 const githubAuth = (req, res) => {
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_REDIRECT_URI}&scope=user:email`;
     res.redirect(githubAuthUrl);
 };
-
+ 
 const githubCallback = async (req, res) => {
     const { code } = req.query;
     try {
@@ -245,21 +245,21 @@ const githubCallback = async (req, res) => {
             },
             { headers: { Accept: 'application/json' } }
         );
-
+ 
         const { access_token } = tokenResponse.data;
         const userResponse = await axios.get('https://api.github.com/user', {
             headers: { Authorization: `Bearer ${access_token}` }
         });
-
+ 
         const githubUser = userResponse.data;
         const emailResponse = await axios.get('https://api.github.com/user/emails', {
             headers: { Authorization: `Bearer ${access_token}` }
         });
-
+ 
         const primaryEmailObj = emailResponse.data.find(emailObj => emailObj.primary && emailObj.verified);
         const email = primaryEmailObj ? primaryEmailObj.email : null;
         if (!email) return res.status(400).send('No primary, verified email found for GitHub user.');
-
+ 
         const user = await User.findOneAndUpdate(
             { githubId: githubUser.id },
             {
@@ -270,25 +270,25 @@ const githubCallback = async (req, res) => {
             },
             { new: true, upsert: true, setDefaultsOnInsert: true }
         );
-
+ 
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
-
-        res.redirect(`${NEXT_PUBLIC_CLIENT_URL}?token=${token}`);
+ 
+        res.redirect(`${CLIENT_URL}/profile?token=${token}`);
     } catch (err) {
         console.error("Server error during GitHub auth:", err.response ? err.response.data : err.message);
         res.status(500).send('Server error during GitHub auth');
     }
 };
-
+ 
 const googleAuth = (req, res) => {
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
     res.redirect(googleAuthUrl);
 };
-
+ 
 const googleCallback = async (req, res) => {
     const { code } = req.query;
     try {
@@ -299,15 +299,15 @@ const googleCallback = async (req, res) => {
             redirect_uri: GOOGLE_REDIRECT_URI,
             grant_type: 'authorization_code'
         });
-
+ 
         const { access_token } = tokenResponse.data;
         const userResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: { Authorization: `Bearer ${access_token}` }
         });
-
+ 
         const googleUser = userResponse.data;
         let user = await User.findOne({ googleId: googleUser.sub });
-
+ 
         if (!user) {
             user = await User.findOne({ email: googleUser.email });
             if (user) {
@@ -324,20 +324,20 @@ const googleCallback = async (req, res) => {
                 await user.save();
             }
         }
-
+ 
         const token = jwt.sign(
             { user: { id: user._id, role: user.role || "user" } },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
-
-        res.redirect(`${NEXT_PUBLIC_CLIENT_URL}?token=${token}`);
+ 
+        res.redirect(`${CLIENT_URL}/profile?token=${token}`);
     } catch (err) {
         console.error("Server error during Google auth:", err);
         res.status(500).send('Server error during Google auth');
     }
 };
-
+ 
 module.exports = {
     signup,
     verifyOtpAndSignup,
