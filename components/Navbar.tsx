@@ -26,6 +26,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Closes the mobile menu on route changes
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  }, [pathname, mobileMenuOpen]);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -113,20 +120,19 @@ export default function Navbar() {
               <div className="flex items-center gap-3">
                 {/* Profile Icon that redirects to login */}
                 <Button
-  variant="ghost"
-  size="sm"
-  onClick={handleProfileRedirect}
-  className={`p-2 rounded-full transition-all duration-200
-    ${isScrolledPastBanner 
-      ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
-      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-    }
-    hover:scale-110 hover:shadow-md active:scale-95
-  `}
->
-  <User className="w-5 h-5 transition-transform duration-200" />
-</Button>
-
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleProfileRedirect}
+                  className={`p-2 rounded-full transition-all duration-200
+                  ${isScrolledPastBanner 
+                    ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }
+                  hover:scale-110 hover:shadow-md active:scale-95
+                  `}
+                >
+                  <User className="w-5 h-5 transition-transform duration-200" />
+                </Button>
                 
                 {/* Login Button */}
                 <Button 
