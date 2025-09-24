@@ -277,7 +277,7 @@ const githubCallback = async (req, res) => {
             { expiresIn: "1d" }
         );
 
-        res.redirect(`${NEXT_PUBLIC_CLIENT_URL}/profile?token=${token}`);
+        res.redirect(`${NEXT_PUBLIC_CLIENT_URL}?token=${token}`);
     } catch (err) {
         console.error("Server error during GitHub auth:", err.response ? err.response.data : err.message);
         res.status(500).send('Server error during GitHub auth');
@@ -331,7 +331,7 @@ const googleCallback = async (req, res) => {
             { expiresIn: "1d" }
         );
 
-        res.redirect(`${NEXT_PUBLIC_CLIENT_URL}/profile?token=${token}`);
+        res.redirect(`${NEXT_PUBLIC_CLIENT_URL}?token=${token}`);
     } catch (err) {
         console.error("Server error during Google auth:", err);
         res.status(500).send('Server error during Google auth');
