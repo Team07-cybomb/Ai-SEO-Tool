@@ -410,99 +410,99 @@ const PDFGenerator: React.FC<PDFProps> = ({ report, url }) => {
     }
 
     /** -------------------------------- PRIORITY BREAKDOWN -------------------------------- **/
-    if (report.recommendations && report.recommendations.length > 0) {
-      if (yPosition > pageHeight - 50) {
-        pdf.addPage();
-        yPosition = margin;
-      }
+//     if (report.recommendations && report.recommendations.length > 0) {
+//       if (yPosition > pageHeight - 50) {
+//         pdf.addPage();
+//         yPosition = margin;
+//       }
 
-      pdf.setFillColor(...primaryColor);
-      pdf.rect(margin, yPosition, contentWidth, 12, "F");
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(16);
-      pdf.text("PRIORITY BREAKDOWN", margin + 8, yPosition + 8);
-      yPosition += 20;
+//       pdf.setFillColor(...primaryColor);
+//       pdf.rect(margin, yPosition, contentWidth, 12, "F");
+//       pdf.setTextColor(255, 255, 255);
+//       pdf.setFontSize(16);
+//       pdf.text("PRIORITY BREAKDOWN", margin + 8, yPosition + 8);
+//       yPosition += 20;
 
-      const priorityCounts = {
-        High: report.recommendations.filter(r => r.priority === 'High').length,
-        Medium: report.recommendations.filter(r => r.priority === 'Medium').length,
-        Low: report.recommendations.filter(r => r.priority === 'Low').length
-      };
+//       const priorityCounts = {
+//         High: report.recommendations.filter(r => r.priority === 'High').length,
+//         Medium: report.recommendations.filter(r => r.priority === 'Medium').length,
+//         Low: report.recommendations.filter(r => r.priority === 'Low').length
+//       };
 
-      const total = report.recommendations.length;
-      const chartRadius = 30;
-      const chartCenterX = margin + contentWidth / 2;
-      const chartCenterY = yPosition + 50;
+//       const total = report.recommendations.length;
+//       const chartRadius = 30;
+//       const chartCenterX = margin + contentWidth / 2;
+//       const chartCenterY = yPosition + 50;
 
-      // Draw pie chart
-      let startAngle = 0;
-      const priorities = [
-        { priority: 'High', color: dangerColor, count: priorityCounts.High },
-        { priority: 'Medium', color: warningColor, count: priorityCounts.Medium },
-        { priority: 'Low', color: successColor, count: priorityCounts.Low }
-      ];
+//       // Draw pie chart
+//       let startAngle = 0;
+//       const priorities = [
+//         { priority: 'High', color: dangerColor, count: priorityCounts.High },
+//         { priority: 'Medium', color: warningColor, count: priorityCounts.Medium },
+//         { priority: 'Low', color: successColor, count: priorityCounts.Low }
+//       ];
 
-      priorities.forEach(item => {
-        if (item.count > 0) {
-          const angle = (item.count / total) * 360;
-          pdf.setFillColor(...item.color);
-         // Draw pie chart manually with paths
-let startAngle = 0;
-const radius = chartRadius;
+//       priorities.forEach(item => {
+//         if (item.count > 0) {
+//           const angle = (item.count / total) * 360;
+//           pdf.setFillColor(...item.color);
+//          // Draw pie chart manually with paths
+// let startAngle = 0;
+// const radius = chartRadius;
 
-priorities.forEach(item => {
-  if (item.count > 0) {
-    const sliceAngle = (item.count / total) * 2 * Math.PI; // in radians
-    const endAngle = startAngle + sliceAngle;
+// priorities.forEach(item => {
+//   if (item.count > 0) {
+//     const sliceAngle = (item.count / total) * 2 * Math.PI; // in radians
+//     const endAngle = startAngle + sliceAngle;
 
-    // Convert polar to cartesian
-    const x1 = chartCenterX + radius * Math.cos(startAngle);
-    const y1 = chartCenterY + radius * Math.sin(startAngle);
-    const x2 = chartCenterX + radius * Math.cos(endAngle);
-    const y2 = chartCenterY + radius * Math.sin(endAngle);
+//     // Convert polar to cartesian
+//     const x1 = chartCenterX + radius * Math.cos(startAngle);
+//     const y1 = chartCenterY + radius * Math.sin(startAngle);
+//     const x2 = chartCenterX + radius * Math.cos(endAngle);
+//     const y2 = chartCenterY + radius * Math.sin(endAngle);
 
-    pdf.setFillColor(...item.color);
+//     pdf.setFillColor(...item.color);
 
-    // Start path
-    pdf.lines(
-      [
-        [x1 - chartCenterX, y1 - chartCenterY],
-        [x2 - x1, y2 - y1],
-        [chartCenterX - x2, chartCenterY - y2]
-      ],
-      chartCenterX,
-      chartCenterY,
-      [1, 1],
-      'F'
-    );
+//     // Start path
+//     pdf.lines(
+//       [
+//         [x1 - chartCenterX, y1 - chartCenterY],
+//         [x2 - x1, y2 - y1],
+//         [chartCenterX - x2, chartCenterY - y2]
+//       ],
+//       chartCenterX,
+//       chartCenterY,
+//       [1, 1],
+//       'F'
+//     );
 
-    startAngle = endAngle;
-  }
-});
+//     startAngle = endAngle;
+//   }
+// });
 
-          startAngle += angle;
-        }
-      });
+//           startAngle += angle;
+//         }
+//       });
 
-      // Legend
-      const legendX = margin;
-      const legendY = yPosition + 100;
-      
-      priorities.forEach((item, index) => {
-        if (item.count > 0) {
-          const y = legendY + (index * 15);
-          
-          pdf.setFillColor(...item.color);
-          pdf.rect(legendX, y, 8, 8, 'F');
-          
-          pdf.setTextColor(...darkColor);
-          pdf.setFontSize(9);
-          pdf.text(`${item.priority}: ${item.count} recommendations (${Math.round((item.count / total) * 100)}%)`, legendX + 12, y + 6);
-        }
-      });
+//       // Legend
+//       const legendX = margin;
+//       const legendY = yPosition + 100;
+//       
+//       priorities.forEach((item, index) => {
+//         if (item.count > 0) {
+//           const y = legendY + (index * 15);
+//           
+//           pdf.setFillColor(...item.color);
+//           pdf.rect(legendX, y, 8, 8, 'F');
+//           
+//           pdf.setTextColor(...darkColor);
+//           pdf.setFontSize(9);
+//           pdf.text(`${item.priority}: ${item.count} recommendations (${Math.round((item.count / total) * 100)}%)`, legendX + 12, y + 6);
+//         }
+//       });
 
-      yPosition += 120;
-    }
+//       yPosition += 120;
+//     }
 
     /** -------------------------------- FOOTER -------------------------------- **/
     const totalPages = pdf.getNumberOfPages();
