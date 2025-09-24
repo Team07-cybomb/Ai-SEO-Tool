@@ -28,20 +28,21 @@ const sidebarItems = [
     href: "/",
     icon: Home,
   },
-  {
-    title: "Profile",
-    href: "/profile",
-    icon: User,
-  },
-  {
+    {
     title: "Dashboard",
     href: "/profile/dashboard",
     icon: LayoutDashboard,
   },
+
   {
     title: "Reports",
     href: "/profile/reports",
     icon: FileText,
+  },
+  {
+    title: "Profile",
+    href: "/profile",
+    icon: User,
   },
   {
     title: "Support",
