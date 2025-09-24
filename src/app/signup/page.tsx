@@ -93,7 +93,7 @@ const SignupPage = () => {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         showSuccessAlert(data.msg);
-        router.push("/profile");
+        router.push("/");
       } else {
         showErrorAlert(data.msg || "OTP verification failed.");
       }
@@ -117,7 +117,7 @@ const SignupPage = () => {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         showSuccessAlert("Login successful!");
-        router.push("/profile");
+        router.push("/");
       } else {
         showErrorAlert(data.msg || "Login failed.");
       }

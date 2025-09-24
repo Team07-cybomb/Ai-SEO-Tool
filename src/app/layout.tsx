@@ -3,15 +3,17 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
-import Navbar from "@/components/Navbar"; // ✅ import navbar
-import Footer from "@/components/Footer"; // ✅ import footer
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { UserProvider } from "@/components/context/UserContext";
+import Script from "next/script";
+
 export const metadata: Metadata = {
   title: "RankSEO - AI Powered SEO Tool",
   description: "Created by Cybomb",
   generator: "Cybomb",
   icons: {
-    icon: "/icon.png", // Add this line to specify your favicon
+    icon: "/icon.png",
   },
 };
 
@@ -24,17 +26,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+        {/* Global Google AdSense Script */}
+        <Script
+          id="adsense-init"
+          strategy="afterInteractive"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4338634405797265"
+          crossOrigin="anonymous"
+        />
+
         <UserProvider>
-          {/* ✅ Navbar and Footer must be inside the provider */}
+          {/* Navbar */}
           <Navbar />
 
-          {/* ✅ Page Content */}
+          {/* Page Content */}
           <main>{children}</main>
 
-          <UserProvider>
-          {children}
-        </UserProvider>
-
+          {/* Footer */}
           <Footer />
         </UserProvider>
       </body>
