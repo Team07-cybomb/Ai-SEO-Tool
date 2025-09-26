@@ -72,6 +72,26 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
+                        <Link
+              href="/keyword-generator"
+              className={`transition-colors ${
+                isScrolledPastBanner
+                  ? "text-muted-foreground hover:text-foreground"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
+            >
+              Keyword Generator
+            </Link>
+            <Link
+              href="/business-name-generator"
+              className={`transition-colors ${
+                isScrolledPastBanner
+                  ? "text-muted-foreground hover:text-foreground"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
+            >
+              Business Name Generator
+            </Link>
             <Link
               href="/pricing"
               className={`transition-colors ${
