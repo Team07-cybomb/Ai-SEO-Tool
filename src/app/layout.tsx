@@ -25,7 +25,8 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} overflow-hidden`}>
         {/* Global Google AdSense Script */}
         <Script
           id="adsense-init"
@@ -40,7 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
 
           {/* Page Content */}
-          <main>{children}</main>
+          <main className="overflow-y-scroll scrollbar-hide h-screen">
+            {children}
+          </main>
 
           {/* Footer */}
           <Footer />

@@ -10,20 +10,44 @@ import {
   SheetTrigger,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from "@/components/ui/sheet";
-import { Menu, LogOut, User } from "lucide-react";
+import {
+  Menu,
+  LogOut,
+  User,
+  ChevronDown,
+  Search,
+  Sparkles,
+  BarChart,
+  Tag,
+} from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/components/context/UserContext";
 
+// dropdown components
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false);
+  const [isServicesMenuOpen, setIsServicesMenuOpen] = useState(false);
 
   const { user, setUser } = useUser();
   const pathname = usePathname();
   const router = useRouter();
+
+  // services for dropdown
+  const services = [
+    { name: "Keyword Checker", href: "/keywordchecker", icon: Search },
+    { name: "Keyword Generator", href: "/keyword-generator", icon: Sparkles },
+    // { name: "Competitor Analysis", href: "/competitorAnalysis", icon: BarChart },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,11 +57,8 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Closes mobile menu on route change
   useEffect(() => {
-    if (mobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
+    if (mobileMenuOpen) setMobileMenuOpen(false);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -50,7 +71,7 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  // Hide Navbar on /profile route
+  // hide navbar on /profile route
   if (pathname.startsWith("/profile")) return null;
 
   return (
@@ -79,6 +100,66 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
+            <Link
+              href="/audit"
+              className={`transition-colors ${
+                isScrolledPastBanner
+                  ? "text-muted-foreground hover:text-foreground"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
+            >
+              SEO Audit
+            </Link>
+            <Link
+              href="/business-name-generator"
+              className={`transition-colors ${
+                isScrolledPastBanner
+                  ? "text-muted-foreground hover:text-foreground"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
+            >
+              Business Name Generator
+            </Link>
+
+            {/* Services Dropdown on hover */}
+            <div
+              className="relative"
+              onMouseEnter={() => setIsServicesMenuOpen(true)}
+              onMouseLeave={() => setIsServicesMenuOpen(false)}
+            >
+              <DropdownMenu open={isServicesMenuOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`flex items-center gap-1 transition-colors ${
+                      isScrolledPastBanner
+                        ? "text-muted-foreground hover:text-foreground"
+                        : "text-gray-700 hover:text-gray-900"
+                    }`}
+                  >
+                    Services{" "}
+                    <ChevronDown className="w-4 h-4 transition-transform" />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className="w-64 rounded-xl shadow-lg border border-gray-200 bg-white p-2"
+                  sideOffset={8}
+                >
+                  {services.map((service) => (
+                    <DropdownMenuItem asChild key={service.href}>
+                      <Link
+                        href={service.href}
+                        className="flex items-center px-3 py-2 rounded-lg hover:bg-primary/10 hover:text-primary"
+                      >
+                        <service.icon className="mr-2 h-4 w-4" />
+                        <span className="font-medium">{service.name}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
             <Link
               href="/pricing"
               className={`transition-colors ${
@@ -168,11 +249,27 @@ export default function Navbar() {
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
-                  
                 </SheetHeader>
 
-                <div className="flex flex-col space-y-6 mt-6">
+                <div className="flex flex-col space-y-6">
                   <div className="mx-5 flex flex-col">
+                    <Link
+                      href="/audit"
+                      className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      SEO Audit
+                    </Link>
+                    {services.map((service) => (
+                      <Link
+                        key={service.href}
+                        href={service.href}
+                        className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {service.name}
+                      </Link>
+                    ))}
                     <Link
                       href="/pricing"
                       className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
@@ -226,12 +323,15 @@ export default function Navbar() {
                             handleProfileRedirect();
                             setMobileMenuOpen(false);
                           }}
-                          className="flex items-center gap-2 justify-start"
+                          className="flex items-center gap-2 justify-center"
                         >
-                          <User className="w-4 h-4" />
+                          <User className="w-4  h-4" />
                           Profile
                         </Button>
-                        <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
                           <Button className="w-full">Login</Button>
                         </Link>
                       </div>
