@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Menu, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,12 +33,12 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Closes the mobile menu on route changes
+  // Closes mobile menu on route change
   useEffect(() => {
     if (mobileMenuOpen) {
       setMobileMenuOpen(false);
     }
-  }, [pathname, mobileMenuOpen]);
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -118,25 +125,20 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                {/* Profile Icon that redirects to login */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleProfileRedirect}
-                  className={`p-2 rounded-full transition-all duration-200
-                  ${isScrolledPastBanner 
-                    ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
-                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                  }
-                  hover:scale-110 hover:shadow-md active:scale-95
-                  `}
+                  className={`p-2 rounded-full transition-all duration-200 ${
+                    isScrolledPastBanner
+                      ? "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  } hover:scale-110 hover:shadow-md active:scale-95`}
                 >
                   <User className="w-5 h-5 transition-transform duration-200" />
                 </Button>
-                
-                {/* Login Button */}
-                <Button 
-                  asChild 
+                <Button
+                  asChild
                   variant={isScrolledPastBanner ? "outline" : "default"}
                   size="sm"
                 >
@@ -150,7 +152,11 @@ export default function Navbar() {
           <div className="md:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMobileMenuOpen(true)}
+                >
                   <Menu
                     className={`w-5 h-5 ${
                       isScrolledPastBanner ? "text-foreground" : "text-gray-900"
@@ -158,7 +164,13 @@ export default function Navbar() {
                   />
                 </Button>
               </SheetTrigger>
+
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                  
+                </SheetHeader>
+
                 <div className="flex flex-col space-y-6 mt-6">
                   <div className="mx-5 flex flex-col">
                     <Link
@@ -197,8 +209,8 @@ export default function Navbar() {
                         <Button
                           variant="outline"
                           onClick={() => {
-                            setMobileMenuOpen(false);
                             handleLogout();
+                            setMobileMenuOpen(false);
                           }}
                           className="flex items-center gap-2"
                         >
@@ -208,20 +220,17 @@ export default function Navbar() {
                       </div>
                     ) : (
                       <div className="flex flex-col gap-3 pt-4">
-                        {/* Profile Icon in mobile menu */}
                         <Button
                           variant="outline"
                           onClick={() => {
-                            setMobileMenuOpen(false);
                             handleProfileRedirect();
+                            setMobileMenuOpen(false);
                           }}
                           className="flex items-center gap-2 justify-start"
                         >
                           <User className="w-4 h-4" />
                           Profile
                         </Button>
-                        
-                        {/* Login Button in mobile menu */}
                         <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                           <Button className="w-full">Login</Button>
                         </Link>
