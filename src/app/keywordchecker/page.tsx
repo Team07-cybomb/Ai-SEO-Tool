@@ -11,29 +11,31 @@ import { Progress } from "@/components/ui/progress"
 // n8n webhook URL
 const API_URL = "https://n8n.cybomb.com/webhook/keyword"
 
-interface Page {
-  page_url: string
+interface ImplementationStep {
+  step: number
+  action: string
+}
+
+interface BlogHeading {
+  heading: string
+  keywords_used: string[]
+}
+
+interface BlogOutline {
   title: string
-  purpose: string
-  main_keywords: string[]
+  headings: BlogHeading[]
+  key_points: string[]
 }
 
-interface PagesData {
-  homepage: Page[]
-  services_products: Page[]
-  blogs: Page[]
-  landing_pages: Page[]
-  other_pages: Page[]
+interface ContentExample {
+  long_tail_keyword: string
+  blog_outline: BlogOutline
 }
 
-interface Keyword {
-  keyword: string
-  intent: string
-  frequency: number
-  relevance_score: number
-  search_volume?: number
-  difficulty: string
-  related_keywords: string[]
+interface SEOStrategy {
+  keyword_usage_explained: string
+  implementation_plan: ImplementationStep[]
+  content_example: ContentExample
 }
 
 interface SEOData {
@@ -78,7 +80,10 @@ export default function Keywordchecker() {
     setError("")
     setSeoData(null)
     setShowAnimations(false)
-    setExpandedKeywords({})
+    setExpandedSections({
+      implementation: false,
+      blogOutline: false
+    })
 
     try {
       const response = await fetch(API_URL, {
@@ -102,6 +107,8 @@ export default function Keywordchecker() {
         parsedData = data;
       }
       
+      // Add the URL to the parsed data
+      parsedData.url = url;
       setSeoData(parsedData)
     } catch (err) {
       console.error('Error parsing SEO data:', err)
@@ -134,7 +141,7 @@ export default function Keywordchecker() {
   const toggleKeywordExpansion = (index: number) => {
     setExpandedKeywords(prev => ({
       ...prev,
-      [index]: !prev[index]
+      [section]: !prev[section]
     }))
   }
 
@@ -370,7 +377,7 @@ export default function Keywordchecker() {
                   <CardTitle className="text-xl font-bold">Keyword Analysis</CardTitle>
                 </div>
                 <CardDescription className="text-teal-100">
-                  Detailed analysis of discovered keywords with metrics and insights
+                  Sample blog outline targeting: "{seoData.seo_strategy.content_example.long_tail_keyword}"
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
