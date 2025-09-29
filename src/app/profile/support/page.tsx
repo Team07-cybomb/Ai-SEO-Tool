@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useCallback, ReactNode } from 'react';
 import { MessageCircle, Mail, FileText, HelpCircle, X, Search, ChevronDown } from 'lucide-react';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
+import { useEffect } from "react";
+
 
 // --- Type Definitions ---
 interface CardProps {
@@ -423,23 +426,38 @@ const ContactForm = () => {
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        setIsSubmitting(false);
-        setSubmitted(true);
-        
-        // Reset form after success
-        setTimeout(() => {
-            setFormData({ subject: '', message: '', priority: 'medium', type: 'technical' });
-            setSubmitted(false);
-        }, 3000);
-    };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
+  try {
+    const res = await fetch(`${API_BASE}/api/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    if (!res.ok) throw new Error("Failed to send");
+
+    setSubmitted(true);
+    setFormData({ subject: "", message: "", priority: "medium", type: "technical" });
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+useEffect(() => {
+  if (submitted) {
+    const timer = setTimeout(() => {
+      setSubmitted(false); // hide success message after 5s
+    }, 5000); // 5000ms = 5 seconds
+
+    return () => clearTimeout(timer); // cleanup
+  }
+}, [submitted]);
     if (submitted) {
         return (
             <Card className="hover:shadow-xl transition-shadow duration-300">
