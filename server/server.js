@@ -7,6 +7,7 @@ const auditRoutes = require("./routes/auditRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const pricingRoutes = require("./routes/pricingRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const scraperRoutes = require("./routes/scraperRoutes"); 
 
 require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
 
@@ -46,6 +47,7 @@ app.use("/api", auditRoutes);
 app.use("/api", adminRoutes);
 app.use("/api", pricingRoutes);
 app.use("/api", subscriptionRoutes);
+app.use("/api", scraperRoutes);
 
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
