@@ -18,14 +18,11 @@ import {
   ChevronDown,
   Search,
   Sparkles,
-  BarChart,
-  Tag,
 } from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/components/context/UserContext";
 
-// dropdown components
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,11 +39,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // services for dropdown
   const services = [
     { name: "Keyword Checker", href: "/keywordchecker", icon: Search },
     { name: "Keyword Generator", href: "/keyword-generator", icon: Sparkles },
-    // { name: "Competitor Analysis", href: "/competitorAnalysis", icon: BarChart },
   ];
 
   useEffect(() => {
@@ -71,7 +66,6 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  // hide navbar on /profile route
   if (pathname.startsWith("/profile")) return null;
 
   return (
@@ -99,7 +93,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-6">
             <Link
               href="/audit"
               className={`transition-colors ${
@@ -121,7 +115,7 @@ export default function Navbar() {
               Business Name Generator
             </Link>
 
-            {/* Services Dropdown on hover */}
+            {/* Services Dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setIsServicesMenuOpen(true)}
@@ -136,7 +130,7 @@ export default function Navbar() {
                         : "text-gray-700 hover:text-gray-900"
                     }`}
                   >
-                    Services{" "}
+                    <span>Services</span>
                     <ChevronDown className="w-4 h-4 transition-transform" />
                   </button>
                 </DropdownMenuTrigger>
@@ -230,7 +224,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Navigation */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -240,7 +234,9 @@ export default function Navbar() {
                 >
                   <Menu
                     className={`w-5 h-5 ${
-                      isScrolledPastBanner ? "text-foreground" : "text-gray-900"
+                      isScrolledPastBanner
+                        ? "text-foreground"
+                        : "text-gray-900"
                     }`}
                   />
                 </Button>
@@ -259,6 +255,13 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       SEO Audit
+                    </Link>
+                    <Link
+                      href="/business-name-generator"
+                      className="text-lg text-muted-foreground hover:text-foreground transition-colors py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Business Name Generator
                     </Link>
                     {services.map((service) => (
                       <Link
@@ -325,7 +328,7 @@ export default function Navbar() {
                           }}
                           className="flex items-center gap-2 justify-center"
                         >
-                          <User className="w-4  h-4" />
+                          <User className="w-4 h-4" />
                           Profile
                         </Button>
                         <Link
