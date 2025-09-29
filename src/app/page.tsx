@@ -360,12 +360,7 @@ export default function LandingPage() {
             style={{ color: "var(--primary)" }}
           >
             Fix your SEO in minutes
-          </Link>
-           <Link href="/keywordchecker">
-    <Button size="lg" variant="outline" className="text-lg px-8 sm:w-auto text-white border-white hover:bg-white hover:text-primary transition-colors">
-      Keyword Checker
-    </Button>
-    </Link>
+          </Link>  
         </div>
       </section>
     </div>
