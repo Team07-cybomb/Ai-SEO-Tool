@@ -14,7 +14,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
 console.log("JWT_SECRET loaded:", process.env.JWT_SECRET);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Body parser
 app.use(express.json());
@@ -22,7 +22,7 @@ app.use(express.json());
 // CORS - allow frontend to send credentials
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://rankseo.in", "http://localhost:3001"],
+    origin: ["http://localhost:3001", "https://rankseo.in"],
     credentials: true,
   })
 );
