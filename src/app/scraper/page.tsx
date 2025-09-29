@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ExternalLink, ChevronDown, ChevronUp, FileText, Globe, Search, BarChart3, Zap, Sparkles, Loader2, XCircle } from "lucide-react";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 // Interface for the data returned by the recursive crawler
 interface CrawlResult {
     url: string;
@@ -150,7 +150,7 @@ export default function ScraperPage() {
         setShowAnimations(false);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/crawl', { url });
+            const response = await axios.post(`${API_URL}/api/crawl`, { url });
             
             if (response.data && response.data.data) {
                 setCrawlingData(response.data.data as CrawlResult[]);
