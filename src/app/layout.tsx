@@ -43,10 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Page Content */}
           <main className="overflow-y-scroll scrollbar-hide h-screen">
             {children}
+               <Footer />
           </main>
-
-          {/* Footer */}
-          <Footer />
+  
         </UserProvider>
       </body>
     </html>
