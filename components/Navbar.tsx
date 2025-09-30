@@ -42,6 +42,7 @@ export default function Navbar() {
   const services = [
     { name: "Keyword Checker", href: "/keywordchecker", icon: Search },
     { name: "Keyword Generator", href: "/keyword-generator", icon: Sparkles },
+    { name: "Keyword Scraper", href: "/scraper", icon: Search }
   ];
 
   useEffect(() => {
