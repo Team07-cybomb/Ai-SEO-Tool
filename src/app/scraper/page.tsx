@@ -1,6 +1,7 @@
 "use client";
 import { useState, FC } from "react";
 import axios from "axios";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // Define the structure of the data we expect from the API
 interface KeywordIntent {
@@ -82,7 +83,7 @@ export default function ScraperPage() {
 
         try {
             // NOTE: Replace with your actual API endpoint if different.
-            const response = await axios.post("http://localhost:5000/api/crawl", { url });
+            const response = await axios.post(`${API_URL}`, { url });
             if (response.data?.success && response.data.data) {
                 setJsonResult(response.data.data);
                 setScrapeInfo({ url: response.data.mainUrl, count: response.data.totalScraped });
