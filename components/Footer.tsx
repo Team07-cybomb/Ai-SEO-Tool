@@ -7,6 +7,7 @@ import { useState } from "react";
 import Swal from "sweetalert2"; // ✅ SweetAlert2
 import Image from "next/image";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Footer() {
   const pathname = usePathname();
   const [email, setEmail] = useState("");
@@ -70,9 +71,10 @@ export default function Footer() {
     <footer className="bg-muted border-t border-border py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
         {/* Top Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-8">
-          {/* Logo + About */}
-          <div className="space-y-4">
+        {/* Changed lg:grid-cols-4 to lg:grid-cols-5 to fit all items */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+          {/* Logo + About - Increased column span for better balance */}
+          <div className="space-y-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
               <Link href={"/"}>
                 <Image
@@ -91,31 +93,70 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Company Links */}
-          <div className="lg:flex lg:justify-center">
-            <div>
-              <h3 className="font-semibold text-foreground text-base mb-3">
-                Company
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/about-us"
-                    className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact-us"
-                    className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-                  >
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
+          {/* Company Links - Removed unnecessary justify-center class */}
+          <div>
+            <h3 className="font-semibold text-foreground text-base mb-3">
+              Company
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/about-us"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact-us"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h3 className="font-semibold text-foreground text-base mb-3">
+              Services
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/business-name-generator"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  Business Name Generator
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/audit"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  Seo Audit Tool
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/keyword-generator"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  Keyword Generator Tool
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/scraper"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  Keyword Scraper Tool
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Legal Links */}
@@ -192,10 +233,10 @@ export default function Footer() {
                   Contact Support
                 </p>
                 <a
-                  href="mailto:Info@rankseo.in"
+                  href="mailto:info@rankkse.in" // Corrected the email address
                   className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors no-underline"
                 >
-                  Info@rankseo.in
+                  info@rankkse.in
                 </a>
               </div>
             </div>
