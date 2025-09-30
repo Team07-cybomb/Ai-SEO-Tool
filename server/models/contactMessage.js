@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+ 
 const ContactMessageSchema = new mongoose.Schema(
   {
     subject: { type: String, required: true },
@@ -9,5 +9,5 @@ const ContactMessageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+ 
 module.exports = mongoose.model("ContactMessage", ContactMessageSchema);
