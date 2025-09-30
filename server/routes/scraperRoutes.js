@@ -7,3 +7,5 @@ router.post('/crawl', scraperController.crawlAndScrape);
 
 module.exports = router;
 //module.exports = { processCrawlQueue };
+
+//https://n8n.cybomb.com/webhook/optimize-crawl
