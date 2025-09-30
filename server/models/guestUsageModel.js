@@ -4,7 +4,7 @@ const guestUsageSchema = new mongoose.Schema({
   ip: {
     type: String,
     required: true,
-    unique: true, // each IP only once per day
+    // unique: true, 
   },
   count: {
     type: Number,

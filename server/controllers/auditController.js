@@ -73,8 +73,15 @@ const auditData = {
     res.status(500).json({ message: "Error saving audit", error: err.message });
   }
 };
-
-
+async function dropIndex() {
+  try {
+    await GuestUsage.collection.dropIndex("ip_1"); // remove unique index on ip
+    console.log("Index dropped successfully");
+  } catch (err) {
+    console.error("Error dropping index:", err.message);
+  }
+}
+dropIndex();
 // ---------------- Get Audits ----------------
 exports.getAudits = async (req, res) => {
   try {
