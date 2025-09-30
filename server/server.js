@@ -8,7 +8,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const pricingRoutes = require("./routes/pricingRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const scraperRoutes = require("./routes/scraperRoutes"); 
-
+const contactRoutes = require("./routes/contactRoutes.js");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
 
 console.log("JWT_SECRET loaded:", process.env.JWT_SECRET);
@@ -48,7 +48,7 @@ app.use("/api", adminRoutes);
 app.use("/api", pricingRoutes);
 app.use("/api", subscriptionRoutes);
 app.use("/api", scraperRoutes);
-
+app.use("/api", contactRoutes);
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
