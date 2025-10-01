@@ -2,8 +2,8 @@ const { chromium } = require("playwright");
 const { URL } = require("url");
 const axios = require("axios");
 
-const MAX_DEPTH = 2; // Reduced for faster testing, can be increased
-const MAX_PAGES = 100; // Reduced for faster testing
+const MAX_DEPTH = 3; // Reduced for faster testing, can be increased
+const MAX_PAGES = 500; // Reduced for faster testing
 
 // --- Core Scraper Function ---
 async function processCrawlQueue(startUrl, page) {
@@ -139,7 +139,7 @@ async function sendToN8nAndWait(scrapedData) {
     };
 
     console.log("Sending data to n8n...");
-    const response = await axios.post(n8nWebhookUrl, payload, { timeout: 120000 }); // Increased timeout
+    const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 }); // Increased timeout
     console.log("Raw n8n response received.");
 
     if (!response.data || !Array.isArray(response.data) || !response.data[0]?.output) {
@@ -193,7 +193,7 @@ async function sendToN8nAndWait(scrapedData) {
       long_tail_keywords: [],
       related_keywords: [],
       keyword_intent: { informational: [], navigational: [], transactional: [], commercial: [] },
-      error: "Could not fetch detailed analysis from n8n. Displaying basic keywords.",
+      error: "Could not fetch detailed analysis from Provided URL. Displaying basic keywords.",
     };
   }
 }
