@@ -15,7 +15,6 @@ async function processCrawlQueue(startUrl, page) {
   urlsToVisit.set(startUrl, 0);
 
   while (urlsToVisit.size > 0 && visitedUrls.size < MAX_PAGES) {
-    // Get the first entry from the map
     const [currentUrl, depth] = urlsToVisit.entries().next().value;
     urlsToVisit.delete(currentUrl);
 
@@ -34,15 +33,14 @@ async function processCrawlQueue(startUrl, page) {
         const elements = document.querySelectorAll("h1, h2, h3, p, li, span");
         const content = Array.from(elements)
           .map((el) => el.innerText.trim())
-          .filter((text) => text.length > 15 && text.length < 800) // Adjusted length filters
-          .slice(0, 25); // Get a bit more content for better analysis
+          .filter((text) => text.length > 15 && text.length < 800)
+          .slice(0, 25);
 
         const allLinks = Array.from(document.querySelectorAll("a[href]"))
           .map((a) => a.href)
           .filter((href) => {
             try {
               const linkUrl = new URL(href);
-              // Ensure it's http/https, belongs to the same domain, and isn't just a fragment '#'
               return (
                 linkUrl.protocol.startsWith("http") &&
                 linkUrl.hostname === new URL(bUrl).hostname &&
@@ -53,17 +51,17 @@ async function processCrawlQueue(startUrl, page) {
             }
           });
 
-        return { pageTitle: title, allContent: content, links: [...new Set(allLinks)] }; // Remove duplicate links
+        return { pageTitle: title, allContent: content, links: [...new Set(allLinks)] };
       }, baseUrl);
 
       const fullText = pageData.allContent.join(" ");
-      const keywords = extractKeywords(fullText); // Keywords extracted locally as a fallback
+      const keywords = extractKeywords(fullText);
 
       scrapedResults.push({
         url: currentUrl,
         depth,
         title: pageData.pageTitle,
-        content: pageData.allContent.slice(0, 15), // Keep a reasonable amount of content
+        content: pageData.allContent.slice(0, 15),
         foundLinks: pageData.links.length,
         keywords,
         contentLength: fullText.length,
@@ -98,7 +96,6 @@ async function processCrawlQueue(startUrl, page) {
 // --- Keyword Extraction (Local Fallback) ---
 function extractKeywords(text, maxKeywords = 10) {
   if (!text) return [];
-  // Expanded stop words list
   const stopWords = new Set([
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
     "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
@@ -114,7 +111,7 @@ function extractKeywords(text, maxKeywords = 10) {
 
   const words = text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, " ") // Allow hyphens in words
+    .replace(/[^\w\s-]/g, " ")
     .split(/\s+/)
     .filter((word) => word.length > 3 && !stopWords.has(word));
 
@@ -129,7 +126,7 @@ function extractKeywords(text, maxKeywords = 10) {
 
 // --- Send data to n8n and wait for response ---
 async function sendToN8nAndWait(scrapedData) {
-  const n8nWebhookUrl = "https://n8n.cybomb.com/webhook/optimize-crawl2";
+  const n8nWebhookUrl = "https://n8n.cybomb.com/webhook/optimize-crawl";
   try {
     const payload = {
       analysisType: "keyword_and_content_analysis",
@@ -139,29 +136,27 @@ async function sendToN8nAndWait(scrapedData) {
     };
 
     console.log("Sending data to n8n...");
-    const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 }); // Increased timeout
+    const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 });
     console.log("Raw n8n response received.");
 
-    // Check if the response is an object with an 'output' property
-    if (!response.data || typeof response.data !== 'object' || !response.data.output) {
+    let parsedData;
+    if (response.data && typeof response.data === 'object' && response.data.output) {
+      let jsonStr = response.data.output.trim();
+      if (jsonStr.startsWith("```json")) {
+        jsonStr = jsonStr.substring(7);
+      }
+      if (jsonStr.endsWith("```")) {
+        jsonStr = jsonStr.slice(0, -3);
+      }
+      parsedData = JSON.parse(jsonStr);
+    } else {
       console.warn("n8n response is not in the expected format:", response.data);
       throw new Error("Invalid n8n response format.");
     }
 
-    // Clean up potential markdown formatting from the AI response
-    let jsonStr = response.data.output.trim();
-    if (jsonStr.startsWith("```json")) {
-      jsonStr = jsonStr.substring(7);
-    }
-    if (jsonStr.endsWith("```")) {
-      jsonStr = jsonStr.slice(0, -3);
-    }
+    //console.log("Parsed n8n data:", JSON.stringify(parsedData, null, 2));
 
-    const parsed = JSON.parse(jsonStr);
-    //console.log("Parsed n8n data:", JSON.stringify(parsed, null, 2));
-
-
-    // More robustly normalizes keywords, handles strings or objects, and filters empty values.
+    // Normalize keywords for the frontend
     const normalizeKeywords = (arr) => {
       if (!Array.isArray(arr)) return [];
       return arr
@@ -169,31 +164,50 @@ async function sendToN8nAndWait(scrapedData) {
         .filter(Boolean);
     };
 
-    // Safely access keyword_intent, providing a default empty object if it's missing.
-    const intentData = parsed.keyword_intent || {};
+    // The core fix: properly map the keywords and intents
+    const combinedKeywords = (parsedData.keyword_intent || []).map(k => ({
+      keyword: k.keyword,
+      intent: k.intent,
+      // The other properties from the frontend's Keyword interface are not in the sample,
+      // so we use placeholders or safe defaults.
+      difficulty: "N/A",
+      frequency: "N/A",
+      relevance_score: 0,
+      search_volume: "N/A",
+      related_keywords: parsedData.related_keywords || []
+    }));
 
     return {
-      primary_keywords: normalizeKeywords(parsed.primary_keywords),
-      secondary_keywords: normalizeKeywords(parsed.secondary_keywords),
-      long_tail_keywords: normalizeKeywords(parsed.long_tail_keywords),
-      related_keywords: normalizeKeywords(parsed.related_keywords),
-      keyword_intent: {
-        informational: normalizeKeywords(intentData.informational),
-        navigational: normalizeKeywords(intentData.navigational),
-        transactional: normalizeKeywords(intentData.transactional),
-        commercial: normalizeKeywords(intentData.commercial),
+      keywords: combinedKeywords,
+      summary: {
+        primary_keywords: normalizeKeywords(parsedData.primary_keywords),
+        secondary_keywords: normalizeKeywords(parsedData.secondary_keywords),
+        keyword_gaps: [], // Not provided in the sample
       },
+      recommendations: [], // Not provided in the sample
+      pages: {}, // Not provided in the sample
+      error: null
     };
   } catch (error) {
     console.error("Error processing n8n data:", error.message);
-    // Fallback to locally extracted keywords if n8n fails
     const allKeywords = scrapedData.flatMap((r) => r.keywords.map((k) => k.word));
     return {
-      primary_keywords: [...new Set(allKeywords)].slice(0, 10), // Use unique keywords
-      secondary_keywords: [],
-      long_tail_keywords: [],
-      related_keywords: [],
-      keyword_intent: { informational: [], navigational: [], transactional: [], commercial: [] },
+      keywords: allKeywords.slice(0, 10).map(k => ({
+        keyword: k,
+        intent: "N/A",
+        difficulty: "N/A",
+        frequency: "N/A",
+        relevance_score: 0,
+        search_volume: "N/A",
+        related_keywords: []
+      })),
+      summary: {
+        primary_keywords: [...new Set(allKeywords)].slice(0, 10),
+        secondary_keywords: [],
+        keyword_gaps: [],
+      },
+      recommendations: [],
+      pages: {},
       error: "Could not fetch detailed analysis from Provided URL. Displaying basic keywords.",
     };
   }
@@ -216,7 +230,6 @@ exports.crawlAndScrape = async (req, res) => {
     console.log(`Starting crawl for: ${startUrl}`);
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
-      // Block images, stylesheets, and fonts to speed up scraping
       route: (route) => {
         const type = route.request().resourceType();
         if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
