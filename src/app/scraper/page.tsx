@@ -1,6 +1,8 @@
 "use client";
+
 import { useState, FC } from "react";
 import axios from "axios";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // Define the structure of the data we expect from the API
@@ -22,7 +24,7 @@ interface KeywordData {
   keywordCount?: number;
 }
 
-// A map to associate keyword groups with colors and descriptions - Updated to teal shades
+// Enhanced gradient configurations with teal theme
 const keywordGroupConfig = {
   primary_keywords: { 
     title: "Primary Keywords", 
@@ -77,14 +79,14 @@ const intentGroupConfig = {
   },
 };
 
-// KeywordChip component for displaying a single keyword
+// Enhanced KeywordChip component
 const KeywordChip: FC<{ keyword: string; color: string }> = ({ keyword, color }) => (
-  <span className={`inline-block ${color} text-white text-sm font-medium px-3 py-2 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl`}>
+  <span className={`inline-block ${color} text-white text-sm font-semibold px-3 py-2 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-xl hover:brightness-110`}>
     {keyword}
   </span>
 );
 
-// KeywordGroup component for displaying a category of keywords
+// Enhanced KeywordGroup component
 const KeywordGroup: FC<{ 
   title: string; 
   keywords?: string[]; 
@@ -95,25 +97,25 @@ const KeywordGroup: FC<{
 }> = ({ title, keywords, color, description, icon, animationDelay = 0 }) => {
   return (
     <div 
-      className="bg-white/80 backdrop-blur-sm border border-teal-100 rounded-2xl shadow-xl p-6 transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+      className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-5 transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-1"
       style={{ animationDelay: `${animationDelay}ms` }}
     >
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-10 h-10 ${color} rounded-xl flex items-center justify-center shadow-lg`}>
-          <span className="text-white font-bold text-lg">{icon}</span>
+      <div className="flex items-center gap-3 mb-3">
+        <div className={`w-9 h-9 ${color} rounded-xl flex items-center justify-center shadow-lg`}>
+          <span className="text-white font-bold text-md">{icon}</span>
         </div>
         <div>
-          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-600">{description}</p>
+          <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+          <p className="text-xs text-gray-600">{description}</p>
         </div>
       </div>
       {(!keywords || keywords.length === 0) ? (
-        <div className="text-center py-8">
-          <div className="text-4xl mb-2 text-teal-300">🔍</div>
-          <p className="text-gray-400 italic">No keywords identified for this category</p>
+        <div className="text-center py-4">
+          <div className="text-3xl mb-1 text-gray-300">🔍</div>
+          <p className="text-gray-400 italic text-sm">No keywords found</p>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {keywords.map((kw, idx) => (
             <KeywordChip key={idx} keyword={kw} color={color} />
           ))}
@@ -123,7 +125,7 @@ const KeywordGroup: FC<{
   );
 };
 
-// Stats Card Component
+// Enhanced Stats Card Component
 const StatsCard: FC<{ 
   title: string; 
   value: string | number; 
@@ -131,12 +133,34 @@ const StatsCard: FC<{
   color: string;
   icon: string;
 }> = ({ title, value, description, color, icon }) => (
-  <div className="bg-white/80 backdrop-blur-sm border border-teal-100 rounded-2xl shadow-lg p-6 text-center transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-    <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+  <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl p-4 text-center transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+    <div className={`w-10 h-10 ${color} rounded-xl flex items-center justify-center mx-auto mb-2 shadow-lg`}>
+      <span className="text-white font-bold text-md">{icon}</span>
+    </div>
+    <p className="text-2xl font-bold text-gray-900 mb-1">{value}</p>
+    <h3 className="text-sm font-semibold text-gray-800 mb-1">{title}</h3>
+    <p className="text-xs text-gray-600">{description}</p>
+  </div>
+);
+
+// Feature Card Component for the empty space
+const FeatureCard: FC<{
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  step?: number;
+}> = ({ title, description, icon, color, step }) => (
+  <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl p-6 text-center transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+    {step && (
+      <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-sm font-bold mb-3 shadow-lg">
+        {step}
+      </div>
+    )}
+    <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
       <span className="text-white font-bold text-lg">{icon}</span>
     </div>
-    <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
-    <h3 className="text-lg font-semibold text-gray-800 mb-1">{title}</h3>
+    <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
     <p className="text-sm text-gray-600">{description}</p>
   </div>
 );
@@ -196,50 +220,61 @@ export default function ScraperPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-teal-50/30 to-cyan-50/30 py-24 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-        {/* Animated Background Elements */}
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-32 w-80 h-80 bg-teal-200/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-cyan-200/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 py-28 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
+      {/* Enhanced Animated Background with teal theme */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        {/* Multi-color gradient orbs */}
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-r from-teal-400/30 to-cyan-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gradient-to-r from-blue-400/30 to-teal-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-40 h-40 bg-gradient-to-r from-emerald-400/20 to-teal-400/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute bottom-1/4 right-1/3 w-32 h-32 bg-gradient-to-r from-cyan-400/20 to-blue-400/10 rounded-full blur-3xl animate-pulse delay-1500"></div>
+        
+        {/* Animated grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24px,#000_25px,transparent_26px)] bg-[length:50px_50px]"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(transparent_24px,#000_25px,transparent_26px)] bg-[length:50px_50px]"></div>
         </div>
+      </div>
 
-        <header className="text-center mb-12 relative">
-          <div className="inline-flex items-center justify-center mb-6">
-            <div className="relative">
-              <span className="px-4 py-1.5 text-sm bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-full shadow-lg shadow-teal-200/50 relative z-10 font-semibold">
+      <div className="max-w-6xl mx-auto">
+        {/* Enhanced Header */}
+        <header className="text-center mb-8 relative">
+          <div className="inline-flex items-center justify-center mb-3">
+            {/* <div className="relative">
+              <span className="px-4 py-1.5 text-sm bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full shadow-lg shadow-teal-200/50 relative z-10 font-semibold">
                 🔍 SEO Keyword Analysis
               </span>
               <div className="absolute -inset-1 bg-teal-300/30 rounded-lg blur-sm animate-pulse"></div>
-            </div>
+            </div> */}
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600 bg-clip-text text-transparent mb-4 relative">
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2 relative">
             SEO Keyword Extractor
-            <span className="absolute -top-2 -right-6 text-teal-400 animate-spin">✨</span>
+            <span className="absolute -top-1 -right-4 text-teal-400 text-xl">✨</span>
           </h1>
           
-          <div className="text-lg text-gray-600 max-w-2xl mx-auto relative">
-            <p>
+          <div className="text-base text-gray-600 max-w-xl mx-auto relative">
+            <p className="mb-1">
               Enter a website URL to crawl and analyze its complete keyword landscape
             </p>
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-20 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full mx-auto"></div>
           </div>
         </header>
 
         <main>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mb-16 relative">
+          {/* Enhanced Input Section */}
+          <div className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto mb-10 relative">
             <div className="relative flex-1 group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-teal-600 text-lg z-10">🔗</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-teal-600 text-base z-10">🔗</span>
                 <input
                   type="url"
                   placeholder="https://example.com"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-10 pr-4 py-3 text-lg text-gray-700 bg-white/80 backdrop-blur-sm border-0 rounded-xl shadow-xl focus:ring-2 focus:ring-teal-300 transition-all duration-300"
+                  className="w-full pl-10 pr-4 py-3 text-base text-gray-700 bg-white/95 backdrop-blur-lg border-0 rounded-xl shadow-xl focus:ring-2 focus:ring-teal-300 transition-all duration-300"
                 />
               </div>
             </div>
@@ -247,7 +282,7 @@ export default function ScraperPage() {
             <button
               onClick={handleCrawl}
               disabled={loading}
-              className="px-8 py-3 text-lg font-semibold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl shadow-xl relative overflow-hidden group transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl shadow-xl relative overflow-hidden group transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               {loading ? (
@@ -258,39 +293,105 @@ export default function ScraperPage() {
               ) : (
                 <>
                   <span className="mr-2 relative z-10">🔎</span>
-                  <span className="relative z-10">Analyze Keywords</span>
+                  <span className="relative z-10">Analyze</span>
                 </>
               )}
             </button>
           </div>
 
+          {/* Empty Space Content - Based on Reference Image */}
+          {!loading && !jsonResult && !error && (
+            <div className="max-w-4xl mx-auto mb-12">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-3">
+                  Ready to Discover Keywords?
+                </h2>
+              </div>
+              {/* Call to Action */}
+              <div className="text-center mt-10">
+                <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-200/50 rounded-2xl p-6 backdrop-blur-sm">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Start Your SEO Journey Today</h3>
+                  <p className="text-gray-600 mb-4">
+                    Unlock the power of data-driven keyword research to boost your search engine rankings and drive targeted traffic to your website.
+                  </p>
+                  {/* <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                      No credit card required
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
+                      Instant results
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <span className="w-2 h-2 bg-teal-400 rounded-full"></span>
+                      Free analysis
+                    </div>
+                  </div> */}
+                </div>
+              </div>
+              {/* Additional Features Section */}
+              <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <span className="text-white font-bold text-lg">🚀</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">AI-Powered Analysis</h3>
+                      <p className="text-gray-600 text-sm">
+                        Our advanced AI algorithms analyze website content, meta tags, and structure to extract the most relevant keywords for your SEO strategy.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <span className="text-white font-bold text-lg">📊</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Comprehensive Reports</h3>
+                      <p className="text-gray-600 text-sm">
+                        Get detailed insights including primary keywords, search intent analysis, long-tail variations, and competitive keyword opportunities.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error Messages */}
           {error && (
-            <div className="mt-6 flex items-center justify-center text-red-600 bg-red-50 p-4 rounded-xl border border-red-200 max-w-2xl mx-auto shadow-lg transform transition-all duration-300 hover:scale-105">
+            <div className="mt-4 flex items-center justify-center text-red-600 bg-red-50/95 backdrop-blur-lg p-3 rounded-xl border border-red-200 max-w-2xl mx-auto shadow-lg transform transition-all duration-300">
               <span className="mr-2">❌</span>
-              <p className="font-medium">{error}</p>
+              <p className="font-medium text-sm">{error}</p>
             </div>
           )}
           
           {jsonResult?.error && (
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-xl shadow-lg mb-6 max-w-2xl mx-auto" role="alert">
-              <p className="font-bold">Analysis Notice</p>
-              <p>{jsonResult.error}</p>
+            <div className="bg-yellow-100/95 backdrop-blur-lg border-l-4 border-yellow-500 text-yellow-800 p-3 rounded-xl shadow-lg mb-4 max-w-2xl mx-auto" role="alert">
+              <p className="font-bold text-sm">Analysis Notice</p>
+              <p className="text-sm">{jsonResult.error}</p>
             </div>
           )}
 
+          {/* Results Section */}
           {!loading && jsonResult && (
-            <div className="space-y-8">
-              {/* Header Stats */}
+            <div className="space-y-6">
+              {/* Enhanced Header Stats */}
               {scrapeInfo && (
-                <div className={`bg-white/80 backdrop-blur-sm border border-teal-100 rounded-2xl shadow-2xl p-8 transition-all duration-700 transform ${showAnimations ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                  <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Analysis Complete! 🎉</h2>
-                    <p className="text-gray-600">
+                <div className={`bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-6 transition-all duration-700 transform ${showAnimations ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                  <div className="text-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">Analysis Complete! 🎉</h2>
+                    <p className="text-gray-600 text-sm">
                       Successfully analyzed <strong className="text-teal-600">{scrapeInfo.url}</strong>
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <StatsCard 
                       title="Pages Scanned" 
                       value={scrapeInfo.count} 
@@ -316,12 +417,12 @@ export default function ScraperPage() {
                 </div>
               )}
 
-              {/* Main Keyword Categories */}
+              {/* Enhanced Keyword Categories */}
               <div className={`transition-all duration-700 delay-200 ${showAnimations ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center border-b pb-4 border-teal-200">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center border-b pb-2 border-gray-200">
                   Keyword Analysis 📊
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(keywordGroupConfig).map(([key, config], index) => (
                     <KeywordGroup
                       key={key}
@@ -336,12 +437,12 @@ export default function ScraperPage() {
                 </div>
               </div>
 
-              {/* Search Intent Section */}
+              {/* Enhanced Search Intent Section */}
               <div className={`transition-all duration-700 delay-400 ${showAnimations ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center border-b pb-4 border-teal-200">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center border-b pb-2 border-gray-200">
                   Search Intent Analysis 🎯
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {Object.entries(intentGroupConfig).map(([key, config], index) => (
                     <KeywordGroup
                       key={key}
@@ -356,47 +457,47 @@ export default function ScraperPage() {
                 </div>
               </div>
 
-              {/* Success Animation */}
+              {/* Enhanced Success Animation */}
               {showAnimations && (
-                <div className="text-center py-12 transition-all duration-1000">
-                  <div className="inline-flex items-center justify-center p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl mb-6 shadow-2xl border border-teal-200">
+                <div className="text-center py-6 transition-all duration-1000">
+                  <div className="inline-flex items-center justify-center p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl mb-3 shadow-xl border border-white/20">
                     <div className="relative">
                       <div className="absolute inset-0 bg-teal-400/20 rounded-full animate-ping"></div>
-                      <span className="text-4xl relative z-10 text-teal-500">✅</span>
+                      <span className="text-3xl relative z-10 text-teal-500">✅</span>
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                     Analysis Complete!
                   </h3>
-                  <p className="text-gray-600 mb-8 text-lg">Your comprehensive keyword analysis is ready for review.</p>
+                  <p className="text-gray-600 text-sm mb-3">Your comprehensive keyword analysis is ready for review.</p>
                   
-                  <div className="max-w-md mx-auto bg-gray-200 rounded-full h-3 mb-6 overflow-hidden shadow-inner">
-                    <div className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 h-3 rounded-full animate-[loading_2s_ease-in-out_infinite]"></div>
+                  <div className="max-w-md mx-auto bg-gray-200 rounded-full h-1.5 mb-3 overflow-hidden shadow-inner">
+                    <div className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 h-1.5 rounded-full animate-[loading_2s_ease-in-out_infinite]"></div>
                   </div>
-                  <p className="text-sm text-gray-500 font-medium">Ready to optimize your SEO strategy</p>
+                  <p className="text-xs text-gray-500 font-medium">Ready to optimize your SEO strategy</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Loading Animation - Fixed without left side element */}
+          {/* Enhanced Loading Animation */}
           {loading && (
-            <div className="text-center py-20">
-              <div className="max-w-md mx-auto mb-8">
-                <div className="bg-gray-200 rounded-full h-3 shadow-inner overflow-hidden">
-                  <div className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 h-3 rounded-full animate-[loading_2s_ease-in-out_infinite]"></div>
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto mb-4">
+                <div className="bg-gray-200 rounded-full h-1.5 shadow-inner overflow-hidden">
+                  <div className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 h-1.5 rounded-full animate-[loading_2s_ease-in-out_infinite]"></div>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="animate-spin text-2xl text-teal-500">⏳</span>
-                <h3 className="text-2xl font-bold text-gray-900">Analyzing Website</h3>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="animate-spin text-xl text-teal-500">⏳</span>
+                <h3 className="text-lg font-bold text-gray-900">Analyzing Website</h3>
               </div>
-              <p className="text-gray-600 text-lg">Scanning pages and extracting keywords...</p>
-              <div className="mt-6 flex justify-center gap-2">
+              <p className="text-gray-600 text-sm">Scanning pages and extracting keywords...</p>
+              <div className="mt-3 flex justify-center gap-1">
                 {[0, 1, 2].map((i) => (
                   <div 
                     key={i} 
-                    className="w-3 h-3 bg-teal-400 rounded-full animate-bounce"
+                    className="w-2 h-2 bg-teal-400 rounded-full animate-bounce"
                     style={{ 
                       animationDelay: `${i * 0.2}s`,
                       animationDuration: '1.5s'
