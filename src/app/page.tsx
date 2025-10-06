@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Link from "next/link"
 import { Menu, Search, BarChart3, Zap, Shield, TrendingUp, FileText, Lightbulb, CheckCircle } from "lucide-react" // Added FileText, Lightbulb, CheckCircle for new section
-
+import { SeoGraph } from "@/components/seo-graph" 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false)
@@ -155,60 +155,123 @@ export default function LandingPage() {
       </section>
 
       {/* From Audit to Action Section */}
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
-  <div className="container mx-auto max-w-5xl">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
+              From Audit to Action: Grow Your Rankings in 3 Simple Steps
+            </h2>
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between md:gap-8">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center text-center flex-1 min-w-0">
+              <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mb-4 border-4 border-blue-500">
+                <FileText className="w-12 h-12 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">1. Audit Your Site</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">
+                Our AI tool performs a deep, comprehensive audit, analyzing 200+ ranking factors for technical errors, content gaps, and security vulnerabilities.
+              </p>
+            </div>
+
+            {/* Separator 1 */}
+            <div className="hidden md:block w-[100px] h-px bg-gray-300 relative">
+              <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center text-center flex-1 min-w-0">
+              <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-4 border-4 border-green-500">
+                <Lightbulb className="w-12 h-12 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">2. Get Actionable Insights</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">
+                We don&apos;t just show problems; provide a prioritized, easy-to-understand list of high-impact recommendations to make first.
+              </p>
+            </div>
+
+            {/* Separator 2 */}
+            <div className="hidden md:block w-[100px] h-px bg-gray-300 relative">
+              <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center text-center flex-1 min-w-0">
+              <div className="w-24 h-24 rounded-full bg-purple-100 flex items-center justify-center mb-4 border-4 border-purple-500">
+                <TrendingUp className="w-12 h-12 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">3. Track Your Progress</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">
+                Monitor your site&apos;s performance in real-time with our live dashboard, tracking keyword rankings, traffic growth, and regular reports.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* Live Graph Section - NEW */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+              See How You Stack Up Against Competitors
+            </h2>
+          </div>
+          <SeoGraph />
+        </div>
+      </section>
+      ---
+{/* Comparison Section - NEW */}
+<section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
+  <div className="container mx-auto max-w-6xl">
     <div className="text-center mb-12">
-      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-        From Audit to Action: Grow Your Rankings in 3 Simple Steps
+      <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+        Our AI Tool vs Manual SEO
       </h2>
+      <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+        See how our AI-powered platform gives you an unfair advantage by automating tasks and providing actionable insights that would take days to find manually.
+      </p>
     </div>
-    <div className="flex flex-col md:flex-row items-center justify-between md:gap-8">
-      {/* Step 1 */}
-      <div className="flex flex-col items-center text-center flex-1 min-w-0">
-        <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mb-4 border-4 border-blue-500">
-          <FileText className="w-12 h-12 text-blue-600" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2 text-foreground">1. Audit Your Site</h3>
-        <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">
-          Our AI tool performs a deep, comprehensive audit, analyzing 200+ ranking factors for technical errors, content gaps, and security vulnerabilities.
-        </p>
-      </div>
 
-      {/* Separator 1 */}
-      <div className="hidden md:block w-[100px] h-px bg-gray-300 relative">
-        <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
-      </div>
-
-      {/* Step 2 */}
-      <div className="flex flex-col items-center text-center flex-1 min-w-0">
-        <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-4 border-4 border-green-500">
-          <Lightbulb className="w-12 h-12 text-green-600" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2 text-foreground">2. Get Actionable Insights</h3>
-        <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">
-          We don&apos;t just show problems; provide a prioritized, easy-to-understand list of high-impact recommendations to make first.
-        </p>
-      </div>
-
-      {/* Separator 2 */}
-      <div className="hidden md:block w-[100px] h-px bg-gray-300 relative">
-        <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-gray-300 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
-      </div>
-
-      {/* Step 3 */}
-      <div className="flex flex-col items-center text-center flex-1 min-w-0">
-        <div className="w-24 h-24 rounded-full bg-purple-100 flex items-center justify-center mb-4 border-4 border-purple-500">
-          <TrendingUp className="w-12 h-12 text-purple-600" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2 text-foreground">3. Track Your Progress</h3>
-        <p className="text-muted-foreground text-sm leading-relaxed max-w-[250px]">
-          Monitor your site&apos;s performance in real-time with our live dashboard, tracking keyword rankings, traffic growth, and regular reports.
-        </p>
-      </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b">
+            <th className="py-4 px-6 text-xl font-bold text-foreground bg-muted/30">Feature</th>
+            <th className="py-4 px-6 text-xl font-bold text-foreground bg-blue-50 dark:bg-blue-950">Our AI Tool</th>
+            <th className="py-4 px-6 text-xl font-bold text-foreground bg-gray-50 dark:bg-gray-900">Manual SEO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b">
+            <td className="py-4 px-6 text-lg font-semibold text-foreground">Comprehensive Audit Speed</td>
+            <td className="py-4 px-6 text-green-600 font-medium">Minutes</td>
+            <td className="py-4 px-6 text-red-600 font-medium">Days to weeks</td>
+          </tr>
+          <tr className="border-b bg-gray-50 dark:bg-gray-900">
+            <td className="py-4 px-6 text-lg font-semibold text-foreground">Actionable Recommendations</td>
+            <td className="py-4 px-6 text-green-600 font-medium">Yes, prioritized and clear</td>
+            <td className="py-4 px-6 text-red-600 font-medium">No, requires expert interpretation</td>
+          </tr>
+          <tr className="border-b">
+            <td className="py-4 px-6 text-lg font-semibold text-foreground">Competitor Analysis</td>
+            <td className="py-4 px-6 text-green-600 font-medium">Included</td>
+            <td className="py-4 px-6 text-red-600 font-medium">Time-consuming & difficult</td>
+          </tr>
+          <tr className="border-b bg-gray-50 dark:bg-gray-900">
+            <td className="py-4 px-6 text-lg font-semibold text-foreground">Progress Tracking</td>
+            <td className="py-4 px-6 text-green-600 font-medium">Automated dashboard</td>
+            <td className="py-4 px-6 text-red-600 font-medium">Manual tracking with spreadsheets</td>
+          </tr>
+          <tr>
+            <td className="py-4 px-6 text-lg font-semibold text-foreground">Cost</td>
+            <td className="py-4 px-6 text-green-600 font-medium">Fixed monthly fee</td>
+            <td className="py-4 px-6 text-red-600 font-medium">High hourly rates</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
-
       {/* What Our Clients Say Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-800">
         <div className="container mx-auto">
@@ -231,7 +294,7 @@ export default function LandingPage() {
                   <p className="text-sm text-muted-foreground">Founder, Urban Urban Bloom</p>
                 </div>
               </div>
-               <p className="absolute bottom-4 right-4 text-6xl dark:text-gray-700 font-serif leading-none">&rdquo;</p>
+              <p className="absolute bottom-4 right-4 text-6xl dark:text-gray-700 font-serif leading-none">&rdquo;</p>
             </Card>
 
             {/* Testimonial 2 */}
@@ -247,7 +310,7 @@ export default function LandingPage() {
                   <p className="text-sm text-muted-foreground">Marketing Director, Connective Solutions</p>
                 </div>
               </div>
-               <p className="absolute bottom-4 right-4 text-6xl dark:text-gray-700 font-serif leading-none">&rdquo;</p>
+              <p className="absolute bottom-4 right-4 text-6xl dark:text-gray-700 font-serif leading-none">&rdquo;</p>
             </Card>
 
             {/* Testimonial 3 */}
@@ -268,6 +331,53 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      {/* Who It's For Section - NEW */}
+<section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
+  <div className="container mx-auto text-center max-w-4xl">
+    <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+      Who Can Benefit From SEO Analysis?
+    </h2>
+    <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+      Whether you're a seasoned pro or just starting, our tool is built for you. We provide the insights you need to succeed in a competitive digital landscape.
+    </p>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
+        <CardHeader className="text-center">
+          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+            <FileText className="w-6 h-6 text-primary" />
+          </div>
+          <CardTitle className="text-lg sm:text-xl text-foreground">Marketing Professionals</CardTitle>
+          <CardDescription>
+            Impress clients with detailed, professional SEO reports and track campaign performance with ease.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+      <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
+        <CardHeader className="text-center">
+          <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+            <TrendingUp className="w-6 h-6 text-primary" />
+          </div>
+          <CardTitle className="text-lg sm:text-xl text-foreground">Small Business Owners</CardTitle>
+          <CardDescription>
+            Take control of your online presence without needing to hire an expensive SEO agency.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+      <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
+        <CardHeader className="text-center">
+          <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+            <Lightbulb className="w-6 h-6 text-primary" />
+          </div>
+          <CardTitle className="text-lg sm:text-xl text-foreground">Bloggers & Content Creators</CardTitle>
+          <CardDescription>
+            Ensure your content is optimized for search engines to reach a wider audience and grow your organic traffic.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  </div>
+</section>
 
       {/* FAQ Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" id="FAQ">
@@ -346,23 +456,91 @@ export default function LandingPage() {
       </section>
 
 
-      {/* CTA Section */}
-      <section className="text-white py-12 sm:py-16 px-4 sm:px-6 text-center"
-        style={{ backgroundColor: "var(--primary)" }}>
-        <div className="container mx-auto text-center max-w-3xl">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6">Ready to Improve Your SEO?</h2>
-          <p className="text-base sm:text-lg lg:text-xl max-w-3xl mx-auto mb-6 text-gray-200 tracking-wide">
-            Join thousands of websites already using our platform to boost their search rankings.
-          </p>
-          <Link
-            href="/audit"
-            className="inline-block bg-white px-5 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all text-base sm:text-lg"
-            style={{ color: "var(--primary)" }}
-          >
-            Fix your SEO in minutes
-          </Link>  
+      {/* Pricing Section - NEW */}
+<section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-800" id="Pricing">
+  <div className="container mx-auto text-center max-w-5xl">
+    <div className="text-center mb-12">
+      <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+      Choose Your Path to SEO Excellence
+      </h2>
+      <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+        Choose a plan that fits your business needs and start improving your search rankings today. No hidden fees, just growth.
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+      {/* Free Plan */}
+      <Card className="flex flex-col h-full bg-white dark:bg-gray-900 border-border p-6 transition duration-300 hover:shadow-xl">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-2xl font-bold text-foreground">Free</CardTitle>
+          <CardDescription className="text-sm">For basic website audits</CardDescription>
+        </CardHeader>
+        <div className="flex-grow flex flex-col justify-center">
+          <div className="text-4xl font-extrabold text-foreground mb-4">$0</div>
+          <ul className="text-left space-y-2 text-muted-foreground">
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> One-time audit</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Basic SEO score</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Top 5 issues identified</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> No PDF report</li>
+          </ul>
         </div>
-      </section>
+        <div className="mt-6">
+          <Link href="/audit">
+            <Button className="w-full">Start Free Audit</Button>
+          </Link>
+        </div>
+      </Card>
+
+      {/* Pro Plan - Highlighted */}
+      <Card className="relative flex flex-col h-full bg-primary text-white p-8 rounded-xl shadow-xl transition duration-300 transform scale-105">
+        <Badge className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-semibold uppercase bg-accent-foreground text-primary">
+          Most Popular
+        </Badge>
+        <CardHeader className="text-center pb-4 text-white">
+          <CardTitle className="text-2xl font-bold">Pro</CardTitle>
+          <CardDescription className="text-sm text-gray-200">For small businesses & pros</CardDescription>
+        </CardHeader>
+        <div className="flex-grow flex flex-col justify-center">
+          <div className="text-4xl font-extrabold text-white mb-4">$29<span className="text-xl font-medium">/mo</span></div>
+          <ul className="text-left space-y-2 text-gray-200">
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Unlimited monthly audits</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Full performance report</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Prioritized action plan</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Competitor analysis</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> PDF report generation</li>
+          </ul>
+        </div>
+        <div className="mt-6">
+          <Link href="/signup">
+            <Button variant="secondary" className="w-full font-semibold">Get Started</Button>
+          </Link>
+        </div>
+      </Card>
+
+      {/* Business Plan */}
+      <Card className="flex flex-col h-full bg-white dark:bg-gray-900 border-border p-6 transition duration-300 hover:shadow-xl">
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-2xl font-bold text-foreground">Business</CardTitle>
+          <CardDescription className="text-sm">For agencies & large sites</CardDescription>
+        </CardHeader>
+        <div className="flex-grow flex flex-col justify-center">
+          <div className="text-4xl font-extrabold text-foreground mb-4">$99<span className="text-xl font-medium">/mo</span></div>
+          <ul className="text-left space-y-2 text-muted-foreground">
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Everything in Pro</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> White-label reports</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> API access</li>
+            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Priority support</li>
+          </ul>
+        </div>
+        <div className="mt-6">
+          <Link href="/contact-us">
+            <Button className="w-full">Contact Us</Button>
+          </Link>
+        </div>
+      </Card>
+    </div>
+  </div>
+</section>
     </div>
   )
 }
