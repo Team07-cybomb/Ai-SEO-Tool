@@ -456,88 +456,27 @@ export default function LandingPage() {
       </section>
 
 
-      {/* Pricing Section - NEW */}
-<section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-800" id="Pricing">
-  <div className="container mx-auto text-center max-w-5xl">
-    <div className="text-center mb-12">
-      <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
-      Choose Your Path to SEO Excellence
-      </h2>
-      <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-        Choose a plan that fits your business needs and start improving your search rankings today. No hidden fees, just growth.
-      </p>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-      {/* Free Plan */}
-      <Card className="flex flex-col h-full bg-white dark:bg-gray-900 border-border p-6 transition duration-300 hover:shadow-xl">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold text-foreground">Free</CardTitle>
-          <CardDescription className="text-sm">For basic website audits</CardDescription>
-        </CardHeader>
-        <div className="flex-grow flex flex-col justify-center">
-          <div className="text-4xl font-extrabold text-foreground mb-4">$0</div>
-          <ul className="text-left space-y-2 text-muted-foreground">
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> One-time audit</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Basic SEO score</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Top 5 issues identified</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> No PDF report</li>
-          </ul>
-        </div>
-        <div className="mt-6">
-          <Link href="/audit">
-            <Button className="w-full">Start Free Audit</Button>
-          </Link>
-        </div>
-      </Card>
-
-      {/* Pro Plan - Highlighted */}
-      <Card className="relative flex flex-col h-full bg-primary text-white p-8 rounded-xl shadow-xl transition duration-300 transform scale-105">
-        <Badge className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-semibold uppercase bg-accent-foreground text-primary">
-          Most Popular
-        </Badge>
-        <CardHeader className="text-center pb-4 text-white">
-          <CardTitle className="text-2xl font-bold">Pro</CardTitle>
-          <CardDescription className="text-sm text-gray-200">For small businesses & pros</CardDescription>
-        </CardHeader>
-        <div className="flex-grow flex flex-col justify-center">
-          <div className="text-4xl font-extrabold text-white mb-4">$29<span className="text-xl font-medium">/mo</span></div>
-          <ul className="text-left space-y-2 text-gray-200">
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Unlimited monthly audits</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Full performance report</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Prioritized action plan</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Competitor analysis</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> PDF report generation</li>
-          </ul>
-        </div>
-        <div className="mt-6">
-          <Link href="/signup">
-            <Button variant="secondary" className="w-full font-semibold">Get Started</Button>
-          </Link>
-        </div>
-      </Card>
-
-      {/* Business Plan */}
-      <Card className="flex flex-col h-full bg-white dark:bg-gray-900 border-border p-6 transition duration-300 hover:shadow-xl">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold text-foreground">Business</CardTitle>
-          <CardDescription className="text-sm">For agencies & large sites</CardDescription>
-        </CardHeader>
-        <div className="flex-grow flex flex-col justify-center">
-          <div className="text-4xl font-extrabold text-foreground mb-4">$99<span className="text-xl font-medium">/mo</span></div>
-          <ul className="text-left space-y-2 text-muted-foreground">
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Everything in Pro</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> White-label reports</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> API access</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Priority support</li>
-          </ul>
-        </div>
-        <div className="mt-6">
-          <Link href="/contact-us">
-            <Button className="w-full">Contact Us</Button>
-          </Link>
-        </div>
-      </Card>
+     {/* Final, Hard-Hitting CTA Section - NEW */}
+<section className="text-white py-16 px-4 sm:px-6 text-center"
+  style={{ backgroundColor: "var(--primary)" }}>
+  <div className="container mx-auto text-center max-w-4xl">
+    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+      Ready to Improve Your SEO?
+    </h2>
+    <p className="text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto mb-8 text-gray-200 tracking-wide leading-relaxed">
+      Join thousands of websites already using our platform to boost their search rankings. 
+    </p>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Link href="/audit">
+        <Button size="lg" className="text-lg px-8 py-4 bg-white hover:bg-gray-200 text-primary transition-all font-semibold w-full sm:w-auto">
+          Start Your Free SEO Audit
+        </Button>
+      </Link>
+      <Link href="/pricing">
+        <Button size="lg" variant="outline" className="text-lg px-8 py-4 bg-transparent border-white text-white hover:bg-white hover:text-primary transition-all w-full sm:w-auto">
+          See All Plans
+        </Button>
+      </Link>
     </div>
   </div>
 </section>
