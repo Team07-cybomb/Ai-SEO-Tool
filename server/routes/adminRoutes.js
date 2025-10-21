@@ -1,10 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { createAdmin, adminLogin, getDashboardData } = require("../controllers/adminController");
+const { 
+  createAdmin, 
+  adminLogin, 
+  getDashboardData,
+  getAllUsers 
+} = require("../controllers/adminController");
 const { verifyAdmin } = require("../middleware/authMiddleware");
- 
-router.post("/create-admin", createAdmin); // use Thunder Client once to create initial admin
+
+router.post("/create-admin", createAdmin);
 router.post("/admin/login", adminLogin);
 router.get("/admin/dashboard", verifyAdmin, getDashboardData);
- 
-module.exports = router; 
+router.get("/admin/users", verifyAdmin, getAllUsers);
+
+module.exports = router;

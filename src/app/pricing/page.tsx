@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 
@@ -20,13 +20,45 @@ interface FAQItem {
 
 const PricingPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  // Exchange rate (you might want to fetch this from an API)
+  const exchangeRate = 83.5;
+
+  const formatPrice = (usdPrice: number, isCustom: boolean = false): string => {
+    if (isCustom) return 'Custom';
+    
+    if (currency === 'INR') {
+      const inrPrice = Math.round(usdPrice * exchangeRate);
+      return `₹${inrPrice.toLocaleString('en-IN')}/month`;
+    }
+    return `$${usdPrice}/month`;
+  };
+
+  const formatPriceDescription = (usdPrice: number, billing: 'monthly' | 'annual'): string => {
+    if (currency === 'INR') {
+      const monthlyPrice = Math.round(usdPrice * exchangeRate);
+      const annualPrice = Math.round(usdPrice * 12 * exchangeRate);
+      
+      if (billing === 'annual') {
+        return `Billed annually (₹${annualPrice.toLocaleString('en-IN')})`;
+      }
+      return `Billed monthly`;
+    }
+    
+    if (billing === 'annual') {
+      const annualPrice = usdPrice * 12;
+      return `Billed annually ($${annualPrice})`;
+    }
+    return `Billed monthly`;
+  };
 
   const pricingPlans: PricingPlan[] = [
     {
       id: 'starter',
       name: 'Starter',
-      price: billingCycle === 'annual' ? '$15/month' : '$19/month',
+      price: billingCycle === 'annual' ? formatPrice(15) : formatPrice(19),
       description: 'Perfect for small businesses and bloggers',
       features: [
         '5 SEO audits per month',
@@ -36,12 +68,12 @@ const PricingPage: React.FC = () => {
         'PDF report export'
       ],
       ctaText: 'Get Started',
-      priceDescription: billingCycle === 'annual' ? 'Billed annually ($180)' : 'Billed monthly'
+      priceDescription: billingCycle === 'annual' ? formatPriceDescription(15, 'annual') : formatPriceDescription(19, 'monthly')
     },
     {
       id: 'professional',
       name: 'Professional',
-      price: billingCycle === 'annual' ? '$39/month' : '$49/month',
+      price: billingCycle === 'annual' ? formatPrice(39) : formatPrice(49),
       description: 'Ideal for marketing agencies and growing businesses',
       features: [
         '20 SEO audits per month',
@@ -54,7 +86,7 @@ const PricingPage: React.FC = () => {
       ],
       ctaText: 'Start Free Trial',
       popular: true,
-      priceDescription: billingCycle === 'annual' ? 'Billed annually ($468)' : 'Billed monthly'
+      priceDescription: billingCycle === 'annual' ? formatPriceDescription(39, 'annual') : formatPriceDescription(49, 'monthly')
     },
     {
       id: 'enterprise',
@@ -136,11 +168,15 @@ const PricingPage: React.FC = () => {
     },
     {
       question: 'What payment methods do you accept?',
-      answer: 'We accept all major credit cards, PayPal, and bank transfers for enterprise plans.'
+      answer: `We accept all major credit cards, PayPal, ${currency === 'INR' ? 'UPI, Net Banking, and bank transfers' : 'and bank transfers'} for enterprise plans.`
     },
     {
       question: 'Is there a free trial available?',
       answer: 'Yes, we offer a 14-day free trial for the Professional plan. No credit card required to start your trial.'
+    },
+    {
+      question: `Do you support ${currency === 'INR' ? 'Indian Rupee (INR)' : 'multiple currency'} payments?`,
+      answer: `Yes! We support ${currency === 'INR' ? 'payments in Indian Rupees (INR) including UPI, Net Banking, and credit/debit cards' : 'multiple currencies including USD and INR. You can switch between currencies using the toggle above.'}`
     }
   ];
 
@@ -163,21 +199,46 @@ const PricingPage: React.FC = () => {
           <h1>AI-Powered SEO Audit Pricing</h1>
           <p>Choose the plan that works best for your business needs</p>
           
+          {/* Currency Toggle */}
+          <div className="currency-toggle">
+            <span className={currency === 'USD' ? 'active' : ''}>USD</span>
+            <label className="toggle-switch">
+              <input 
+                type="checkbox" 
+                checked={currency === 'INR'} 
+                onChange={() => setCurrency(currency === 'INR' ? 'USD' : 'INR')} 
+              />
+              <span className="slider"></span>
+            </label>
+            <span className={currency === 'INR' ? 'active' : ''}>
+              INR
+            </span>
+          </div>
+
+          {/* Exchange Rate Notice */}
+          <div className="exchange-rate-notice">
+            {currency === 'INR' ? (
+              <p>Exchange rate: 1 USD ≈ ₹{exchangeRate}. Prices in INR include all applicable taxes.</p>
+            ) : (
+              <p>All prices in USD. Switch to INR for local currency pricing.</p>
+            )}
+          </div>
+          
           {/* Billing Toggle */}
           <div className="billing-toggle">
-  <span className={billingCycle === 'monthly' ? 'active' : ''}>Monthly</span>
-  <label className="toggle-switch">
-    <input 
-      type="checkbox" 
-      checked={billingCycle === 'annual'} 
-      onChange={() => setBillingCycle(billingCycle === 'annual' ? 'monthly' : 'annual')} 
-    />
-    <span className="slider"></span>
-  </label>
-  <span className={billingCycle === 'annual' ? 'active' : ''}>
-    Annual <span className="discount-badge">Save 20%</span>
-  </span>
-</div>
+            <span className={billingCycle === 'monthly' ? 'active' : ''}>Monthly</span>
+            <label className="toggle-switch">
+              <input 
+                type="checkbox" 
+                checked={billingCycle === 'annual'} 
+                onChange={() => setBillingCycle(billingCycle === 'annual' ? 'monthly' : 'annual')} 
+              />
+              <span className="slider"></span>
+            </label>
+            <span className={billingCycle === 'annual' ? 'active' : ''}>
+              Annual <span className="discount-badge">Save 20%</span>
+            </span>
+          </div>
         </div>
       </header>
 
@@ -338,6 +399,34 @@ const PricingPage: React.FC = () => {
           margin-bottom: 30px;
         }
         
+        /* Currency Toggle */
+        .currency-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+        
+        .currency-toggle span {
+          font-weight: 600;
+          color: #666;
+        }
+        
+        .currency-toggle span.active {
+          color: #2d3748;
+        }
+        
+        .exchange-rate-notice {
+          margin-bottom: 20px;
+        }
+        
+        .exchange-rate-notice p {
+          font-size: 0.9rem;
+          color: #666;
+          margin: 0;
+        }
+        
         .billing-toggle {
           display: flex;
           align-items: center;
@@ -348,7 +437,7 @@ const PricingPage: React.FC = () => {
         
         .billing-toggle span {
           font-weight: 600;
-          color:rgb(2, 2, 2);
+          color: #666;
         }
         
         .billing-toggle span.active {
@@ -773,12 +862,19 @@ const PricingPage: React.FC = () => {
             margin-bottom: 25px;
           }
           
+          .currency-toggle {
+            flex-direction: row;
+            gap: 15px;
+            margin-bottom: 15px;
+          }
+          
           .billing-toggle {
             flex-direction: row;
             gap: 15px;
             margin-top: 15px;
           }
           
+          .currency-toggle span,
           .billing-toggle span {
             font-size: 0.9rem;
           }
@@ -996,11 +1092,13 @@ const PricingPage: React.FC = () => {
             font-size: 0.9rem;
           }
           
+          .currency-toggle,
           .billing-toggle {
             gap: 12px;
             flex-direction: row;
           }
           
+          .currency-toggle span,
           .billing-toggle span {
             font-size: 0.8rem;
           }

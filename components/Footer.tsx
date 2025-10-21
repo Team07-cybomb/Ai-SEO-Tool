@@ -233,7 +233,7 @@ export default function Footer() {
                   Contact Support
                 </p>
                 <a
-                  href="mailto:info@rankkse.in" // Corrected the email address
+                  href="mailto:info@rankseo.in" // Corrected the email address
                   className="text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors no-underline"
                 >
                   info@rankseo.in

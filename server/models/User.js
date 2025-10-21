@@ -42,7 +42,22 @@ const UserSchema = new mongoose.Schema({
     otpExpiresAt: {
         type: Date,
         required: false,
+    },
+    plan: {
+        type: String,
+        default: 'Free',
+        enum: ['Free', 'Basic', 'Premium']
+    },
+    lastLogin: {
+        type: Date,
+        default: Date.now
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
+}, {
+    timestamps: true // This adds createdAt and updatedAt fields
 });
 
 // Remove the pre-save hook as password hashing is now handled in the controller.
