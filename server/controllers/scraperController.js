@@ -24,7 +24,7 @@ async function processCrawlQueue(startUrl, page) {
     }
     visitedUrls.add(currentUrl);
 
-    console.log(`[Depth ${depth}, Page ${visitedUrls.size}/${MAX_PAGES}] Scraping: ${currentUrl}`);
+   // console.log(`[Depth ${depth}, Page ${visitedUrls.size}/${MAX_PAGES}] Scraping: ${currentUrl}`);
 
     try {
       await page.goto(currentUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -136,10 +136,10 @@ async function sendToN8nAndWait(scrapedData) {
       data: scrapedData,
     };
 
-    console.log("Sending data to n8n...");
+    // console.log("Sending data to n8n...");
     const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 });
 
-    console.log("Raw n8n response received.");
+    // console.log("Raw n8n response received.");
 
     if (!response.data || typeof response.data !== 'object' || !response.data.output) {
       console.warn("n8n response is not in the expected format:", response.data);
@@ -192,7 +192,7 @@ async function sendToN8nAndWait(scrapedData) {
 }
 
 // --- Save Report to Database ---
-async function saveScrapeReport(mainUrl, scrapedResults, n8nData, totalScraped) {
+async function saveScrapeReport(userId, mainUrl, scrapedResults, n8nData, totalScraped) {
   try {
     const domain = new URL(mainUrl).hostname;
     
@@ -203,6 +203,7 @@ async function saveScrapeReport(mainUrl, scrapedResults, n8nData, totalScraped) 
       (n8nData.related_keywords?.length || 0);
 
     const reportData = {
+      user: userId,
       mainUrl,
       domain,
       keywordData: {
@@ -239,7 +240,7 @@ async function saveScrapeReport(mainUrl, scrapedResults, n8nData, totalScraped) 
     const report = new KeyScrapeReport(reportData);
     await report.save();
     
-    console.log(`Report saved with ID: ${report.reportId}`);
+    // console.log(`Report saved with ID: ${report.reportId}`);
     return report.reportId;
     
   } catch (error) {
@@ -255,6 +256,15 @@ exports.crawlAndScrape = async (req, res) => {
   
   try {
     const startUrl = req.body.url;
+    const userId = req.user.id; // Get user from authenticated request
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
     if (!startUrl) {
       return res.status(400).json({ success: false, error: "Starting URL is required" });
     }
@@ -265,7 +275,9 @@ exports.crawlAndScrape = async (req, res) => {
       return res.status(400).json({ success: false, error: "Invalid URL format" });
     }
 
-    console.log(`Starting crawl for: ${startUrl}`);
+   // console.log(`Starting crawl for: ${startUrl}`);
+   // console.log(`User ID: ${userId}`);
+    
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
       route: (route) => {
@@ -288,8 +300,8 @@ exports.crawlAndScrape = async (req, res) => {
 
     const n8nData = await sendToN8nAndWait(scrapedResults);
 
-    // Save to database
-    reportId = await saveScrapeReport(startUrl, scrapedResults, n8nData, totalScraped);
+    // Save to database with user reference
+    reportId = await saveScrapeReport(userId, startUrl, scrapedResults, n8nData, totalScraped);
 
     res.status(200).json({
       success: true,
@@ -314,16 +326,24 @@ exports.crawlAndScrape = async (req, res) => {
     });
   } finally {
     if (browser) await browser.close();
-    console.log("Crawl process finished.");
+    // console.log("Crawl process finished.");
   }
 };
 
-// --- New API to retrieve saved reports ---
+// --- New API to retrieve saved reports for the authenticated user ---
 exports.getReportById = async (req, res) => {
   try {
     const { reportId } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
     
-    const report = await KeyScrapeReport.findOne({ reportId });
+    const report = await KeyScrapeReport.findOne({ reportId, user: userId });
     
     if (!report) {
       return res.status(404).json({ 
@@ -356,13 +376,22 @@ exports.getReportById = async (req, res) => {
   }
 };
 
-// --- Get recent reports for a domain ---
+// --- Get recent reports for a domain for the authenticated user ---
 exports.getDomainReports = async (req, res) => {
   try {
     const { domain } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
     const { limit = 5 } = req.query;
     
-    const reports = await KeyScrapeReport.findByDomain(domain, parseInt(limit));
+    const reports = await KeyScrapeReport.findByUserAndDomain(userId, domain, parseInt(limit));
     
     res.status(200).json({
       success: true,

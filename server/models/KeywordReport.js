@@ -44,6 +44,11 @@ const keywordSchema = new mongoose.Schema({
 });
 
 const keywordReportSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   sessionId: {
     type: String,
     required: true,
@@ -80,11 +85,13 @@ const keywordReportSchema = new mongoose.Schema({
   }
 });
 
-// Indexes for better query performance
+// Updated indexes
+keywordReportSchema.index({ user: 1 });
 keywordReportSchema.index({ sessionId: 1 });
 keywordReportSchema.index({ topic: 1 });
 keywordReportSchema.index({ industry: 1 });
 keywordReportSchema.index({ generatedAt: -1 });
+keywordReportSchema.index({ user: 1, generatedAt: -1 });
 
 // Pre-save middleware to calculate totals
 keywordReportSchema.pre('save', function(next) {

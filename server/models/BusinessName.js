@@ -17,6 +17,11 @@ const nameEntrySchema = new mongoose.Schema({
 });
 
 const businessNameSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   sessionId: {
     type: String,
     required: true,
@@ -34,7 +39,7 @@ const businessNameSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  names: [nameEntrySchema], // Array of name objects
+  names: [nameEntrySchema],
   generatedAt: {
     type: Date,
     default: Date.now
@@ -45,9 +50,11 @@ const businessNameSchema = new mongoose.Schema({
   }
 });
 
-// Index for better query performance
+// Updated indexes
+businessNameSchema.index({ user: 1 });
 businessNameSchema.index({ sessionId: 1 });
 businessNameSchema.index({ industry: 1 });
 businessNameSchema.index({ generatedAt: -1 });
+businessNameSchema.index({ user: 1, generatedAt: -1 });
 
 module.exports = mongoose.model('BusinessName', businessNameSchema);

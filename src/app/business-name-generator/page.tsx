@@ -24,6 +24,14 @@ export default function BusinessNameGeneratorPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
 
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
+
   useEffect(() => {
     setIsVisible(true);
     
@@ -37,13 +45,22 @@ export default function BusinessNameGeneratorPage() {
   const saveNamesToDatabase = async (namesToSave: BusinessName[]): Promise<boolean> => {
     if (!namesToSave.length) return false;
 
+    const token = getToken();
+    if (!token) {
+      console.error('No authentication token found');
+      return false;
+    }
+
     setSaving(true);
     try {
       const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const saveResponse = await fetch(`${API_BASE_URL}/names`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           names: namesToSave,
           industry,
@@ -54,6 +71,12 @@ export default function BusinessNameGeneratorPage() {
       });
 
       if (!saveResponse.ok) {
+        if (saveResponse.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return false;
+        }
         throw new Error(`Save failed: ${saveResponse.status}`);
       }
 

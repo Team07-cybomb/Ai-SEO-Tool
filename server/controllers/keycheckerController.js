@@ -24,7 +24,7 @@ async function processCrawlQueue(startUrl, page) {
     }
     visitedUrls.add(currentUrl);
 
-    console.log(`[Depth ${depth}, Page ${visitedUrls.size}/${MAX_PAGES}] Scraping: ${currentUrl}`);
+    // console.log(`[Depth ${depth}, Page ${visitedUrls.size}/${MAX_PAGES}] Scraping: ${currentUrl}`);
 
     try {
       await page.goto(currentUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -136,9 +136,9 @@ async function sendToN8nAndWait(scrapedData) {
       data: scrapedData,
     };
 
-    console.log("Sending data to n8n...");
+    // console.log("Sending data to n8n...");
     const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 });
-    console.log("Raw n8n response received.");
+   // console.log("Raw n8n response received.");
 
     let parsedData;
     if (response.data && typeof response.data === 'object' && response.data.output) {
@@ -155,7 +155,7 @@ async function sendToN8nAndWait(scrapedData) {
       throw new Error("Invalid n8n response format.");
     }
 
-    console.log("Parsed n8n data structure:", Object.keys(parsedData));
+    //console.log("Parsed n8n data structure:", Object.keys(parsedData));
 
     // Normalize keywords for the frontend
     const normalizeKeywords = (arr) => {
@@ -266,6 +266,15 @@ exports.crawlAndScrape = async (req, res) => {
   
   try {
     const startUrl = req.body.url;
+    const userId = req.user.id; // Get user from authenticated request
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
     if (!startUrl) {
       return res.status(400).json({ success: false, error: "Starting URL is required" });
     }
@@ -278,11 +287,13 @@ exports.crawlAndScrape = async (req, res) => {
     // Generate report ID
     reportId = KeycheckReport.generateReportId();
     
-    console.log(`Starting crawl for: ${startUrl}`);
-    console.log(`Report ID: ${reportId}`);
+   // console.log(`Starting crawl for: ${startUrl}`);
+    // console.log(`Report ID: ${reportId}`);
+    // console.log(`User ID: ${userId}`);
     
     // Create initial report in database with processing status
     await saveReportToDB({
+      user: userId,
       reportId,
       mainUrl: startUrl,
       totalScraped: 0,
@@ -310,7 +321,7 @@ exports.crawlAndScrape = async (req, res) => {
     if (scrapedResults.length === 0) {
       // Update report status to failed
       await KeycheckReport.findOneAndUpdate(
-        { reportId },
+        { reportId, user: userId },
         { 
           status: 'failed',
           updatedAt: new Date(),
@@ -324,6 +335,7 @@ exports.crawlAndScrape = async (req, res) => {
 
     // Prepare complete report data
     const completeReportData = {
+      user: userId,
       reportId,
       mainUrl: startUrl,
       totalScraped,
@@ -343,12 +355,12 @@ exports.crawlAndScrape = async (req, res) => {
 
     // Update the report in database with complete data
     await KeycheckReport.findOneAndUpdate(
-      { reportId },
+      { reportId, user: userId },
       completeReportData,
       { new: true }
     );
 
-    console.log(`Report ${reportId} completed and saved to database`);
+   // console.log(`Report ${reportId} completed and saved to database`);
 
     res.status(200).json({
       success: true,
@@ -368,7 +380,7 @@ exports.crawlAndScrape = async (req, res) => {
     // Update report status to failed if reportId exists
     if (reportId) {
       await KeycheckReport.findOneAndUpdate(
-        { reportId },
+        { reportId, user: req.user.id },
         { 
           status: 'failed',
           updatedAt: new Date(),
@@ -381,17 +393,26 @@ exports.crawlAndScrape = async (req, res) => {
     res.status(500).json({ success: false, error: "An internal server error occurred during the crawl." });
   } finally {
     if (browser) await browser.close();
-    console.log("Crawl process finished.");
+    // console.log("Crawl process finished.");
   }
 };
 
 // --- Additional controller methods for report management ---
 
-// Get report by ID
+// Get report by ID for the authenticated user
 exports.getReportById = async (req, res) => {
   try {
     const { reportId } = req.params;
-    const report = await KeycheckReport.findOne({ reportId });
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+    
+    const report = await KeycheckReport.findOne({ reportId, user: userId });
     
     if (!report) {
       return res.status(404).json({ success: false, error: "Report not found" });
@@ -404,19 +425,28 @@ exports.getReportById = async (req, res) => {
   }
 };
 
-// Get reports by URL
+// Get reports by URL for the authenticated user
 exports.getReportsByUrl = async (req, res) => {
   try {
     const { url } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
     const { limit = 10, page = 1 } = req.query;
     
-    const reports = await KeycheckReport.find({ mainUrl: url })
+    const reports = await KeycheckReport.find({ mainUrl: url, user: userId })
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip((parseInt(page) - 1) * parseInt(limit))
       .select('reportId mainUrl totalScraped status createdAt processingTime');
     
-    const total = await KeycheckReport.countDocuments({ mainUrl: url });
+    const total = await KeycheckReport.countDocuments({ mainUrl: url, user: userId });
     
     res.status(200).json({
       success: true,
@@ -434,11 +464,20 @@ exports.getReportsByUrl = async (req, res) => {
   }
 };
 
-// Delete report by ID
+// Delete report by ID for the authenticated user
 exports.deleteReport = async (req, res) => {
   try {
     const { reportId } = req.params;
-    const result = await KeycheckReport.deleteOne({ reportId });
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+    
+    const result = await KeycheckReport.deleteOne({ reportId, user: userId });
     
     if (result.deletedCount === 0) {
       return res.status(404).json({ success: false, error: "Report not found" });
@@ -451,12 +490,21 @@ exports.deleteReport = async (req, res) => {
   }
 };
 
-// Get all reports with pagination
+// Get all reports for the authenticated user with pagination
 exports.getAllReports = async (req, res) => {
   try {
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
     const { limit = 10, page = 1, status } = req.query;
     
-    const query = {};
+    const query = { user: userId };
     if (status && ['processing', 'completed', 'failed'].includes(status)) {
       query.status = status;
     }

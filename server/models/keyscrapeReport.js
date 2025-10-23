@@ -24,6 +24,13 @@ const scrapedPageSchema = new mongoose.Schema({
 }, { _id: false });
 
 const keyScrapeReportSchema = new mongoose.Schema({
+  // User reference
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  
   // Report Metadata
   reportId: {
     type: String,
@@ -41,7 +48,7 @@ const keyScrapeReportSchema = new mongoose.Schema({
     index: true
   },
   
-  // Analysis Results (what's displayed on frontend)
+  // Analysis Results
   keywordData: {
     primary_keywords: [{ type: String }],
     secondary_keywords: [{ type: String }],
@@ -68,17 +75,19 @@ const keyScrapeReportSchema = new mongoose.Schema({
   completedAt: { type: Date },
   expiresAt: {
     type: Date,
-    default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     index: { expireAfterSeconds: 0 }
   }
 }, {
-  timestamps: true // Adds createdAt and updatedAt automatically
+  timestamps: true
 });
 
-// Indexes for better query performance
+// Updated indexes
+keyScrapeReportSchema.index({ user: 1 });
 keyScrapeReportSchema.index({ createdAt: -1 });
 keyScrapeReportSchema.index({ domain: 1, createdAt: -1 });
 keyScrapeReportSchema.index({ 'keywordData.primary_keywords': 'text' });
+keyScrapeReportSchema.index({ user: 1, createdAt: -1 });
 
 // Virtual for report duration
 keyScrapeReportSchema.virtual('duration').get(function() {
@@ -100,12 +109,19 @@ keyScrapeReportSchema.methods.getSummary = function() {
   };
 };
 
-// Static method to find recent reports for a domain
-keyScrapeReportSchema.statics.findByDomain = function(domain, limit = 5) {
-  return this.find({ domain })
+// Static method to find recent reports for a user and domain
+keyScrapeReportSchema.statics.findByUserAndDomain = function(userId, domain, limit = 5) {
+  return this.find({ user: userId, domain })
     .sort({ createdAt: -1 })
     .limit(limit)
     .select('reportId mainUrl totalPagesScraped totalKeywordsFound createdAt');
+};
+
+// Static method to find user reports
+keyScrapeReportSchema.statics.findByUser = function(userId, limit = 10) {
+  return this.find({ user: userId })
+    .sort({ createdAt: -1 })
+    .limit(limit);
 };
 
 module.exports = mongoose.model('KeyScrapeReport', keyScrapeReportSchema);

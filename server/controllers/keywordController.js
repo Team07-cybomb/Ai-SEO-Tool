@@ -3,18 +3,17 @@ const KeywordReport = require('../models/KeywordReport');
 // Save generated keyword report
 exports.saveKeywordReport = async (req, res) => {
   try {
-    // console.log('📥 Received request to save keyword report:', {
-    //   topic: req.body.topic,
-    //   industry: req.body.industry,
-    //   audience: req.body.audience,
-    //   keywordCount: req.body.keywords?.length,
-    //   sessionId: req.body.sessionId
-    // });
-
     const { topic, industry, audience, keywords, sessionId } = req.body;
+    const userId = req.user.id; // Get user from authenticated request
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
 
     if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
-      //console.log('❌ No keywords provided');
       return res.status(400).json({
         success: false,
         message: 'No keywords provided to save'
@@ -22,24 +21,20 @@ exports.saveKeywordReport = async (req, res) => {
     }
 
     if (!topic || !industry || !audience) {
-      //console.log('❌ Missing required fields');
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: topic, industry, audience'
       });
     }
 
-    // Check if session already exists
-    const existingSession = await KeywordReport.findOne({ sessionId });
+    // Check if session already exists for this user
+    const existingSession = await KeywordReport.findOne({ sessionId, user: userId });
     if (existingSession) {
-     // console.log('❌ Session ID already exists:', sessionId);
       return res.status(400).json({
         success: false,
         message: 'Session ID already exists'
       });
     }
-
-    //console.log('💾 Creating new keyword report document...');
 
     // Calculate values manually to ensure they're set
     const keywordCount = keywords.length;
@@ -49,6 +44,7 @@ exports.saveKeywordReport = async (req, res) => {
 
     // Create single document with all keywords
     const keywordReport = new KeywordReport({
+      user: userId,
       sessionId,
       topic,
       industry,
@@ -64,19 +60,12 @@ exports.saveKeywordReport = async (req, res) => {
         keyword_density: keyword.keyword_density || 0,
         content_idea: keyword.content_idea || "No content idea provided."
       })),
-      keywordCount, // Manually set required field
-      totalSearchVolume, // Manually set
-      averageCPC // Manually set
+      keywordCount,
+      totalSearchVolume,
+      averageCPC
     });
 
     const savedReport = await keywordReport.save();
-    //console.log('✅ Successfully saved to MongoDB. Document ID:', savedReport._id);
-    // console.log('📊 Report details:', {
-    //   keywordCount: savedReport.keywordCount,
-    //   totalSearchVolume: savedReport.totalSearchVolume,
-    //   averageCPC: savedReport.averageCPC,
-    //   sessionId: savedReport.sessionId
-    // });
 
     res.status(201).json({
       success: true,
@@ -92,8 +81,6 @@ exports.saveKeywordReport = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Error saving keyword report:', error);
-    
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -109,31 +96,34 @@ exports.saveKeywordReport = async (req, res) => {
   }
 };
 
-// Get keyword report by session ID
+// Get keyword report by session ID for the authenticated user
 exports.getKeywordReportBySession = async (req, res) => {
   try {
     const { sessionId } = req.params;
+    const userId = req.user.id;
 
-    //console.log('🔍 Fetching keyword report for session:', sessionId);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
 
-    const report = await KeywordReport.findOne({ sessionId });
+    const report = await KeywordReport.findOne({ sessionId, user: userId });
 
     if (!report) {
-      //console.log('❌ Keyword report not found for session:', sessionId);
       return res.status(404).json({
         success: false,
         message: 'Keyword report not found'
       });
     }
 
-    //console.log('✅ Found keyword report:', report._id);
     res.json({
       success: true,
       data: report
     });
 
   } catch (error) {
-    //console.error('❌ Error fetching keyword report:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch keyword report',
@@ -142,14 +132,21 @@ exports.getKeywordReportBySession = async (req, res) => {
   }
 };
 
-// Get all keyword reports (paginated)
+// Get all keyword reports for the authenticated user (paginated)
 exports.getAllKeywordReports = async (req, res) => {
   try {
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
+
     const { page = 1, limit = 10, industry, topic } = req.query;
 
-    //console.log('📋 Fetching all keyword reports:', { page, limit, industry, topic });
-
-    const filter = {};
+    const filter = { user: userId };
     if (industry) filter.industry = new RegExp(industry, 'i');
     if (topic) filter.topic = new RegExp(topic, 'i');
 
@@ -160,8 +157,6 @@ exports.getAllKeywordReports = async (req, res) => {
       .select('sessionId topic industry audience keywordCount totalSearchVolume averageCPC generatedAt');
 
     const total = await KeywordReport.countDocuments(filter);
-
-    //console.log(`✅ Found ${reports.length} reports out of ${total} total`);
 
     res.json({
       success: true,
@@ -174,7 +169,6 @@ exports.getAllKeywordReports = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Error fetching keyword reports:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch keyword reports',
@@ -183,13 +177,21 @@ exports.getAllKeywordReports = async (req, res) => {
   }
 };
 
-// Get analytics data
+// Get analytics data for the authenticated user
 exports.getAnalytics = async (req, res) => {
   try {
-    //console.log('📊 Generating analytics data...');
+    const userId = req.user.id;
 
-    const totalReports = await KeywordReport.countDocuments();
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
+
+    const totalReports = await KeywordReport.countDocuments({ user: userId });
     const totalKeywords = await KeywordReport.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: null,
@@ -199,6 +201,7 @@ exports.getAnalytics = async (req, res) => {
     ]);
 
     const industryStats = await KeywordReport.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: '$industry',
@@ -212,6 +215,7 @@ exports.getAnalytics = async (req, res) => {
     ]);
 
     const topicStats = await KeywordReport.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: '$topic',
@@ -223,6 +227,7 @@ exports.getAnalytics = async (req, res) => {
     ]);
 
     const recentActivity = await KeywordReport.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: {
@@ -239,8 +244,6 @@ exports.getAnalytics = async (req, res) => {
       { $limit: 7 }
     ]);
 
-    //console.log('✅ Analytics generated successfully');
-
     res.json({
       success: true,
       data: {
@@ -253,7 +256,6 @@ exports.getAnalytics = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Error fetching analytics:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch analytics',
@@ -262,24 +264,27 @@ exports.getAnalytics = async (req, res) => {
   }
 };
 
-// Delete keyword report by sessionId
+// Delete keyword report by sessionId for the authenticated user
 exports.deleteKeywordReport = async (req, res) => {
   try {
     const { sessionId } = req.params;
+    const userId = req.user.id;
 
-    //console.log('🗑️ Attempting to delete keyword report:', sessionId);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
 
-    const result = await KeywordReport.deleteOne({ sessionId });
+    const result = await KeywordReport.deleteOne({ sessionId, user: userId });
 
     if (result.deletedCount === 0) {
-      //console.log('❌ Keyword report not found for deletion:', sessionId);
       return res.status(404).json({
         success: false,
         message: 'Keyword report not found'
       });
     }
-
-    //console.log('✅ Keyword report deleted successfully:', sessionId);
 
     res.json({
       success: true,
@@ -287,7 +292,6 @@ exports.deleteKeywordReport = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Error deleting keyword report:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete keyword report',
@@ -296,23 +300,34 @@ exports.deleteKeywordReport = async (req, res) => {
   }
 };
 
-// Get keyword reports by industry
+// Get keyword reports by industry for the authenticated user
 exports.getKeywordReportsByIndustry = async (req, res) => {
   try {
     const { industry } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
+
     const { page = 1, limit = 10 } = req.query;
 
-    //console.log('🏢 Fetching reports for industry:', industry);
-
-    const reports = await KeywordReport.find({ industry: new RegExp(industry, 'i') })
+    const reports = await KeywordReport.find({ 
+      industry: new RegExp(industry, 'i'),
+      user: userId
+    })
       .sort({ generatedAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .select('sessionId topic industry audience keywordCount totalSearchVolume averageCPC generatedAt');
 
-    const total = await KeywordReport.countDocuments({ industry: new RegExp(industry, 'i') });
-
-    //console.log(`✅ Found ${reports.length} reports for industry: ${industry}`);
+    const total = await KeywordReport.countDocuments({ 
+      industry: new RegExp(industry, 'i'),
+      user: userId
+    });
 
     res.json({
       success: true,
@@ -325,7 +340,6 @@ exports.getKeywordReportsByIndustry = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Error fetching reports by industry:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch reports by industry',
@@ -334,23 +348,34 @@ exports.getKeywordReportsByIndustry = async (req, res) => {
   }
 };
 
-// Get keyword reports by topic
+// Get keyword reports by topic for the authenticated user
 exports.getKeywordReportsByTopic = async (req, res) => {
   try {
     const { topic } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
+
     const { page = 1, limit = 10 } = req.query;
 
-    //console.log('🔍 Fetching reports for topic:', topic);
-
-    const reports = await KeywordReport.find({ topic: new RegExp(topic, 'i') })
+    const reports = await KeywordReport.find({ 
+      topic: new RegExp(topic, 'i'),
+      user: userId
+    })
       .sort({ generatedAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .select('sessionId topic industry audience keywordCount totalSearchVolume averageCPC generatedAt');
 
-    const total = await KeywordReport.countDocuments({ topic: new RegExp(topic, 'i') });
-
-    //console.log(`✅ Found ${reports.length} reports for topic: ${topic}`);
+    const total = await KeywordReport.countDocuments({ 
+      topic: new RegExp(topic, 'i'),
+      user: userId
+    });
 
     res.json({
       success: true,
@@ -363,7 +388,6 @@ exports.getKeywordReportsByTopic = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Error fetching reports by topic:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch reports by topic',
@@ -386,7 +410,6 @@ exports.healthCheck = async (req, res) => {
     });
 
   } catch (error) {
-    //console.error('❌ Health check failed:', error);
     res.status(500).json({
       success: false,
       message: 'Keyword API health check failed',

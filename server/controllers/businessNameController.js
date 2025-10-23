@@ -1,9 +1,23 @@
 const BusinessName = require('../models/BusinessName');
 
+
 // Save generated names as a single document
 exports.saveGeneratedNames = async (req, res) => {
   try {
     const { names, industry, audience, stylePreference, sessionId } = req.body;
+    
+    // Debug what we're receiving
+    //console.log('Request user:', req.user);
+    //console.log('Request body:', { industry, audience, stylePreference, sessionId, namesCount: names?.length });
+    
+    const userId = req.user.id; // Get user from authenticated request
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    }
 
     if (!names || !Array.isArray(names) || names.length === 0) {
       return res.status(400).json({
@@ -12,8 +26,8 @@ exports.saveGeneratedNames = async (req, res) => {
       });
     }
 
-    // Check if session already exists
-    const existingSession = await BusinessName.findOne({ sessionId });
+    // Check if session already exists for this user
+    const existingSession = await BusinessName.findOne({ sessionId, user: userId });
     if (existingSession) {
       return res.status(400).json({
         success: false,
@@ -23,6 +37,7 @@ exports.saveGeneratedNames = async (req, res) => {
 
     // Create single document with all names
     const businessNameDoc = new BusinessName({
+      user: userId, // Make sure this is set
       sessionId,
       industry,
       audience,
@@ -35,6 +50,7 @@ exports.saveGeneratedNames = async (req, res) => {
       nameCount: names.length
     });
 
+    //console.log('Saving document with user:', userId);
     const savedDoc = await businessNameDoc.save();
 
     res.status(201).json({
@@ -49,7 +65,7 @@ exports.saveGeneratedNames = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error saving names to database:', error);
+    //console.error('Error saving names to database:', error);
     
     if (error.code === 11000) {
       return res.status(400).json({
@@ -65,14 +81,15 @@ exports.saveGeneratedNames = async (req, res) => {
       error: error.message
     });
   }
-};
+};;
 
 // Get names by session ID
 exports.getNamesBySession = async (req, res) => {
   try {
     const { sessionId } = req.params;
+    const userId = req.user._id;
 
-    const session = await BusinessName.findOne({ sessionId });
+    const session = await BusinessName.findOne({ sessionId, user: userId });
 
     if (!session) {
       return res.status(404).json({
@@ -105,18 +122,19 @@ exports.getNamesBySession = async (req, res) => {
   }
 };
 
-// Get all sessions (for admin/list view)
+// Get all sessions for the authenticated user
 exports.getAllSessions = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
+    const userId = req.user._id;
 
-    const sessions = await BusinessName.find()
+    const sessions = await BusinessName.find({ user: userId })
       .sort({ generatedAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .select('sessionId industry audience stylePreference nameCount generatedAt');
 
-    const total = await BusinessName.countDocuments();
+    const total = await BusinessName.countDocuments({ user: userId });
 
     res.json({
       success: true,
@@ -138,11 +156,14 @@ exports.getAllSessions = async (req, res) => {
   }
 };
 
-// Get analytics data
+// Get analytics data for the authenticated user
 exports.getAnalytics = async (req, res) => {
   try {
-    const totalSessions = await BusinessName.countDocuments();
+    const userId = req.user._id;
+
+    const totalSessions = await BusinessName.countDocuments({ user: userId });
     const totalNames = await BusinessName.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: null,
@@ -152,6 +173,7 @@ exports.getAnalytics = async (req, res) => {
     ]);
     
     const industryStats = await BusinessName.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: '$industry',
@@ -163,6 +185,7 @@ exports.getAnalytics = async (req, res) => {
     ]);
 
     const styleStats = await BusinessName.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: '$stylePreference',
@@ -174,6 +197,7 @@ exports.getAnalytics = async (req, res) => {
     ]);
 
     const recentActivity = await BusinessName.aggregate([
+      { $match: { user: userId } },
       {
         $group: {
           _id: {
@@ -211,12 +235,13 @@ exports.getAnalytics = async (req, res) => {
   }
 };
 
-// Delete session by sessionId
+// Delete session by sessionId for the authenticated user
 exports.deleteSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
+    const userId = req.user._id;
 
-    const result = await BusinessName.deleteOne({ sessionId });
+    const result = await BusinessName.deleteOne({ sessionId, user: userId });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({
@@ -239,8 +264,3 @@ exports.deleteSession = async (req, res) => {
     });
   }
 };
-
-// Helper function to generate session ID
-function generateSessionId() {
-  return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}

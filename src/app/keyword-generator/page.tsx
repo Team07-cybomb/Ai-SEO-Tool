@@ -35,6 +35,14 @@ export default function KeywordGeneratorPage() {
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
+
   const startProgressAnimation = (initialTopic: string) => {
     setProgress(0);
     setLoadingStep(`Running AI analysis for "${initialTopic}"...`);
@@ -70,6 +78,12 @@ export default function KeywordGeneratorPage() {
   // Function to save keyword report to MongoDB
   const saveKeywordReportToDatabase = async (keywords: Keyword[], sessionId: string): Promise<boolean> => {
     try {
+      const token = getToken();
+      if (!token) {
+        console.error('No authentication token found');
+        return false;
+      }
+
       console.log('🔄 Attempting to save to MongoDB...', {
         topic,
         industry, 
@@ -80,7 +94,10 @@ export default function KeywordGeneratorPage() {
 
       const saveResponse = await fetch(`${API_BASE_URL}/reports`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           topic,
           industry,
@@ -93,6 +110,12 @@ export default function KeywordGeneratorPage() {
       console.log('📡 Save response status:', saveResponse.status);
 
       if (!saveResponse.ok) {
+        if (saveResponse.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return false;
+        }
         const errorText = await saveResponse.text();
         console.error('❌ Save failed with response:', errorText);
         throw new Error(`Save failed: ${saveResponse.status} - ${errorText}`);

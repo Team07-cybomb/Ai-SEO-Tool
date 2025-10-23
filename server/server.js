@@ -30,7 +30,6 @@ app.use(
   })
 );
 
-
 // Connect to MongoDB
 connectDB();
 
@@ -55,7 +54,8 @@ app.use("/api", contactRoutes);
 app.use("/api", keyRoutes);
 app.use('/api/business', businessNameRoutes);
 app.use('/api/keywords', keywordRoutes);
-app.use('/api', scraperRoutes); 
+
+
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );

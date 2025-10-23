@@ -46,6 +46,14 @@ export default function KeywordAnalyzer() {
   const [expandedKeywords, setExpandedKeywords] = useState<{[key: number]: boolean}>({})
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
 
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
+
   useEffect(() => {
     if (seoData) {
       const timer = setTimeout(() => {
@@ -63,6 +71,12 @@ export default function KeywordAnalyzer() {
       return
     }
 
+    const token = getToken();
+    if (!token) {
+      setError("Please log in to use this feature.");
+      return;
+    }
+
     setLoading(true)
     setError("")
     setSeoData(null)
@@ -70,7 +84,11 @@ export default function KeywordAnalyzer() {
     setExpandedKeywords({});
 
     try {
-      const response = await axios.post(`${API_URL}/api/keychecker`, { url });
+      const response = await axios.post(`${API_URL}/api/keychecker`, { url }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
       if (response.data?.success && response.data.data) {
         setSeoData({ ...response.data.data, url: response.data.mainUrl });
@@ -79,6 +97,11 @@ export default function KeywordAnalyzer() {
       }
     } catch (err: any) {
       console.error('Error fetching SEO data:', err)
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
       const errorMessage = err.response?.data?.error || "Failed to fetch data. The server might be down or the URL is unreachable.";
       setError(errorMessage);
     } finally {

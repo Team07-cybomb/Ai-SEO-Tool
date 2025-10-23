@@ -83,6 +83,13 @@ const scrapedPageSchema = new mongoose.Schema({
 });
 
 const keycheckReportSchema = new mongoose.Schema({
+  // User reference
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  
   // Basic report information
   reportId: {
     type: String,
@@ -146,7 +153,7 @@ const keycheckReportSchema = new mongoose.Schema({
   
   // Performance metrics
   processingTime: {
-    type: Number, // in milliseconds
+    type: Number,
     default: 0
   }
 });
@@ -162,11 +169,13 @@ keycheckReportSchema.statics.generateReportId = function() {
   return `KR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
-// Index for faster queries
+// Updated indexes
+keycheckReportSchema.index({ user: 1 });
 keycheckReportSchema.index({ mainUrl: 1, createdAt: -1 });
 keycheckReportSchema.index({ reportId: 1 });
 keycheckReportSchema.index({ createdAt: -1 });
 keycheckReportSchema.index({ status: 1 });
+keycheckReportSchema.index({ user: 1, createdAt: -1 });
 
 const KeycheckReport = mongoose.model('KeycheckReport', keycheckReportSchema);
 

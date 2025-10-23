@@ -165,11 +165,26 @@ export default function ScraperPage() {
   const [scrapeInfo, setScrapeInfo] = useState<{ url: string; count: number; reportId?: string } | null>(null);
   const [showAnimations, setShowAnimations] = useState(false);
 
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
+
   const handleCrawl = async () => {
     if (!url.trim()) {
       setError("Please enter a valid URL.");
       return;
     }
+
+    const token = getToken();
+    if (!token) {
+      setError("Please log in to use this feature.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setJsonResult(null);
@@ -177,7 +192,11 @@ export default function ScraperPage() {
     setShowAnimations(false);
 
     try {
-      const response = await axios.post<ApiResponse>(`${API_URL}/api/crawl`, { url });
+      const response = await axios.post<ApiResponse>(`${API_URL}/api/crawl`, { url }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.data?.success && response.data.data) { 
         setJsonResult(response.data.data);
         setScrapeInfo({ 
@@ -191,6 +210,11 @@ export default function ScraperPage() {
       }
     } catch (err: any) {
       console.error("Crawl error:", err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
       const errorMessage = err.response?.data?.error || "Failed to fetch data. The server might be down or the URL is unreachable.";
       setError(errorMessage);
     } finally {

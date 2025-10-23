@@ -1,29 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const keywordController = require('../controllers/keywordController');
+const auth = require('../middleware/auth'); // Your existing auth middleware
 
 // Save generated keyword report
-router.post('/reports', keywordController.saveKeywordReport);
+router.post('/reports', auth, keywordController.saveKeywordReport);
 
 // Get keyword report by session ID
-router.get('/reports/session/:sessionId', keywordController.getKeywordReportBySession);
+router.get('/reports/session/:sessionId', auth, keywordController.getKeywordReportBySession);
 
 // Get all keyword reports
-router.get('/reports', keywordController.getAllKeywordReports);
+router.get('/reports', auth, keywordController.getAllKeywordReports);
 
 // Get reports by industry
-router.get('/reports/industry/:industry', keywordController.getKeywordReportsByIndustry);
+router.get('/reports/industry/:industry', auth, keywordController.getKeywordReportsByIndustry);
 
 // Get reports by topic
-router.get('/reports/topic/:topic', keywordController.getKeywordReportsByTopic);
+router.get('/reports/topic/:topic', auth, keywordController.getKeywordReportsByTopic);
 
 // Get analytics
-router.get('/analytics', keywordController.getAnalytics);
+router.get('/analytics', auth, keywordController.getAnalytics);
 
 // Delete keyword report
-router.delete('/reports/:sessionId', keywordController.deleteKeywordReport);
+router.delete('/reports/:sessionId', auth, keywordController.deleteKeywordReport);
 
-// Health check
-router.get('/health', keywordController.healthCheck);
 
 module.exports = router;
