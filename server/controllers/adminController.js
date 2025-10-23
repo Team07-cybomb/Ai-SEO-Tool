@@ -73,28 +73,32 @@ exports.getDashboardData = async (req, res) => {
         .populate('userId', 'name email')
         .lean(),
       
-      // Business Name Generator data
+      // Business Name Generator data - FIXED: Added populate
       BusinessName.find()
         .sort({ generatedAt: -1 })
         .limit(50)
+        .populate('user', 'name email') // Added populate
         .lean(),
       
-      // Keycheck Report data
+      // Keycheck Report data - FIXED: Added populate
       KeycheckReport.find()
         .sort({ createdAt: -1 })
         .limit(50)
+        .populate('user', 'name email') // Added populate
         .lean(),
       
-      // Key Scrape Report data
+      // Key Scrape Report data - FIXED: Added populate
       KeyScrapeReport.find()
         .sort({ createdAt: -1 })
         .limit(50)
+        .populate('user', 'name email') // Added populate
         .lean(),
       
-      // Keyword Report data
+      // Keyword Report data - FIXED: Added populate
       KeywordReport.find()
         .sort({ generatedAt: -1 })
         .limit(50)
+        .populate('user', 'name email') // Added populate
         .lean()
     ]);
 
@@ -104,15 +108,41 @@ exports.getDashboardData = async (req, res) => {
       userMap[user._id.toString()] = user;
     });
 
+    // Helper function to extract user info from populated data
+    const getUserInfo = (item, userField = 'user') => {
+      if (!item[userField]) return { email: 'Unknown', name: 'Anonymous User', id: null };
+      
+      // Handle populated user object
+      if (item[userField]._id) {
+        return {
+          email: item[userField].email || 'Unknown',
+          name: item[userField].name || 'Anonymous User',
+          id: item[userField]._id.toString()
+        };
+      }
+      
+      // Handle user ID string
+      if (typeof item[userField] === 'string') {
+        const user = userMap[item[userField]];
+        return {
+          email: user ? user.email : 'Unknown',
+          name: user ? user.name : 'Anonymous User',
+          id: item[userField]
+        };
+      }
+      
+      return { email: 'Unknown', name: 'Anonymous User', id: null };
+    };
+
     // Format audit data with user information
     const formattedAuditData = audits.map(audit => {
-      const user = audit.userId ? userMap[audit.userId._id?.toString() || audit.userId.toString()] : null;
+      const userInfo = getUserInfo(audit, 'userId');
       
       return {
         _id: audit._id.toString(),
-        userEmail: user ? user.email : 'Unknown',
-        userName: user ? user.name : 'Anonymous User',
-        userId: audit.userId?._id?.toString() || audit.userId?.toString(),
+        userEmail: userInfo.email,
+        userName: userInfo.name,
+        userId: userInfo.id,
         url: audit.url,
         timestamp: audit.createdAt,
         action: 'seo_audit',
@@ -120,63 +150,91 @@ exports.getDashboardData = async (req, res) => {
       };
     });
 
-    // Format Business Name Generator data
-    const formattedBusinessNameData = businessNames.map(item => ({
-      _id: item._id.toString(),
-      sessionId: item.sessionId,
-      industry: item.industry,
-      audience: item.audience,
-      stylePreference: item.stylePreference,
-      nameCount: item.nameCount,
-      names: item.names || [],
-      timestamp: item.generatedAt,
-      tool: 'business_name_generator',
-      action: 'name_generation'
-    }));
+    // Format Business Name Generator data - FIXED: User info
+    const formattedBusinessNameData = businessNames.map(item => {
+      const userInfo = getUserInfo(item, 'user');
+      
+      return {
+        _id: item._id.toString(),
+        userEmail: userInfo.email,
+        userName: userInfo.name,
+        userId: userInfo.id,
+        sessionId: item.sessionId,
+        industry: item.industry,
+        audience: item.audience,
+        stylePreference: item.stylePreference,
+        nameCount: item.nameCount,
+        names: item.names || [],
+        timestamp: item.generatedAt,
+        tool: 'business_name_generator',
+        action: 'name_generation'
+      };
+    });
 
-    // Format Keycheck Report data
-    const formattedKeycheckData = keycheckReports.map(report => ({
-      _id: report._id.toString(),
-      reportId: report.reportId,
-      mainUrl: report.mainUrl,
-      totalScraped: report.totalScraped,
-      keywordCount: report.keywords?.length || 0,
-      status: report.status,
-      analysisType: report.analysis?.fallback ? 'fallback' : 'n8n',
-      timestamp: report.createdAt,
-      tool: 'keyword_checker',
-      action: 'keyword_analysis'
-    }));
+    // Format Keycheck Report data - FIXED: User info
+    const formattedKeycheckData = keycheckReports.map(report => {
+      const userInfo = getUserInfo(report, 'user');
+      
+      return {
+        _id: report._id.toString(),
+        userEmail: userInfo.email,
+        userName: userInfo.name,
+        userId: userInfo.id,
+        reportId: report.reportId,
+        mainUrl: report.mainUrl,
+        totalScraped: report.totalScraped,
+        keywordCount: report.keywords?.length || 0,
+        status: report.status,
+        analysisType: report.analysis?.fallback ? 'fallback' : 'n8n',
+        timestamp: report.createdAt,
+        tool: 'keyword_checker',
+        action: 'keyword_analysis'
+      };
+    });
 
-    // Format Key Scrape Report data
-    const formattedKeyScrapeData = keyScrapeReports.map(report => ({
-      _id: report._id.toString(),
-      reportId: report.reportId,
-      mainUrl: report.mainUrl,
-      domain: report.domain,
-      totalPagesScraped: report.totalPagesScraped,
-      totalKeywordsFound: report.totalKeywordsFound,
-      primaryKeywords: report.keywordData?.primary_keywords?.length || 0,
-      analysisType: report.analysisType,
-      timestamp: report.createdAt,
-      tool: 'keyword_scraper',
-      action: 'keyword_scraping'
-    }));
+    // Format Key Scrape Report data - FIXED: User info
+    const formattedKeyScrapeData = keyScrapeReports.map(report => {
+      const userInfo = getUserInfo(report, 'user');
+      
+      return {
+        _id: report._id.toString(),
+        userEmail: userInfo.email,
+        userName: userInfo.name,
+        userId: userInfo.id,
+        reportId: report.reportId,
+        mainUrl: report.mainUrl,
+        domain: report.domain,
+        totalPagesScraped: report.totalPagesScraped,
+        totalKeywordsFound: report.totalKeywordsFound,
+        primaryKeywords: report.keywordData?.primary_keywords?.length || 0,
+        analysisType: report.analysisType,
+        timestamp: report.createdAt,
+        tool: 'keyword_scraper',
+        action: 'keyword_scraping'
+      };
+    });
 
-    // Format Keyword Report data
-    const formattedKeywordData = keywordReports.map(report => ({
-      _id: report._id.toString(),
-      sessionId: report.sessionId,
-      topic: report.topic,
-      industry: report.industry,
-      audience: report.audience,
-      keywordCount: report.keywordCount,
-      totalSearchVolume: report.totalSearchVolume,
-      averageCPC: report.averageCPC,
-      timestamp: report.generatedAt,
-      tool: 'keyword_generator',
-      action: 'keyword_generation'
-    }));
+    // Format Keyword Report data - FIXED: User info
+    const formattedKeywordData = keywordReports.map(report => {
+      const userInfo = getUserInfo(report, 'user');
+      
+      return {
+        _id: report._id.toString(),
+        userEmail: userInfo.email,
+        userName: userInfo.name,
+        userId: userInfo.id,
+        sessionId: report.sessionId,
+        topic: report.topic,
+        industry: report.industry,
+        audience: report.audience,
+        keywordCount: report.keywordCount,
+        totalSearchVolume: report.totalSearchVolume,
+        averageCPC: report.averageCPC,
+        timestamp: report.generatedAt,
+        tool: 'keyword_generator',
+        action: 'keyword_generation'
+      };
+    });
 
     // Combine all data for unified view
     const allToolData = [
@@ -200,10 +258,9 @@ exports.getDashboardData = async (req, res) => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const activeUsers = new Set(
-      formattedAuditData
-        .filter(a => a.timestamp >= sevenDaysAgo)
+      allToolData
+        .filter(a => a.timestamp >= sevenDaysAgo && a.userEmail !== 'Unknown')
         .map(a => a.userEmail)
-        .filter(email => email !== 'Unknown')
     ).size;
 
     // Count premium users
@@ -229,7 +286,7 @@ exports.getDashboardData = async (req, res) => {
     return res.json({
       // Overall statistics
       totalActivities,
-      uniqueUsers: new Set(formattedAuditData.map((a) => a.userEmail).filter(email => email !== 'Unknown')).size,
+      uniqueUsers: new Set(allToolData.map((a) => a.userEmail).filter(email => email !== 'Unknown')).size,
       activeUsers,
       premiumUsers,
       
@@ -304,6 +361,7 @@ exports.getToolData = async (req, res) => {
           .sort({ generatedAt: -1 })
           .skip(skip)
           .limit(parseInt(limit))
+          .populate('user', 'name email') // Added populate
           .lean();
         total = await BusinessName.countDocuments();
         break;
@@ -313,6 +371,7 @@ exports.getToolData = async (req, res) => {
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit))
+          .populate('user', 'name email') // Added populate
           .lean();
         total = await KeycheckReport.countDocuments();
         break;
@@ -322,6 +381,7 @@ exports.getToolData = async (req, res) => {
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit))
+          .populate('user', 'name email') // Added populate
           .lean();
         total = await KeyScrapeReport.countDocuments();
         break;
@@ -331,6 +391,7 @@ exports.getToolData = async (req, res) => {
           .sort({ generatedAt: -1 })
           .skip(skip)
           .limit(parseInt(limit))
+          .populate('user', 'name email') // Added populate
           .lean();
         total = await KeywordReport.countDocuments();
         break;

@@ -87,7 +87,7 @@ const keywordReportSchema = new mongoose.Schema({
 
 // Updated indexes
 keywordReportSchema.index({ user: 1 });
-keywordReportSchema.index({ sessionId: 1 });
+//keywordReportSchema.index({ sessionId: 1 });
 keywordReportSchema.index({ topic: 1 });
 keywordReportSchema.index({ industry: 1 });
 keywordReportSchema.index({ generatedAt: -1 });

@@ -22,7 +22,7 @@ interface KeywordReport {
 }
 
 const N8N_WEBHOOK_URL = "https://n8n.cybomb.com/webhook/keyword-generator";
-const API_BASE_URL = "http://localhost:5000/api/keywords"; 
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/keywords`;
 
 export default function KeywordGeneratorPage() {
   const [topic, setTopic] = useState("");

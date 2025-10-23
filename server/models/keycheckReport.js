@@ -170,12 +170,12 @@ keycheckReportSchema.statics.generateReportId = function() {
 };
 
 // Updated indexes
-keycheckReportSchema.index({ user: 1 });
+//keycheckReportSchema.index({ user: 1 });
 keycheckReportSchema.index({ mainUrl: 1, createdAt: -1 });
-keycheckReportSchema.index({ reportId: 1 });
+//keycheckReportSchema.index({ reportId: 1 });
 keycheckReportSchema.index({ createdAt: -1 });
 keycheckReportSchema.index({ status: 1 });
-keycheckReportSchema.index({ user: 1, createdAt: -1 });
+//keycheckReportSchema.index({ user: 1, createdAt: -1 });
 
 const KeycheckReport = mongoose.model('KeycheckReport', keycheckReportSchema);
 

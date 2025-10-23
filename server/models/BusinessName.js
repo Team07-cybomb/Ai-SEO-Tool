@@ -51,10 +51,10 @@ const businessNameSchema = new mongoose.Schema({
 });
 
 // Updated indexes
-businessNameSchema.index({ user: 1 });
-businessNameSchema.index({ sessionId: 1 });
+//businessNameSchema.index({ user: 1 });
+//businessNameSchema.index({ sessionId: 1 });
 businessNameSchema.index({ industry: 1 });
 businessNameSchema.index({ generatedAt: -1 });
-businessNameSchema.index({ user: 1, generatedAt: -1 });
+//businessNameSchema.index({ user: 1, generatedAt: -1 });
 
 module.exports = mongoose.model('BusinessName', businessNameSchema);
