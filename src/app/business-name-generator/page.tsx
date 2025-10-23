@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GeneratorHeader, NameResults } from "./frontend";
-import { Building2, Zap, Target, Users, Palette, Star, ArrowUpRight } from "lucide-react";
+import { Building2, Zap, Target, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BusinessName {
@@ -12,6 +12,7 @@ interface BusinessName {
 }
 
 const N8N_WEBHOOK_URL = "https://n8n.cybomb.com/webhook/Business-name-generator";
+const API_BASE_URL = "http://localhost:5000/api/business";
 
 export default function BusinessNameGeneratorPage() {
   const [industry, setIndustry] = useState("");
@@ -19,6 +20,7 @@ export default function BusinessNameGeneratorPage() {
   const [style, setStyle] = useState("");
   const [names, setNames] = useState<BusinessName[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
 
@@ -31,6 +33,40 @@ export default function BusinessNameGeneratorPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const saveNamesToDatabase = async (namesToSave: BusinessName[]): Promise<boolean> => {
+    if (!namesToSave.length) return false;
+
+    setSaving(true);
+    try {
+      const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const saveResponse = await fetch(`${API_BASE_URL}/names`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          names: namesToSave,
+          industry,
+          audience,
+          stylePreference: style,
+          sessionId
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        throw new Error(`Save failed: ${saveResponse.status}`);
+      }
+
+      const saveResult = await saveResponse.json();
+      console.log('Names saved to database:', saveResult.data);
+      return true;
+    } catch (error) {
+      console.error('Error saving to database:', error);
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleGenerateNames = async () => {
     if (!industry || !audience || !style) {
@@ -62,11 +98,17 @@ export default function BusinessNameGeneratorPage() {
         throw new Error("Invalid response format");
       }
 
-      setNames(namesArray.map((item: any) => ({
+      const businessNames = namesArray.map((item: any) => ({
         name: item.name || "Unnamed",
         style: item.style || "General",
         tagline: item.tagline || "",
-      })));
+      }));
+
+      setNames(businessNames);
+      
+      // Save to MongoDB in background (silently)
+      saveNamesToDatabase(businessNames);
+      
     } catch (err: any) {
       console.error("Generation failed:", err.message);
       alert("Name generation failed. Please try again.");
@@ -171,10 +213,6 @@ export default function BusinessNameGeneratorPage() {
                         </div>
                       ))}
                     </div>
-
-                    {/* <Button variant="outline" className="w-full mt-4 border-color-mix(in oklab, var(--primary) 30%, transparent) text-primary hover:bg-color-mix(in oklab, var(--primary) 5%, transparent)">
-                      View Case Studies <ArrowUpRight className="ml-2 h-4 w-4" />
-                    </Button> */}
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FC } from "react";
+import { useState, FC, useMemo } from "react";
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -20,8 +20,21 @@ interface KeywordData {
   related_keywords: string[];
   keyword_intent: KeywordIntent;
   error?: string;
-  url?: string;
-  keywordCount?: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: KeywordData;
+  mainUrl: string;
+  totalScraped: number;
+  reportId?: string;
+  analysis: {
+    sentToN8n: boolean;
+    dataOptimized: boolean;
+    fallback: boolean;
+    savedToDb?: boolean;
+  };
+  error?: string;
 }
 
 // Enhanced gradient configurations with teal theme
@@ -143,35 +156,13 @@ const StatsCard: FC<{
   </div>
 );
 
-// Feature Card Component for the empty space
-const FeatureCard: FC<{
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-  step?: number;
-}> = ({ title, description, icon, color, step }) => (
-  <div className="bg-white/95 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl p-6 text-center transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
-    {step && (
-      <div className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-sm font-bold mb-3 shadow-lg">
-        {step}
-      </div>
-    )}
-    <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
-      <span className="text-white font-bold text-lg">{icon}</span>
-    </div>
-    <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-    <p className="text-sm text-gray-600">{description}</p>
-  </div>
-);
-
 // Main Scraper Page component
 export default function ScraperPage() {
   const [url, setUrl] = useState<string>("");
   const [jsonResult, setJsonResult] = useState<KeywordData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [scrapeInfo, setScrapeInfo] = useState<{ url: string; count: number } | null>(null);
+  const [scrapeInfo, setScrapeInfo] = useState<{ url: string; count: number; reportId?: string } | null>(null);
   const [showAnimations, setShowAnimations] = useState(false);
 
   const handleCrawl = async () => {
@@ -186,10 +177,14 @@ export default function ScraperPage() {
     setShowAnimations(false);
 
     try {
-      const response = await axios.post(`${API_URL}/api/crawl`, { url });
+      const response = await axios.post<ApiResponse>(`${API_URL}/api/crawl`, { url });
       if (response.data?.success && response.data.data) { 
         setJsonResult(response.data.data);
-        setScrapeInfo({ url: response.data.mainUrl, count: response.data.totalScraped });
+        setScrapeInfo({ 
+          url: response.data.mainUrl, 
+          count: response.data.totalScraped,
+          reportId: response.data.reportId 
+        });
         setTimeout(() => setShowAnimations(true), 500);
       } else {
         setError(response.data.error || "An unexpected API response was received.");
@@ -219,6 +214,8 @@ export default function ScraperPage() {
     );
   };
 
+  const totalKeywordCount = useMemo(() => getTotalKeywordCount(jsonResult), [jsonResult]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 py-28 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
       {/* Enhanced Animated Background with teal theme */}
@@ -239,15 +236,6 @@ export default function ScraperPage() {
       <div className="max-w-6xl mx-auto">
         {/* Enhanced Header */}
         <header className="text-center mb-8 relative">
-          <div className="inline-flex items-center justify-center mb-3">
-            {/* <div className="relative">
-              <span className="px-4 py-1.5 text-sm bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full shadow-lg shadow-teal-200/50 relative z-10 font-semibold">
-                🔍 SEO Keyword Analysis
-              </span>
-              <div className="absolute -inset-1 bg-teal-300/30 rounded-lg blur-sm animate-pulse"></div>
-            </div> */}
-          </div>
-          
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2 relative">
             SEO Keyword Extractor
             <span className="absolute -top-1 -right-4 text-teal-400 text-xl">✨</span>
@@ -299,7 +287,7 @@ export default function ScraperPage() {
             </button>
           </div>
 
-          {/* Empty Space Content - Based on Reference Image */}
+          {/* Empty Space Content */}
           {!loading && !jsonResult && !error && (
             <div className="max-w-4xl mx-auto mb-12">
               <div className="text-center mb-8">
@@ -314,20 +302,6 @@ export default function ScraperPage() {
                   <p className="text-gray-600 mb-4">
                     Unlock the power of data-driven keyword research to boost your search engine rankings and drive targeted traffic to your website.
                   </p>
-                  {/* <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
-                      No credit card required
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
-                      Instant results
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span className="w-2 h-2 bg-teal-400 rounded-full"></span>
-                      Free analysis
-                    </div>
-                  </div> */}
                 </div>
               </div>
               {/* Additional Features Section */}
@@ -389,6 +363,14 @@ export default function ScraperPage() {
                     <p className="text-gray-600 text-sm">
                       Successfully analyzed <strong className="text-teal-600">{scrapeInfo.url}</strong>
                     </p>
+                    {/* {scrapeInfo.reportId && (
+                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-teal-50 border border-teal-200 rounded-lg">
+                        <span className="text-teal-600 text-xs">Report ID:</span>
+                        <code className="text-teal-800 text-xs font-mono bg-teal-100 px-2 py-1 rounded">
+                          {scrapeInfo.reportId}
+                        </code>
+                      </div>
+                    )} */}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -401,7 +383,7 @@ export default function ScraperPage() {
                     />
                     <StatsCard 
                       title="Total Keywords" 
-                      value={getTotalKeywordCount(jsonResult)} 
+                      value={totalKeywordCount} 
                       description="Keywords identified"
                       color="bg-gradient-to-r from-cyan-400 to-teal-400"
                       icon="🔑"
