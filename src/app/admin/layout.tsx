@@ -1,11 +1,17 @@
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// app/admin/layout.tsx
+export const metadata = {
+  title: 'Admin Dashboard',
+  description: 'Admin panel',
+};
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="admin-layout">
-      {children}
-    </div>
+    <html lang="en">
+      <body>
+        <div className="admin-dashboard">
+          {children}
+        </div>
+      </body>
+    </html>
   );
 }

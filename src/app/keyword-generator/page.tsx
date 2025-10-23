@@ -1,10 +1,8 @@
-// page.tsx
 "use client";
 
 import { useState, useRef } from "react";
 import { Building, Sparkles, Target, Users } from "lucide-react";
 import { GeneratorHeader, KeywordResults } from "./frontend";
-
 
 interface Keyword {
   keyword: string;
@@ -14,10 +12,9 @@ interface Keyword {
   cpc: number;
   intent: string;
   content_type: string;
-  keyword_density: number; // ✅ add this
+  keyword_density: number;
   content_idea: string;
 }
-
 
 interface KeywordReport {
   topic: string;
@@ -25,6 +22,7 @@ interface KeywordReport {
 }
 
 const N8N_WEBHOOK_URL = "https://n8n.cybomb.com/webhook/keyword-generator";
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/keywords`;
 
 export default function KeywordGeneratorPage() {
   const [topic, setTopic] = useState("");
@@ -36,6 +34,14 @@ export default function KeywordGeneratorPage() {
   const [loadingStep, setLoadingStep] = useState("Initializing...");
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  };
 
   const startProgressAnimation = (initialTopic: string) => {
     setProgress(0);
@@ -69,6 +75,61 @@ export default function KeywordGeneratorPage() {
     }
   };
 
+  // Function to save keyword report to MongoDB
+  const saveKeywordReportToDatabase = async (keywords: Keyword[], sessionId: string): Promise<boolean> => {
+    try {
+      const token = getToken();
+      if (!token) {
+        console.error('No authentication token found');
+        return false;
+      }
+
+      console.log('🔄 Attempting to save to MongoDB...', {
+        topic,
+        industry, 
+        audience,
+        keywordCount: keywords.length,
+        sessionId
+      });
+
+      const saveResponse = await fetch(`${API_BASE_URL}/reports`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          topic,
+          industry,
+          audience,
+          keywords,
+          sessionId
+        }),
+      });
+
+      console.log('📡 Save response status:', saveResponse.status);
+
+      if (!saveResponse.ok) {
+        if (saveResponse.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return false;
+        }
+        const errorText = await saveResponse.text();
+        console.error('❌ Save failed with response:', errorText);
+        throw new Error(`Save failed: ${saveResponse.status} - ${errorText}`);
+      }
+
+      const saveResult = await saveResponse.json();
+      console.log('✅ Keyword report saved to database:', saveResult.data);
+      return true;
+    } catch (error) {
+      console.error('❌ Error saving to database:', error);
+      return false;
+    }
+  };
+
   const handleGenerateKeywords = async () => {
     if (!topic || !industry || !audience) {
       alert("⚠️ Please fill in all fields.");
@@ -78,6 +139,8 @@ export default function KeywordGeneratorPage() {
     setLoading(true);
     setReport(null);
     const initialTopic = topic;
+    const sessionId = `kw_sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     startProgressAnimation(initialTopic);
 
     try {
@@ -115,21 +178,24 @@ export default function KeywordGeneratorPage() {
       const cleanedKeywords: Keyword[] = Array.isArray(keywordsArray)
         ? keywordsArray
             .map((item: any) => ({
-  keyword: item.keyword || "N/A",
-  type: item.type || "N/A",
-  difficulty_score: item.difficulty_score || "N/A",
-  search_volume: item.search_volume || 0,
-  cpc: item.cpc || 0,
-  intent: item.intent || "N/A",
-  content_type: item.content_type || "N/A",
-  keyword_density: item.keyword_density || 0, // ✅ add this
-  content_idea: item.content_idea || "No idea provided.",
-}))
-
+              keyword: item.keyword || "N/A",
+              type: item.type || "N/A",
+              difficulty_score: item.difficulty_score || "N/A",
+              search_volume: item.search_volume || 0,
+              cpc: item.cpc || 0,
+              intent: item.intent || "N/A",
+              content_type: item.content_type || "N/A",
+              keyword_density: item.keyword_density || 0,
+              content_idea: item.content_idea || "No idea provided.",
+            }))
             .filter((item: Keyword) => item.keyword !== "N/A")
         : [];
 
       setReport({ topic: initialTopic, keywords: cleanedKeywords });
+      
+      // Save to MongoDB in background (silently)
+      saveKeywordReportToDatabase(cleanedKeywords, sessionId);
+      
       stopProgressAnimation(true);
     } catch (err: any) {
       console.error("⚠️ Keyword generation failed:", err.message);

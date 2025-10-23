@@ -1,21 +1,21 @@
 const { chromium } = require("playwright");
 const { URL } = require("url");
 const axios = require("axios");
+const KeyScrapeReport = require("../models/keyscrapeReport");
 
-const MAX_DEPTH = 3; // Reduced for faster testing, can be increased
-const MAX_PAGES = 500; // Reduced for faster testing
+const MAX_DEPTH = 3;
+const MAX_PAGES = 500;
 
 // --- Core Scraper Function ---
 async function processCrawlQueue(startUrl, page) {
   const baseUrl = new URL(startUrl).origin;
   const visitedUrls = new Set();
-  const urlsToVisit = new Map(); // Using Map to store URL and its depth
+  const urlsToVisit = new Map();
   const scrapedResults = [];
 
   urlsToVisit.set(startUrl, 0);
 
   while (urlsToVisit.size > 0 && visitedUrls.size < MAX_PAGES) {
-    // Get the first entry from the map
     const [currentUrl, depth] = urlsToVisit.entries().next().value;
     urlsToVisit.delete(currentUrl);
 
@@ -24,7 +24,7 @@ async function processCrawlQueue(startUrl, page) {
     }
     visitedUrls.add(currentUrl);
 
-    console.log(`[Depth ${depth}, Page ${visitedUrls.size}/${MAX_PAGES}] Scraping: ${currentUrl}`);
+   // console.log(`[Depth ${depth}, Page ${visitedUrls.size}/${MAX_PAGES}] Scraping: ${currentUrl}`);
 
     try {
       await page.goto(currentUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -34,15 +34,14 @@ async function processCrawlQueue(startUrl, page) {
         const elements = document.querySelectorAll("h1, h2, h3, p, li, span");
         const content = Array.from(elements)
           .map((el) => el.innerText.trim())
-          .filter((text) => text.length > 15 && text.length < 800) // Adjusted length filters
-          .slice(0, 25); // Get a bit more content for better analysis
+          .filter((text) => text.length > 15 && text.length < 800)
+          .slice(0, 25);
 
         const allLinks = Array.from(document.querySelectorAll("a[href]"))
           .map((a) => a.href)
           .filter((href) => {
             try {
               const linkUrl = new URL(href);
-              // Ensure it's http/https, belongs to the same domain, and isn't just a fragment '#'
               return (
                 linkUrl.protocol.startsWith("http") &&
                 linkUrl.hostname === new URL(bUrl).hostname &&
@@ -53,17 +52,17 @@ async function processCrawlQueue(startUrl, page) {
             }
           });
 
-        return { pageTitle: title, allContent: content, links: [...new Set(allLinks)] }; // Remove duplicate links
+        return { pageTitle: title, allContent: content, links: [...new Set(allLinks)] };
       }, baseUrl);
 
       const fullText = pageData.allContent.join(" ");
-      const keywords = extractKeywords(fullText); // Keywords extracted locally as a fallback
+      const keywords = extractKeywords(fullText);
 
       scrapedResults.push({
         url: currentUrl,
         depth,
         title: pageData.pageTitle,
-        content: pageData.allContent.slice(0, 15), // Keep a reasonable amount of content
+        content: pageData.allContent.slice(0, 15),
         foundLinks: pageData.links.length,
         keywords,
         contentLength: fullText.length,
@@ -98,7 +97,6 @@ async function processCrawlQueue(startUrl, page) {
 // --- Keyword Extraction (Local Fallback) ---
 function extractKeywords(text, maxKeywords = 10) {
   if (!text) return [];
-  // Expanded stop words list
   const stopWords = new Set([
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
     "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
@@ -114,7 +112,7 @@ function extractKeywords(text, maxKeywords = 10) {
 
   const words = text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, " ") // Allow hyphens in words
+    .replace(/[^\w\s-]/g, " ")
     .split(/\s+/)
     .filter((word) => word.length > 3 && !stopWords.has(word));
 
@@ -138,17 +136,16 @@ async function sendToN8nAndWait(scrapedData) {
       data: scrapedData,
     };
 
-    console.log("Sending data to n8n...");
-    const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 }); // Increased timeout
-    console.log("Raw n8n response received.");
+    // console.log("Sending data to n8n...");
+    const response = await axios.post(n8nWebhookUrl, payload, { timeout: 220000 });
 
-    // Check if the response is an object with an 'output' property
+    // console.log("Raw n8n response received.");
+
     if (!response.data || typeof response.data !== 'object' || !response.data.output) {
       console.warn("n8n response is not in the expected format:", response.data);
       throw new Error("Invalid n8n response format.");
     }
 
-    // Clean up potential markdown formatting from the AI response
     let jsonStr = response.data.output.trim();
     if (jsonStr.startsWith("```json")) {
       jsonStr = jsonStr.substring(7);
@@ -158,10 +155,7 @@ async function sendToN8nAndWait(scrapedData) {
     }
 
     const parsed = JSON.parse(jsonStr);
-    //console.log("Parsed n8n data:", JSON.stringify(parsed, null, 2));
 
-
-    // More robustly normalizes keywords, handles strings or objects, and filters empty values.
     const normalizeKeywords = (arr) => {
       if (!Array.isArray(arr)) return [];
       return arr
@@ -169,7 +163,6 @@ async function sendToN8nAndWait(scrapedData) {
         .filter(Boolean);
     };
 
-    // Safely access keyword_intent, providing a default empty object if it's missing.
     const intentData = parsed.keyword_intent || {};
 
     return {
@@ -186,10 +179,9 @@ async function sendToN8nAndWait(scrapedData) {
     };
   } catch (error) {
     console.error("Error processing n8n data:", error.message);
-    // Fallback to locally extracted keywords if n8n fails
     const allKeywords = scrapedData.flatMap((r) => r.keywords.map((k) => k.word));
     return {
-      primary_keywords: [...new Set(allKeywords)].slice(0, 10), // Use unique keywords
+      primary_keywords: [...new Set(allKeywords)].slice(0, 10),
       secondary_keywords: [],
       long_tail_keywords: [],
       related_keywords: [],
@@ -199,24 +191,95 @@ async function sendToN8nAndWait(scrapedData) {
   }
 }
 
+// --- Save Report to Database ---
+async function saveScrapeReport(userId, mainUrl, scrapedResults, n8nData, totalScraped) {
+  try {
+    const domain = new URL(mainUrl).hostname;
+    
+    const totalKeywordsFound = 
+      (n8nData.primary_keywords?.length || 0) +
+      (n8nData.secondary_keywords?.length || 0) +
+      (n8nData.long_tail_keywords?.length || 0) +
+      (n8nData.related_keywords?.length || 0);
+
+    const reportData = {
+      user: userId,
+      mainUrl,
+      domain,
+      keywordData: {
+        primary_keywords: n8nData.primary_keywords || [],
+        secondary_keywords: n8nData.secondary_keywords || [],
+        long_tail_keywords: n8nData.long_tail_keywords || [],
+        related_keywords: n8nData.related_keywords || [],
+        keyword_intent: {
+          informational: n8nData.keyword_intent?.informational || [],
+          navigational: n8nData.keyword_intent?.navigational || [],
+          transactional: n8nData.keyword_intent?.transactional || [],
+          commercial: n8nData.keyword_intent?.commercial || [],
+        }
+      },
+      scrapedPages: scrapedResults.map(page => ({
+        url: page.url,
+        depth: page.depth,
+        title: page.title || '',
+        content: page.content || [],
+        foundLinks: page.foundLinks || 0,
+        keywords: page.keywords || [],
+        contentLength: page.contentLength || 0,
+        wordCount: page.wordCount || 0,
+        error: page.error,
+        timestamp: page.timestamp ? new Date(page.timestamp) : new Date()
+      })),
+      totalPagesScraped: totalScraped,
+      totalKeywordsFound,
+      analysisType: n8nData.error ? 'fallback_analysis' : 'n8n_analysis',
+      analysisError: n8nData.error || undefined,
+      completedAt: new Date()
+    };
+
+    const report = new KeyScrapeReport(reportData);
+    await report.save();
+    
+    // console.log(`Report saved with ID: ${report.reportId}`);
+    return report.reportId;
+    
+  } catch (error) {
+    console.error('Error saving report to database:', error);
+    return null;
+  }
+}
+
 // --- Main Controller ---
 exports.crawlAndScrape = async (req, res) => {
   let browser;
+  let reportId = null;
+  
   try {
     const startUrl = req.body.url;
+    const userId = req.user.id; // Get user from authenticated request
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
     if (!startUrl) {
       return res.status(400).json({ success: false, error: "Starting URL is required" });
     }
+    
     try {
       new URL(startUrl);
     } catch {
       return res.status(400).json({ success: false, error: "Invalid URL format" });
     }
 
-    console.log(`Starting crawl for: ${startUrl}`);
+   // console.log(`Starting crawl for: ${startUrl}`);
+   // console.log(`User ID: ${userId}`);
+    
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
-      // Block images, stylesheets, and fonts to speed up scraping
       route: (route) => {
         const type = route.request().resourceType();
         if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
@@ -237,22 +300,110 @@ exports.crawlAndScrape = async (req, res) => {
 
     const n8nData = await sendToN8nAndWait(scrapedResults);
 
+    // Save to database with user reference
+    reportId = await saveScrapeReport(userId, startUrl, scrapedResults, n8nData, totalScraped);
+
     res.status(200).json({
       success: true,
       data: n8nData,
       mainUrl: startUrl,
       totalScraped: totalScraped,
+      reportId: reportId,
       analysis: {
         sentToN8n: !n8nData.error,
         dataOptimized: !n8nData.error,
         fallback: !!n8nData.error,
+        savedToDb: !!reportId
       },
     });
+    
   } catch (error) {
     console.error("Crawler failed:", error);
-    res.status(500).json({ success: false, error: "An internal server error occurred during the crawl." });
+    res.status(500).json({ 
+      success: false, 
+      error: "An internal server error occurred during the crawl.",
+      reportId: reportId
+    });
   } finally {
     if (browser) await browser.close();
-    console.log("Crawl process finished.");
+    // console.log("Crawl process finished.");
+  }
+};
+
+// --- New API to retrieve saved reports for the authenticated user ---
+exports.getReportById = async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+    
+    const report = await KeyScrapeReport.findOne({ reportId, user: userId });
+    
+    if (!report) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Report not found" 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      report: {
+        reportId: report.reportId,
+        mainUrl: report.mainUrl,
+        domain: report.domain,
+        keywordData: report.keywordData,
+        totalPagesScraped: report.totalPagesScraped,
+        totalKeywordsFound: report.totalKeywordsFound,
+        analysisType: report.analysisType,
+        createdAt: report.createdAt,
+        duration: report.duration
+      }
+    });
+    
+  } catch (error) {
+    console.error("Error fetching report:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Failed to fetch report" 
+    });
+  }
+};
+
+// --- Get recent reports for a domain for the authenticated user ---
+exports.getDomainReports = async (req, res) => {
+  try {
+    const { domain } = req.params;
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "User authentication required" 
+      });
+    }
+
+    const { limit = 5 } = req.query;
+    
+    const reports = await KeyScrapeReport.findByUserAndDomain(userId, domain, parseInt(limit));
+    
+    res.status(200).json({
+      success: true,
+      domain,
+      reports
+    });
+    
+  } catch (error) {
+    console.error("Error fetching domain reports:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Failed to fetch domain reports" 
+    });
   }
 };
