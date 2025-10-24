@@ -9,7 +9,7 @@ import { BarChart3, Loader2, LinkIcon, XCircle, Star, TrendingUp, Target, Zap, L
 import { Progress } from "@/components/ui/progress"
 import axios from "axios"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 // Define the structure of the data we expect from the backend API
 interface Keyword {

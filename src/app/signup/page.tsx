@@ -3,7 +3,7 @@ import React, { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { showSuccessAlert, showErrorAlert } from "@/components/Utils/alert-util";
 import Link from "next/link";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const SignupPage = () => {
   const [isLoginMode, setIsLoginMode] = useState(false);

@@ -22,7 +22,7 @@ interface KeywordReport {
 }
 
 const N8N_WEBHOOK_URL = "https://n8n.cybomb.com/webhook/keyword-generator";
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/keywords`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function KeywordGeneratorPage() {
   const [topic, setTopic] = useState("");
@@ -92,7 +92,7 @@ export default function KeywordGeneratorPage() {
         sessionId
       });
 
-      const saveResponse = await fetch(`${API_BASE_URL}/reports`, {
+      const saveResponse = await fetch(`${API_BASE_URL}/api/keywords/reports`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

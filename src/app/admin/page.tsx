@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ;
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");

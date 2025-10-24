@@ -12,7 +12,7 @@ interface BusinessName {
 }
 
 const N8N_WEBHOOK_URL = "https://n8n.cybomb.com/webhook/Business-name-generator";
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/business`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ;
 export default function BusinessNameGeneratorPage() {
   const [industry, setIndustry] = useState("");
   const [audience, setAudience] = useState("");
@@ -54,7 +54,7 @@ export default function BusinessNameGeneratorPage() {
     try {
       const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      const saveResponse = await fetch(`${API_BASE_URL}/names`, {
+      const saveResponse = await fetch(`${API_BASE_URL}/api/business/names`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

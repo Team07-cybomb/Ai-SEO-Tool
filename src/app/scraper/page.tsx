@@ -3,7 +3,7 @@
 import { useState, FC, useMemo } from "react";
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 // Define the structure of the data we expect from the API
 interface KeywordIntent {

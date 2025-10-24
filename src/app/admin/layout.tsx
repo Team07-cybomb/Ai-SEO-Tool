@@ -1,4 +1,4 @@
-// app/admin/layout.tsx
+
 export const metadata = {
   title: 'Admin Dashboard',
   description: 'Admin panel',

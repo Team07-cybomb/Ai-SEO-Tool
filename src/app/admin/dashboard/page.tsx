@@ -9,7 +9,7 @@ import AuditTab from "./components/tabs/AuditTab";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { DashboardData } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 export default function AdminDashboard() {
   const router = useRouter();

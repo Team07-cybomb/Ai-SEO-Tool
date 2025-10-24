@@ -1,6 +1,6 @@
 import { DashboardData } from "../../types";
 import StatsGrid from "../StatsGrid";
-import RecentUsers from "../../components/RecentUsers";
+import RecentUsers from "../RecentUsers";
 
 interface OverviewTabProps {
   data: DashboardData;

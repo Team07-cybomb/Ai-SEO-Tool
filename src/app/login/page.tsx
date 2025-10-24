@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/components/Utils/alert-util";
 import { useUser } from "@/components/context/UserContext";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ;
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
