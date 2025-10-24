@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type User = { id: string; name?: string | null; email: string; image?: string | null } | null;
 

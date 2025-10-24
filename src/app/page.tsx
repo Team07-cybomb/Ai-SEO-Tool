@@ -6,16 +6,29 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import Link from "next/link"
-import { Menu, Search, BarChart3, Zap, Shield, TrendingUp, FileText, Lightbulb, CheckCircle } from "lucide-react" // Added FileText, Lightbulb, CheckCircle for new section
-import { SeoGraph } from "@/components/seo-graph" 
+import { Menu, Search, BarChart3, Zap, Shield, TrendingUp, FileText, Lightbulb, CheckCircle } from "lucide-react"
+import { SeoGraph } from "@/components/seo-graph"
+import styles from './partnership.module.css' // Add this import
+
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolledPastBanner, setIsScrolledPastBanner] = useState(false)
-
+  const logos = [
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761200939/microsoft-5_z1f1q9.svg",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761201009/Zoho-logo_ggtqnk.png",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761201062/aws-2_whii9k.svg",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761201134/djit-trading-DY90WfDK_kbwf1d.png",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761200939/microsoft-5_z1f1q9.svg",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761201009/Zoho-logo_ggtqnk.png",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761201062/aws-2_whii9k.svg",
+    "https://res.cloudinary.com/duomzq5mm/image/upload/v1761201134/djit-trading-DY90WfDK_kbwf1d.png",
+  ];
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolledPastBanner(window.scrollY > window.innerHeight * 0.8)
     }
+    window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -208,7 +221,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      {/* Live Graph Section - NEW */}
+
+      {/* Live Graph Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
@@ -219,59 +233,60 @@ export default function LandingPage() {
           <SeoGraph />
         </div>
       </section>
-      ---
-{/* Comparison Section - NEW */}
-<section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
-  <div className="container mx-auto max-w-6xl">
-    <div className="text-center mb-12">
-      <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
-        Our AI Tool vs Manual SEO
-      </h2>
-      <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-        See how our AI-powered platform gives you an unfair advantage by automating tasks and providing actionable insights that would take days to find manually.
-      </p>
-    </div>
 
-    <div className="overflow-x-auto">
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="border-b">
-            <th className="py-4 px-6 text-xl font-bold text-foreground bg-muted/30">Feature</th>
-            <th className="py-4 px-6 text-xl font-bold text-foreground bg-blue-50 dark:bg-blue-950">Our AI Tool</th>
-            <th className="py-4 px-6 text-xl font-bold text-foreground bg-gray-50 dark:bg-gray-900">Manual SEO</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="border-b">
-            <td className="py-4 px-6 text-lg font-semibold text-foreground">Comprehensive Audit Speed</td>
-            <td className="py-4 px-6 text-green-600 font-medium">Minutes</td>
-            <td className="py-4 px-6 text-red-600 font-medium">Days to weeks</td>
-          </tr>
-          <tr className="border-b bg-gray-50 dark:bg-gray-900">
-            <td className="py-4 px-6 text-lg font-semibold text-foreground">Actionable Recommendations</td>
-            <td className="py-4 px-6 text-green-600 font-medium">Yes, prioritized and clear</td>
-            <td className="py-4 px-6 text-red-600 font-medium">No, requires expert interpretation</td>
-          </tr>
-          <tr className="border-b">
-            <td className="py-4 px-6 text-lg font-semibold text-foreground">Competitor Analysis</td>
-            <td className="py-4 px-6 text-green-600 font-medium">Included</td>
-            <td className="py-4 px-6 text-red-600 font-medium">Time-consuming & difficult</td>
-          </tr>
-          <tr className="border-b bg-gray-50 dark:bg-gray-900">
-            <td className="py-4 px-6 text-lg font-semibold text-foreground">Progress Tracking</td>
-            <td className="py-4 px-6 text-green-600 font-medium">Automated dashboard</td>
-            <td className="py-4 px-6 text-red-600 font-medium">Manual tracking with spreadsheets</td>
-          </tr>
-          <tr>
-            <td className="py-4 px-6 text-lg font-semibold text-foreground">Cost</td>
-            <td className="py-4 px-6 text-green-600 font-medium">Fixed monthly fee</td>
-            <td className="py-4 px-6 text-red-600 font-medium">High hourly rates</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+      {/* Comparison Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+              Our AI Tool vs Manual SEO
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              See how our AI-powered platform gives you an unfair advantage by automating tasks and providing actionable insights that would take days to find manually.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-4 px-6 text-xl font-bold text-foreground bg-muted/30">Feature</th>
+                  <th className="py-4 px-6 text-xl font-bold text-foreground bg-blue-50 dark:bg-blue-950">Our AI Tool</th>
+                  <th className="py-4 px-6 text-xl font-bold text-foreground bg-gray-50 dark:bg-gray-900">Manual SEO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="py-4 px-6 text-lg font-semibold text-foreground">Comprehensive Audit Speed</td>
+                  <td className="py-4 px-6 text-green-600 font-medium">Minutes</td>
+                  <td className="py-4 px-6 text-red-600 font-medium">Days to weeks</td>
+                </tr>
+                <tr className="border-b bg-gray-50 dark:bg-gray-900">
+                  <td className="py-4 px-6 text-lg font-semibold text-foreground">Actionable Recommendations</td>
+                  <td className="py-4 px-6 text-green-600 font-medium">Yes, prioritized and clear</td>
+                  <td className="py-4 px-6 text-red-600 font-medium">No, requires expert interpretation</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-4 px-6 text-lg font-semibold text-foreground">Competitor Analysis</td>
+                  <td className="py-4 px-6 text-green-600 font-medium">Included</td>
+                  <td className="py-4 px-6 text-red-600 font-medium">Time-consuming & difficult</td>
+                </tr>
+                <tr className="border-b bg-gray-50 dark:bg-gray-900">
+                  <td className="py-4 px-6 text-lg font-semibold text-foreground">Progress Tracking</td>
+                  <td className="py-4 px-6 text-green-600 font-medium">Automated dashboard</td>
+                  <td className="py-4 px-6 text-red-600 font-medium">Manual tracking with spreadsheets</td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-6 text-lg font-semibold text-foreground">Cost</td>
+                  <td className="py-4 px-6 text-green-600 font-medium">Fixed monthly fee</td>
+                  <td className="py-4 px-6 text-red-600 font-medium">High hourly rates</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* What Our Clients Say Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-800">
         <div className="container mx-auto">
@@ -331,53 +346,54 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      {/* Who It's For Section - NEW */}
-<section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
-  <div className="container mx-auto text-center max-w-4xl">
-    <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
-      Who Can Benefit From SEO Analysis?
-    </h2>
-    <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-      Whether you're a seasoned pro or just starting, our tool is built for you. We provide the insights you need to succeed in a competitive digital landscape.
-    </p>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-      <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
-        <CardHeader className="text-center">
-          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
-            <FileText className="w-6 h-6 text-primary" />
+      {/* Who It's For Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="container mx-auto text-center max-w-4xl">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
+            Who Can Benefit From SEO Analysis?
+          </h2>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            Whether you're a seasoned pro or just starting, our tool is built for you. We provide the insights you need to succeed in a competitive digital landscape.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
+              <CardHeader className="text-center">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-lg sm:text-xl text-foreground">Marketing Professionals</CardTitle>
+                <CardDescription>
+                  Impress clients with detailed, professional SEO reports and track campaign performance with ease.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
+              <CardHeader className="text-center">
+                <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <TrendingUp className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-lg sm:text-xl text-foreground">Small Business Owners</CardTitle>
+                <CardDescription>
+                  Take control of your online presence without needing to hire an expensive SEO agency.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
+              <CardHeader className="text-center">
+                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <Lightbulb className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-lg sm:text-xl text-foreground">Bloggers & Content Creators</CardTitle>
+                <CardDescription>
+                  Ensure your content is optimized for search engines to reach a wider audience and grow your organic traffic.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
-          <CardTitle className="text-lg sm:text-xl text-foreground">Marketing Professionals</CardTitle>
-          <CardDescription>
-            Impress clients with detailed, professional SEO reports and track campaign performance with ease.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-      <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
-        <CardHeader className="text-center">
-          <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
-            <TrendingUp className="w-6 h-6 text-primary" />
-          </div>
-          <CardTitle className="text-lg sm:text-xl text-foreground">Small Business Owners</CardTitle>
-          <CardDescription>
-            Take control of your online presence without needing to hire an expensive SEO agency.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-      <Card className="border-border hover:shadow-lg transition-shadow bg-muted/50">
-        <CardHeader className="text-center">
-          <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
-            <Lightbulb className="w-6 h-6 text-primary" />
-          </div>
-          <CardTitle className="text-lg sm:text-xl text-foreground">Bloggers & Content Creators</CardTitle>
-          <CardDescription>
-            Ensure your content is optimized for search engines to reach a wider audience and grow your organic traffic.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" id="FAQ">
@@ -397,7 +413,7 @@ export default function LandingPage() {
                 What is SEO and why is it important?
               </AccordionTrigger>
               <AccordionContent className="text-base sm:text-lg text-muted-foreground px-4 sm:px-6 pb-4 leading-relaxed">
-                SEO (Search Engine Optimization) helps improve your website’s visibility in search engines, driving more
+                SEO (Search Engine Optimization) helps improve your website&apos;s visibility in search engines, driving more
                 organic traffic and building credibility for your brand.
               </AccordionContent>
             </AccordionItem>
@@ -455,92 +471,54 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Partnership section - UPDATED */}
+      <section className="py-20 bg-gray-50">
+        {/* Centered Heading */}
+        <div className="text-center">
+          <h2 className={styles.partnershipHeading}>
+            Our Partners
+            <div className={styles.underline}></div>
+          </h2>
+        </div>
 
-      {/* Pricing Section - NEW */}
-<section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-800" id="Pricing">
-  <div className="container mx-auto text-center max-w-5xl">
-    <div className="text-center mb-12">
-      <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">
-      Choose Your Path to SEO Excellence
-      </h2>
-      <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-        Choose a plan that fits your business needs and start improving your search rankings today. No hidden fees, just growth.
-      </p>
-    </div>
+        {/* Carousel */}
+        <div className="container mx-auto">
+          <div className={styles.carousel}>
+            <div className={styles.carouselTrack}>
+              {[...logos, ...logos].map((logo, index) => (
+                <div key={index} className={styles.partnerCard}>
+                  <img src={logo} alt={`Partner ${index + 1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-      {/* Free Plan */}
-      <Card className="flex flex-col h-full bg-white dark:bg-gray-900 border-border p-6 transition duration-300 hover:shadow-xl">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold text-foreground">Free</CardTitle>
-          <CardDescription className="text-sm">For basic website audits</CardDescription>
-        </CardHeader>
-        <div className="flex-grow flex flex-col justify-center">
-          <div className="text-4xl font-extrabold text-foreground mb-4">$0</div>
-          <ul className="text-left space-y-2 text-muted-foreground">
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> One-time audit</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Basic SEO score</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Top 5 issues identified</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> No PDF report</li>
-          </ul>
+      {/* Final CTA Section */}
+      <section className="text-white py-16 px-4 sm:px-6 text-center"
+        style={{ backgroundColor: "var(--primary)" }}>
+        <div className="container mx-auto text-center max-w-4xl">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+            Ready to Improve Your SEO?
+          </h2>
+          <p className="text-lg sm:text-xl lg:text-2xl max-w-3xl mx-auto mb-8 text-gray-200 tracking-wide leading-relaxed">
+            Join thousands of websites already using our platform to boost their search rankings. 
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/audit">
+              <Button size="lg" className="text-lg px-8 py-4 bg-white hover:bg-gray-200 text-primary transition-all font-semibold w-full sm:w-auto">
+                Start Your Free SEO Audit
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="text-lg px-8 py-4 bg-transparent border-white text-white hover:bg-white hover:text-primary transition-all w-full sm:w-auto">
+                See All Plans
+              </Button>
+            </Link>
+          </div>
         </div>
-        <div className="mt-6">
-          <Link href="/audit">
-            <Button className="w-full">Start Free Audit</Button>
-          </Link>
-        </div>
-      </Card>
-
-      {/* Pro Plan - Highlighted */}
-      <Card className="relative flex flex-col h-full bg-primary text-white p-8 rounded-xl shadow-xl transition duration-300 transform scale-105">
-        <Badge className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-semibold uppercase bg-accent-foreground text-primary">
-          Most Popular
-        </Badge>
-        <CardHeader className="text-center pb-4 text-white">
-          <CardTitle className="text-2xl font-bold">Pro</CardTitle>
-          <CardDescription className="text-sm text-gray-200">For small businesses & pros</CardDescription>
-        </CardHeader>
-        <div className="flex-grow flex flex-col justify-center">
-          <div className="text-4xl font-extrabold text-white mb-4">$29<span className="text-xl font-medium">/mo</span></div>
-          <ul className="text-left space-y-2 text-gray-200">
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Unlimited monthly audits</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Full performance report</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Prioritized action plan</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> Competitor analysis</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-300 mr-2 flex-shrink-0" /> PDF report generation</li>
-          </ul>
-        </div>
-        <div className="mt-6">
-          <Link href="/signup">
-            <Button variant="secondary" className="w-full font-semibold">Get Started</Button>
-          </Link>
-        </div>
-      </Card>
-
-      {/* Business Plan */}
-      <Card className="flex flex-col h-full bg-white dark:bg-gray-900 border-border p-6 transition duration-300 hover:shadow-xl">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold text-foreground">Business</CardTitle>
-          <CardDescription className="text-sm">For agencies & large sites</CardDescription>
-        </CardHeader>
-        <div className="flex-grow flex flex-col justify-center">
-          <div className="text-4xl font-extrabold text-foreground mb-4">$99<span className="text-xl font-medium">/mo</span></div>
-          <ul className="text-left space-y-2 text-muted-foreground">
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Everything in Pro</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> White-label reports</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> API access</li>
-            <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" /> Priority support</li>
-          </ul>
-        </div>
-        <div className="mt-6">
-          <Link href="/contact-us">
-            <Button className="w-full">Contact Us</Button>
-          </Link>
-        </div>
-      </Card>
-    </div>
-  </div>
-</section>
+      </section>
     </div>
   )
 }
